@@ -1,0 +1,56 @@
+{
+  "name": "bledger",
+  "version": "0.0.0",
+  "description": "Communication and management of ledger devices",
+  "keywords": [
+    "Bitcoin",
+    "Hardware",
+    "Wallet",
+    "Ledger",
+    "bcoin",
+    "blockchain"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bcoin-org/bledger.git"
+  },
+  "main": "./lib/bledger.js",
+  "license": "MIT",
+  "author": "The Bcoin Developers",
+  "bugs": {
+    "url": "https://github.com/bcoin-org/bledger/issues"
+  },
+  "homepage": "https://github.com/bcoin-org/bledger#readme",
+  "scripts": {
+    "browserify": "browserify -s bledger lib/bledger.js | uglifyjs -c > build/bledger.js",
+    "clean": "rm -f build/bledger.js",
+    "lint": "eslint lib/ test/ || exit 0",
+    "test": "mocha --reporter spec test/*-test.js",
+    "webpack": "webpack --config webpack.config.js"
+  },
+  "dependencies": {
+    "bmutex": "0.0.0",
+    "bufio": "0.0.0",
+    "node-hid": "^0.5.7"
+  },
+  "devDependencies": {
+    "babelify": "^7.3.0",
+    "babel-core": "^6.26.0",
+    "babel-loader": "^7.1.2",
+    "babel-preset-env": "^1.6.1",
+    "browserify": "^14.5.0",
+    "eslint": "^4.9.0",
+    "mocha": "^4.0.1",
+    "uglifyjs-webpack-plugin": "^1.0.0-beta.3",
+    "uglify-es": "^3.1.3",
+    "webpack": "^3.8.1"
+  },
+  "engines": {
+    "node": ">=7.6.0"
+  },
+  "browserify": {
+    "transform": [
+      "babelify"
+    ]
+  }
+}
