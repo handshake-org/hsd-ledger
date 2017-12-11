@@ -147,15 +147,4 @@ describe('Ledger Protocol', function () {
       assert.bufferEqual(decodedBuffer, test.expectedData);
     }
   });
-
-  it('should split buffer to messages', () => {
-    for (const test of responseTests) {
-      const buf = Buffer.concat(test.messages);
-      const messages = ProtocolReader.splitBuffer(buf, 64);
-
-      for (let i = 0; i < messages.length; i++) {
-        assert.bufferEqual(messages[i], test.messages[i]);
-      }
-    }
-  });
 });
