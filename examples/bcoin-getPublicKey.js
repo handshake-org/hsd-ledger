@@ -1,7 +1,7 @@
 'use strict';
 
 const bledger = require('../lib/bledger');
-const {LedgerBTC} = bledger;
+const {LedgerBcoin} = bledger;
 const hid = bledger.hid;
 const Device = hid.HIDDevice;
 
@@ -24,17 +24,16 @@ const devices = Device.getDevices();
   const coinTypePath = `m/${purpose}'/${coinType}'`;
   const account2Path = `${coinTypePath}/${account2}`;
 
-  const ledgerBTC = new LedgerBTC({
+  const ledgerBcoin = new LedgerBcoin({
     path: `${coinTypePath}/${account1}'`,
     device: device
   });
 
-  const pubkey1 = await ledgerBTC.getPublicKey();
-  const pubkey2 = await ledgerBTC.getPublicKey(account2Path);
+  const pubkey1 = await ledgerBcoin.getPublicKey();
+  const pubkey2 = await ledgerBcoin.getPublicKey(account2Path);
 
   console.log(pubkey1);
-  console.log(pubkey1.data);
-  console.log(pubkey2.data);
+  console.log(pubkey2);
 
   await device.close();
 })().catch((e) => {
