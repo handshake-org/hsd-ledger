@@ -2,8 +2,7 @@
 
 const bledger = require('../lib/bledger');
 const {LedgerBcoin} = bledger;
-const hid = bledger.hid;
-const Device = hid.HIDDevice;
+const {Device} = bledger.hid;
 
 const devices = Device.getDevices();
 
@@ -18,14 +17,13 @@ const devices = Device.getDevices();
   const purpose = 44;
   const coinType = 0;
 
-  const account1 = 0;
-  const account2 = 1;
-
   const coinTypePath = `m/${purpose}'/${coinType}'`;
-  const account2Path = `${coinTypePath}/${account2}`;
+
+  const account1Path = `${coinTypePath}/0'`;
+  const account2Path = `${coinTypePath}/1'`;
 
   const ledgerBcoin = new LedgerBcoin({
-    path: `${coinTypePath}/${account1}'`,
+    path: account1Path,
     device: device
   });
 
