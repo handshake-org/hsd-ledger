@@ -53,15 +53,10 @@ getTrustedInputResponses[12] = Buffer.from(
   '3200b32b1674edca60ce7863a3bbf04fdaad83aa9bbbd90d57f269134aca8bedae5355b60100'
   + '0000005ed0b200000000a726e3482a6e18909000', 'hex');
 
-const GetTrustedInput = zipObject(
-  getTrustedInputCommands.map(test => test.toString('hex')),
-  getTrustedInputResponses
-);
-
 describe('Bitcoin App', function () {
   it('should split transaction to commands', async () => {
     const device = new Device({
-      responses: GetTrustedInput
+      responses: getTrustedInputResponses
     });
     const bcoinApp = new LedgerBcoin({
       device: device
@@ -84,16 +79,3 @@ describe('Bitcoin App', function () {
     );
   });
 });
-
-/*
- * Helpers
- */
-function zipObject(keys, values) {
-  assert(keys.length === values.length);
-  const object = {};
-
-  for (let i = 0; i < keys.length; i++)
-    object[keys[i]] = values[i];
-
-  return object;
-}

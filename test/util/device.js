@@ -14,7 +14,8 @@ class TestDevice extends Device {
     super(options);
 
     this.commands = [];
-    this.responses = {};
+    this.responses = [];
+    this.responseCount = 0;
 
     if (options)
       this.set(options);
@@ -33,15 +34,17 @@ class TestDevice extends Device {
 
   close() {}
 
+  resetResponses() {
+    this.responseCount = 0;
+  }
+
   async exchange(APDU) {
     this.commands.push(APDU);
 
-    const hexAPDU = APDU.toString('hex');
+    if (this.responseCount >= this.responses.length)
+      return Buffer.alloc(0);
 
-    if (this.responses[hexAPDU])
-      return this.responses[hexAPDU];
-
-    return Buffer.alloc(0);
+    return this.responses[this.responseCount++];
   }
 
   getCommands() {
