@@ -9,6 +9,9 @@ exports.getCommands = (file) => {
 
   const data = require(file);
 
+  data.commands = data.commands || [];
+  data.responses = data.responses || [];
+
   return {
     data,
     tx: data.tx ? Buffer.from(data.tx, 'hex') : EMPTY,
