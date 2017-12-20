@@ -8,10 +8,12 @@ const assert = require('./util/assert');
 const utils = require('./util/utils');
 const {Device} = require('./util/device');
 const LedgerBcoin = require('../lib/bcoin');
+const {hashType} = require('../lib/utils/util');
 
 const getTrustedInput = utils.getCommands('data/getTrustedInput.json');
 const hashTxStart = utils.getCommands('data/hashTransactionStart.json');
 const hashOutputFinalize = utils.getCommands('data/hashOutputFinalize.json');
+const hashSign = utils.getCommands('data/hashSign.json');
 
 describe('Bitcoin App', function () {
   let device, bcoinApp;
@@ -30,7 +32,7 @@ describe('Bitcoin App', function () {
     const deviceCommands = device.getCommands();
 
     assert.bufferEqual(response, responses[12].slice(0, -2));
-    assert.strictEqual(commands.length, deviceCommands.length,
+    assert.strictEqual(deviceCommands.length, commands.length,
       'Number of messages doesn\'t match'
     );
 
@@ -52,7 +54,7 @@ describe('Bitcoin App', function () {
 
     const deviceCommands = device.getCommands();
 
-    assert.strictEqual(commands.length, deviceCommands.length,
+    assert.strictEqual(deviceCommands.length, commands.length,
       'Number of messages doesn\'t match'
     );
 
@@ -77,7 +79,7 @@ describe('Bitcoin App', function () {
       );
     }
 
-    assert.strictEqual(commands.length, deviceCommands.length,
+    assert.strictEqual(deviceCommands.length, commands.length,
       'Number of messages doesn\'t match'
     );
 
@@ -90,5 +92,37 @@ describe('Bitcoin App', function () {
         'All valdiation requests are false'
       );
     }
+  });
+
+  it('should handle hashSign', async () => {
+    const {
+      tx,
+      responses,
+      commands,
+      data
+    } = hashSign;
+
+    device.set({ responses });
+
+    const path = 'm/44\'/0\'/0\'/0/0';
+    const sigType = hashType.ALL;
+
+    const signature = await bcoinApp.hashSign(tx, path, sigType);
+
+    const deviceCommands = device.getCommands();
+
+    for (const [i, deviceCommand] of deviceCommands.entries()) {
+      assert.bufferEqual(deviceCommand, commands[i],
+        `Message ${i} wasn't correct`
+      );
+    }
+
+    assert.strictEqual(deviceCommands.length, commands.length,
+      'Number of messages doesn\'t match'
+    );
+
+    assert.bufferEqual(signature, Buffer.from(data.signature, 'hex'),
+      'Signature wasn\'t correct'
+    );
   });
 });
