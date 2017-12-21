@@ -79,9 +79,13 @@ describe('Bitcoin App', function () {
 
     device.set({ responses });
 
-    const tis = data.trusted.map(ti => Buffer.from(ti, 'hex'));
+    const tis = {};
 
-    await bcoinApp.hashTransactionStart(tx, 0, tis, true);
+    for (const tik of Object.keys(data.trusted)) {
+      tis[tik] = Buffer.from(data.trusted[tik], 'hex');
+    }
+
+    await bcoinApp.hashTransactionStart(tx, data.prevoutKey, tis, true);
 
     const deviceCommands = device.getCommands();
 
