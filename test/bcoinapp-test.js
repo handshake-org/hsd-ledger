@@ -10,6 +10,7 @@ const {Device} = require('./util/device');
 const LedgerBcoin = require('../lib/bcoin');
 const {hashType} = require('../lib/utils/util');
 
+const getRing = utils.getCommands('data/getRing.json');
 const getTrustedInput = utils.getCommands('data/getTrustedInput.json');
 const hashTxStart = utils.getCommands('data/hashTransactionStart.json');
 const hashOutputFinalize = utils.getCommands('data/hashOutputFinalize.json');
@@ -21,6 +22,36 @@ describe('Bitcoin App', function () {
   beforeEach(() => {
     device = new Device();
     bcoinApp = new LedgerBcoin({ device });
+  });
+
+  it('should get ring from pubkey', async () => {
+    const {data, responses, commands} = getRing;
+
+    device.set({ responses });
+
+    bcoinApp.set({
+      network: 'testnet'
+    });
+
+    const path = data.path;
+    const hd = await bcoinApp.getPublicKey(path);
+    const ring = bcoinApp.ringFromHD(hd);
+
+    const deviceCommands = device.getCommands();
+
+    for (const [i, deviceCommand] of deviceCommands.entries()) {
+      assert.bufferEqual(deviceCommand, commands[i],
+        `Message ${i} wasn't correct`
+      );
+    }
+
+    assert.strictEqual(deviceCommands.length, commands.length,
+      'Number of messages doesn\'t match'
+    );
+
+    // ring checks
+    assert.strictEqual(ring.getPublicKey('hex'), data.pubkey);
+    assert.strictEqual(ring.network.toString(), 'testnet');
   });
 
   it('should handle getTrustedInput commands', async () => {
