@@ -4,7 +4,7 @@
 'use strict';
 
 const assert = require('./util/assert');
-const util = require('../lib/utils/util');
+const util = require('../lib/utils/transaction');
 
 const responseTests = [{
   messages: [
