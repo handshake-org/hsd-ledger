@@ -18,6 +18,7 @@ const hashOutputFinalize = utils.getCommands('data/hashOutputFinalize.json');
 const hashSign = utils.getCommands('data/hashSign.json');
 
 const tx1 = utils.getCommands('data/tx1.json');
+const tx2 = utils.getCommands('data/tx2.json');
 
 describe('Bitcoin App', function () {
   let device, bcoinApp;
@@ -168,38 +169,40 @@ describe('Bitcoin App', function () {
     );
   });
 
-  it('should sign transaction', async () => {
-    const { data, tx, commands, responses } = tx1;
+  for (const [i, txData] of [tx1, tx2].entries()) {
+    it(`should sign normal P2PKH transaction ${i}`, async () => {
+      const { data, tx, commands, responses } = txData;
 
-    device.set({ responses });
+      device.set({ responses });
 
-    const signInputs = [];
+      const signInputs = [];
 
-    for (const si of data.signInputs) {
-      signInputs.push(new SignInput({
-        tx: Buffer.from(si.tx, 'hex'),
-        index: si.index,
-        path: si.path
-      }));
-    }
+      for (const si of data.signInputs) {
+        signInputs.push(new SignInput({
+          tx: Buffer.from(si.tx, 'hex'),
+          index: si.index,
+          path: si.path
+        }));
+      }
 
-    const signTx = Buffer.from(tx, 'hex');
-    const signedTx = await bcoinApp.signTransaction(signTx, signInputs);
+      const signTx = Buffer.from(tx, 'hex');
+      const signedTx = await bcoinApp.signTransaction(signTx, signInputs);
 
-    const deviceCommands = device.getCommands();
+      const deviceCommands = device.getCommands();
 
-    for (const [i, deviceCommand] of deviceCommands.entries()) {
-      assert.bufferEqual(deviceCommand, commands[i],
-        `Message ${i} wasn't correct`
+      for (const [i, deviceCommand] of deviceCommands.entries()) {
+        assert.bufferEqual(deviceCommand, commands[i],
+          `Message ${i} wasn't correct`
+        );
+      }
+
+      assert.strictEqual(deviceCommands.length, commands.length,
+        'Number of messages doesn\'t match'
       );
-    }
 
-    assert.strictEqual(deviceCommands.length, commands.length,
-      'Number of messages doesn\'t match'
-    );
-
-    assert.bufferEqual(signedTx.toRaw(), Buffer.from(data.signedTX, 'hex'),
-      'Transaction was not signed properly'
-    );
-  });
+      assert.bufferEqual(signedTx.toRaw(), Buffer.from(data.signedTX, 'hex'),
+        'Transaction was not signed properly'
+      );
+    });
+  }
 });
