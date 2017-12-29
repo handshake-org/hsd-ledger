@@ -8,6 +8,7 @@ const assert = require('./util/assert');
 const utils = require('./util/utils');
 const {Device} = require('./util/device');
 const {LedgerBcoin, SignInput} = require('../lib/bcoin');
+const TX = require('bcoin/lib/primitives/tx');
 const {hashType} = require('../lib/utils/util');
 const {Script} = require('bcoin/lib/script');
 
@@ -19,6 +20,7 @@ const hashSign = utils.getCommands('data/hashSign.json');
 
 const tx1 = utils.getCommands('data/tx1.json');
 const tx2 = utils.getCommands('data/tx2.json');
+const multisigTX1 = utils.getCommands('data/tx-p2sh-mulsig.json');
 
 describe('Bitcoin App', function () {
   let device, bcoinApp;
@@ -175,15 +177,7 @@ describe('Bitcoin App', function () {
 
       device.set({ responses });
 
-      const signInputs = [];
-
-      for (const si of data.signInputs) {
-        signInputs.push(new SignInput({
-          tx: Buffer.from(si.tx, 'hex'),
-          index: si.index,
-          path: si.path
-        }));
-      }
+      const signInputs = wrapSignInputs(data.signInputs);
 
       const signTx = Buffer.from(tx, 'hex');
       const signedTx = await bcoinApp.signTransaction(signTx, signInputs);
@@ -205,4 +199,48 @@ describe('Bitcoin App', function () {
       );
     });
   }
+
+  for (const [i, txData] of [multisigTX1].entries()) {
+    it(`should sign P2SH/Multisig transaction ${i}`, async () => {
+      const {data, tx, commands, responses } = txData;
+
+      device.set({ responses });
+
+      const signInputs = wrapSignInputs(data.signInputs);
+
+      const signTx = TX.fromRaw(tx, 'hex');
+      const signedTx = await bcoinApp.signTransaction(signTx, signInputs);
+
+      const deviceCommands = device.getCommands();
+
+      for (const [i, deviceCommand] of deviceCommands.entries()) {
+        assert.bufferEqual(deviceCommand, commands[i],
+          `Message ${i} wasn't correct`
+        );
+      }
+
+      assert.strictEqual(deviceCommands.length, commands.length,
+        'Number of messages doesn\'t match'
+      );
+
+      assert.bufferEqual(signedTx.toRaw(), Buffer.from(data.signedTX, 'hex'),
+        'Transaction was not signed properly'
+      );
+    });
+  }
 });
+
+function wrapSignInputs(sis) {
+  const signInputs = [];
+
+  for (const si of sis) {
+    signInputs.push(new SignInput({
+      tx: Buffer.from(si.tx, 'hex'),
+      index: si.index,
+      path: si.path,
+      redeem: si.redeem != null ? Script.fromRaw(si.redeem, 'hex') : null
+    }));
+  }
+
+  return signInputs;
+}
