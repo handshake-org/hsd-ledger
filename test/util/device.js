@@ -13,6 +13,7 @@ class TestDevice extends Device {
   constructor(options) {
     super(options);
 
+    this.debug = false;
     this.commands = [];
     this.responses = [];
     this.responseCount = 0;
@@ -28,6 +29,9 @@ class TestDevice extends Device {
       assert(options.responses instanceof Object);
       this.responses = options.responses;
     }
+
+    if (options.debug != null)
+      this.debug = Boolean(options.debug);
   }
 
   open() {}
@@ -39,12 +43,20 @@ class TestDevice extends Device {
   }
 
   async exchange(APDU) {
+    if (this.debug)
+      console.log(`> ${APDU.toString('hex')}`);
+
     this.commands.push(APDU);
 
     if (this.responseCount >= this.responses.length)
       return Buffer.alloc(0);
 
-    return this.responses[this.responseCount++];
+    const response = this.responses[this.responseCount++];
+
+    if (this.debug)
+      console.log(`< ${response.toString('hex')}`);
+
+    return response;
   }
 
   getCommands() {
