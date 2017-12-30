@@ -74,7 +74,6 @@ const devices = Device.getDevices();
   signedTX.view = mtx.view;
   console.log(signedTX);
   console.log(signedTX.verify());
-  console.log(signedTX.check());
 
   await device.close();
 })().catch((e) => {
