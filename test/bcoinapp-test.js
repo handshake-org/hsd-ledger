@@ -9,8 +9,8 @@ const utils = require('./util/utils');
 const {Device} = require('./util/device');
 const {LedgerBcoin, SignInput} = require('../lib/bcoin');
 const TX = require('bcoin/lib/primitives/tx');
-const {hashType} = require('../lib/utils/util');
 const {Script} = require('bcoin/lib/script');
+const hashType = Script.hashType;
 
 const getRing = utils.getCommands('data/getRing.json');
 const getTrustedInput = utils.getCommands('data/getTrustedInput.json');
