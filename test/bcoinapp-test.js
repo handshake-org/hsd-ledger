@@ -7,7 +7,8 @@
 const assert = require('./util/assert');
 const utils = require('./util/utils');
 const {Device} = require('./util/device');
-const {LedgerBcoin, SignInput} = require('../lib/bcoin');
+const LedgerBcoin = require('../lib/bcoin');
+const LedgerTXInput = require('../lib/txinput');
 const TX = require('bcoin/lib/primitives/tx');
 const KeyRing = require('bcoin/lib/primitives/keyring');
 const {Script} = require('bcoin/lib/script');
@@ -178,10 +179,10 @@ describe('Bitcoin App', function () {
 
       device.set({ responses });
 
-      const signInputs = wrapSignInputs(data.signInputs);
+      const ledgerInputs = wrapTXInputs(data.ledgerInputs);
 
       const signTx = Buffer.from(tx, 'hex');
-      const signedTx = await bcoinApp.signTransaction(signTx, signInputs);
+      const signedTx = await bcoinApp.signTransaction(signTx, ledgerInputs);
 
       const deviceCommands = device.getCommands();
 
@@ -207,10 +208,10 @@ describe('Bitcoin App', function () {
 
       device.set({ responses });
 
-      const signInputs = wrapSignInputs(data.signInputs);
+      const ledgerInputs = wrapTXInputs(data.ledgerInputs);
 
       const signTx = TX.fromRaw(tx, 'hex');
-      const signedTx = await bcoinApp.signTransaction(signTx, signInputs);
+      const signedTx = await bcoinApp.signTransaction(signTx, ledgerInputs);
 
       const deviceCommands = device.getCommands();
 
@@ -231,11 +232,11 @@ describe('Bitcoin App', function () {
   }
 });
 
-function wrapSignInputs(sis) {
-  const signInputs = [];
+function wrapTXInputs(sis) {
+  const ledgerInputs = [];
 
   for (const si of sis) {
-    signInputs.push(new SignInput({
+    ledgerInputs.push(new LedgerTXInput({
       tx: Buffer.from(si.tx, 'hex'),
       index: si.index,
       path: si.path,
@@ -243,5 +244,5 @@ function wrapSignInputs(sis) {
     }));
   }
 
-  return signInputs;
+  return ledgerInputs;
 }
