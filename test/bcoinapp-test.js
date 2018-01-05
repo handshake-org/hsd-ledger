@@ -9,6 +9,7 @@ const utils = require('./util/utils');
 const {Device} = require('./util/device');
 const {LedgerBcoin, SignInput} = require('../lib/bcoin');
 const TX = require('bcoin/lib/primitives/tx');
+const KeyRing = require('bcoin/lib/primitives/keyring');
 const {Script} = require('bcoin/lib/script');
 const hashType = Script.hashType;
 
@@ -41,7 +42,7 @@ describe('Bitcoin App', function () {
 
     const path = data.path;
     const hd = await bcoinApp.getPublicKey(path);
-    const ring = bcoinApp.ringFromHD(hd);
+    const ring = KeyRing.fromPublic(hd.publicKey, bcoinApp.network);
 
     const deviceCommands = device.getCommands();
 
