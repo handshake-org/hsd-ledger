@@ -55,13 +55,13 @@ const CHANGE = true;
   process.exit(1);
 });
 
-async function getPublicKey(btc, path) {
-  return await btc.getPublicKey(path);
+async function getPublicKey(btcApp, path) {
+  return await btcApp.getPublicKey(path);
 }
 
 function deriveAddress(hd, change, index, network) {
   const pubkey = hd.derive(change).derive(index);
-  const kr = KeyRing.fromPublic(pubkey.publicKey, network);
+  const keyring = KeyRing.fromPublic(pubkey.publicKey, network);
 
-  return kr.getAddress().toString();
+  return keyring.getAddress().toString();
 }
