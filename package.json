@@ -26,6 +26,7 @@
     "clean": "rm -f build/bledger.js",
     "lint": "eslint lib/ test/ || exit 0",
     "test": "mocha --reporter spec test/*-test.js",
+    "test-device": "mocha --reporter spec test/device-hid/*-test.js",
     "webpack": "webpack --config webpack.config.js"
   },
   "dependencies": {
