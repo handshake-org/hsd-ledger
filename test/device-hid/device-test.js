@@ -94,11 +94,11 @@ describe('HID Device', function () {
       })
     ];
 
-    const tx = await createTX(inputs, addr);
+    const tx = await createTX(ledgerInputs, addr);
 
     assert.ok(!tx.verify(), 'Transaction does not need signing');
 
-    await bcoinApp.signTransaction(tx, inputs);
+    await bcoinApp.signTransaction(tx, ledgerInputs);
 
     assert.ok(tx.verify(), 'Transaction was not signed');
   });
