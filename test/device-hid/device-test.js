@@ -9,6 +9,7 @@ const fundUtil = require('../util/fund');
 
 const KeyRing = require('bcoin/lib/primitives/keyring');
 const MTX = require('bcoin/lib/primitives/mtx');
+const Script = require('bcoin/lib/script/script');
 
 const {Device, DeviceInfo} = bledger.hid;
 const {LedgerBcoin, LedgerTXInput} = bledger;
@@ -85,7 +86,7 @@ describe('HID Device', function () {
     const {txs} = await fundUtil.fundAddress(addr, 1);
 
     // return
-    const inputs = [
+    const ledgerInputs = [
       LedgerTXInput.fromOptions({
         path: path,
         tx: txs[0],
@@ -100,6 +101,57 @@ describe('HID Device', function () {
     await bcoinApp.signTransaction(tx, inputs);
 
     assert.ok(tx.verify(), 'Transaction was not signed');
+  });
+
+  it('should sign simple p2sh transaction', async () => {
+    const path1 = 'm/44\'/0\'/0\'/0/0';
+    const path2 = 'm/44\'/0\'/1\'/0/0';
+
+    const pubHD1 = await bcoinApp.getPublicKey(path1);
+    const pubHD2 = await bcoinApp.getPublicKey(path2);
+
+    const [pk1, pk2] = [pubHD1.publicKey, pubHD2.publicKey];
+    const [m, n] = [2, 2];
+
+    const multisigScript = Script.fromMultisig(m, n, [pk1, pk2]);
+
+    const addr = multisigScript.getAddress().toBase58();
+
+    const {txs} = await fundUtil.fundAddress(addr, 1);
+
+    const ledgerInputs1 = [
+      LedgerTXInput.fromOptions({
+        path:  path1,
+        tx: txs[0],
+        index: 0,
+        redeem: multisigScript,
+        publicKey: pk1
+      })
+    ];
+
+    const ledgerInputs2 = [
+      LedgerTXInput.fromOptions({
+        path: path2,
+        tx: txs[0],
+        index: 0,
+        redeem: multisigScript,
+        publicKey: pk2
+      })
+    ];
+
+    const tx1 = await createTX(ledgerInputs1, addr);
+
+    await bcoinApp.signTransaction(tx1, ledgerInputs1);
+    await bcoinApp.signTransaction(tx1, ledgerInputs2);
+
+    assert(tx1.verify(), 'Transaction was not signed');
+
+    // Or sign both together
+    const tx2 = await createTX(ledgerInputs1, addr);
+
+    await bcoinApp.signTransaction(tx2, ledgerInputs1.concat(ledgerInputs2));
+
+    assert(tx2.verify(), 'Transaction was not signed');
   });
 });
 
