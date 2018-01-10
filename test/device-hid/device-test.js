@@ -5,11 +5,16 @@
 
 const assert = require('../util/assert');
 const bledger = require('../../lib/bledger');
+const fundUtil = require('../util/fund');
+
+const KeyRing = require('bcoin/lib/primitives/keyring');
+const MTX = require('bcoin/lib/primitives/mtx');
 
 const {Device, DeviceInfo} = bledger.hid;
-const {LedgerBcoin} = bledger;
+const {LedgerBcoin, LedgerTXInput} = bledger;
 
 const DEVICE_TIMEOUT = Number(process.env.DEVICE_TIMEOUT) || 15000;
+const ADDRESS = '3Bi9H1hzCHWJoFEjc4xzVzEMywi35dyvsV';
 
 describe('HID Device', function () {
   this.timeout(DEVICE_TIMEOUT);
@@ -71,4 +76,61 @@ describe('HID Device', function () {
       );
     }
   });
+
+  it('should sign simple p2pkh transaction', async () => {
+    const path = 'm/44\'/0\'/0\'/0/0';
+    const pubHD = await bcoinApp.getPublicKey(path);
+    const addr = hd2addr(pubHD);
+
+    const {txs} = await fundUtil.fundAddress(addr, 1);
+
+    // return
+    const inputs = [
+      LedgerTXInput.fromOptions({
+        path: path,
+        tx: txs[0],
+        index: 0
+      })
+    ];
+
+    const tx = await createTX(inputs, addr);
+
+    assert.ok(!tx.verify(), 'Transaction does not need signing');
+
+    await bcoinApp.signTransaction(tx, inputs);
+
+    assert.ok(tx.verify(), 'Transaction was not signed');
+  });
 });
+
+/*
+ * Helpers
+ */
+
+function hd2addr(hd, network) {
+  return KeyRing.fromPublic(hd.publicKey, network).getAddress(network);
+}
+
+async function createTX(inputs, changeAddress) {
+  const mtx = new MTX();
+  const coins = [];
+  let totalAmount = 0;
+
+  for (const input of inputs) {
+    const coin = input.getCoin();
+    coins.push(coin);
+    totalAmount += coin.value;
+  }
+
+  mtx.addOutput({
+    value: totalAmount,
+    address: ADDRESS
+  });
+
+  await mtx.fund(coins, {
+    subtractFee: true,
+    changeAddress: changeAddress
+  });
+
+  return mtx;
+}
