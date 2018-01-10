@@ -3,6 +3,7 @@
 const bledger = require('../lib/bledger');
 const {LedgerBcoin, LedgerTXInput} = bledger;
 const {Device} = bledger.hid;
+const MTX = require('bcoin/lib/primitives/mtx');
 
 const devices = Device.getDevices();
 
@@ -75,9 +76,11 @@ const devices = Device.getDevices();
 
   const ledgerInputs = inputs.map(i => new LedgerTXInput(i));
 
-  const signedTX = await ledgerBcoin.signTransaction(tx, ledgerInputs);
+  const mtx = MTX.fromRaw(tx, 'hex');
 
-  console.log(signedTX.toRaw().toString('hex'));
+  await ledgerBcoin.signTransaction(mtx, ledgerInputs);
+
+  console.log(mtx.toRaw().toString('hex'));
 
   await device.close();
 })().catch((e) => {
