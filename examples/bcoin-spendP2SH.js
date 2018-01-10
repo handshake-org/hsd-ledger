@@ -5,10 +5,10 @@ const Amount = require('bcoin/lib/btc/amount');
 const {Script} = require('bcoin/lib/script');
 
 const bledger = require('../lib/bledger');
-const {LedgerBcoin, SignInput} = bledger;
+const {LedgerBcoin, LedgerTXInput} = bledger;
 const {Device} = bledger.hid;
 
-const fundUtil = require('./utils/fund');
+const fundUtil = require('../test/util/fund');
 
 const devices = Device.getDevices();
 
@@ -53,12 +53,12 @@ const devices = Device.getDevices();
     changeAddress: addr
   });
 
-  console.log('Create SignInputs for each input and each signer');
-  const signInputs = [];
+  console.log('Create LedgerInputs for each input and each signer');
+  const ledgerInputs = [];
 
   for (const acc of accounts) {
     for (const tx of txs) {
-      const si = new SignInput({
+      const ledgerInput = new LedgerTXInput({
         tx: tx,
         index: 0,
         redeem: multisigScript,
@@ -66,14 +66,14 @@ const devices = Device.getDevices();
         publicKey: acc.pk
       });
 
-      signInputs.push(si);
+      ledgerInputs.push(ledgerInput);
     }
   }
 
-  const signedTX = await bcoinApp.signTransaction(mtx, signInputs);
-  signedTX.view = mtx.view;
-  console.log(signedTX);
-  console.log(signedTX.verify());
+  await bcoinApp.signTransaction(mtx, ledgerInputs);
+
+  console.log(mtx);
+  console.log(mtx.verify());
 
   await device.close();
 })().catch((e) => {
