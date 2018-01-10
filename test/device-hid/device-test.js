@@ -10,6 +10,7 @@ const fundUtil = require('../util/fund');
 const KeyRing = require('bcoin/lib/primitives/keyring');
 const MTX = require('bcoin/lib/primitives/mtx');
 const Script = require('bcoin/lib/script/script');
+const hashType = Script.hashType;
 
 const {Device, DeviceInfo} = bledger.hid;
 const {LedgerBcoin, LedgerTXInput} = bledger;
@@ -86,19 +87,17 @@ describe('HID Device', function () {
     const {txs} = await fundUtil.fundAddress(addr, 1);
 
     // return
-    const ledgerInputs = [
-      LedgerTXInput.fromOptions({
-        path: path,
-        tx: txs[0],
-        index: 0
-      })
-    ];
+    const ledgerInput = LedgerTXInput.fromOptions({
+      path: path,
+      tx: txs[0],
+      index: 0
+    });
 
-    const tx = await createTX(ledgerInputs, addr);
+    const tx = await createTX([ledgerInput.getCoin()], addr);
 
     assert.ok(!tx.verify(), 'Transaction does not need signing');
 
-    await bcoinApp.signTransaction(tx, ledgerInputs);
+    await bcoinApp.signTransaction(tx, [ledgerInput]);
 
     assert.ok(tx.verify(), 'Transaction was not signed');
   });
@@ -119,39 +118,67 @@ describe('HID Device', function () {
 
     const {txs} = await fundUtil.fundAddress(addr, 1);
 
-    const ledgerInputs1 = [
-      LedgerTXInput.fromOptions({
-        path:  path1,
-        tx: txs[0],
-        index: 0,
-        redeem: multisigScript,
-        publicKey: pk1
-      })
-    ];
+    const ledgerInput1 = LedgerTXInput.fromOptions({
+      path:  path1,
+      tx: txs[0],
+      index: 0,
+      redeem: multisigScript,
+      publicKey: pk1
+    });
 
-    const ledgerInputs2 = [
-      LedgerTXInput.fromOptions({
-        path: path2,
-        tx: txs[0],
-        index: 0,
-        redeem: multisigScript,
-        publicKey: pk2
-      })
-    ];
+    const ledgerInput2 = LedgerTXInput.fromOptions({
+      path: path2,
+      tx: txs[0],
+      index: 0,
+      redeem: multisigScript,
+      publicKey: pk2
+    });
 
-    const tx1 = await createTX(ledgerInputs1, addr);
+    const tx1 = await createTX([ledgerInput1.getCoin()], addr);
 
-    await bcoinApp.signTransaction(tx1, ledgerInputs1);
-    await bcoinApp.signTransaction(tx1, ledgerInputs2);
+    await bcoinApp.signTransaction(tx1, [ledgerInput1]);
+    await bcoinApp.signTransaction(tx1, [ledgerInput2]);
 
     assert(tx1.verify(), 'Transaction was not signed');
 
     // Or sign both together
-    const tx2 = await createTX(ledgerInputs1, addr);
+    const tx2 = await createTX([ledgerInput1.getCoin()], addr);
 
-    await bcoinApp.signTransaction(tx2, ledgerInputs1.concat(ledgerInputs2));
+    await bcoinApp.signTransaction(tx2, [ledgerInput1, ledgerInput2]);
 
     assert(tx2.verify(), 'Transaction was not signed');
+  });
+
+  it('should sign foreign ANYONECANPAY input p2pkh transaction', async () => {
+    const path = 'm/44\'/0\'/0\'/0/0';
+    const pubHD = await bcoinApp.getPublicKey(path);
+    const addr1 = hd2addr(pubHD);
+
+    // generate another address
+    const ring = KeyRing.generate(true);
+    const addr2 = ring.getAddress();
+
+    const txInfo1 = await fundUtil.fundAddress(addr1, 1);
+    const txInfo2 = await fundUtil.fundAddress(addr2, 1);
+
+    const ledgerInputs = [
+      LedgerTXInput.fromOptions({
+        path: path,
+        tx: txInfo1.txs[0],
+        index: 0
+      })
+    ];
+
+    const coins1 = txInfo1.coins;
+    const coins2 = txInfo2.coins;
+
+    const mtx = await createTX(coins1.concat(coins2), addr1);
+
+    mtx.sign(ring, hashType.ALL | hashType.ANYONECANPAY);
+
+    await bcoinApp.signTransaction(mtx, ledgerInputs);
+
+    assert(mtx.verify, 'Transaction was not signed');
   });
 });
 
@@ -163,16 +190,13 @@ function hd2addr(hd, network) {
   return KeyRing.fromPublic(hd.publicKey, network).getAddress(network);
 }
 
-async function createTX(inputs, changeAddress) {
+async function createTX(coins, changeAddress) {
   const mtx = new MTX();
-  const coins = [];
+
   let totalAmount = 0;
 
-  for (const input of inputs) {
-    const coin = input.getCoin();
-    coins.push(coin);
+  for (const coin of coins)
     totalAmount += coin.value;
-  }
 
   mtx.addOutput({
     value: totalAmount,
