@@ -237,12 +237,14 @@ describe('Bitcoin App', function () {
 function wrapTXInputs(inputData) {
   const ledgerInputs = [];
 
-  for (const li of inputData) {
+  for (const ledgerInput of inputData) {
     ledgerInputs.push(new LedgerTXInput({
-      tx: Buffer.from(li.tx, 'hex'),
-      index: li.index,
-      path: li.path,
-      redeem: li.redeem != null ? Script.fromRaw(li.redeem, 'hex') : null
+      tx: Buffer.from(ledgerInput.tx, 'hex'),
+      index: ledgerInput.index,
+      path: ledgerInput.path,
+      redeem: ledgerInput.redeem != null
+        ? Script.fromRaw(ledgerInput.redeem, 'hex')
+        : null
     }));
   }
 

@@ -48,7 +48,7 @@ exports.fundAddressCoinbase = function (addr, inputs) {
  */
 exports.fundAddress = async function (addr, inputs) {
   const master = HD.generate();
-  const key = master.derivePath('m/1');
+  const key = master.derivePath('m/44\'/0\'/0\'/0/0');
   const keyring = new KeyRing(key.privateKey);
   const tmpaddr = keyring.getAddress();
 
