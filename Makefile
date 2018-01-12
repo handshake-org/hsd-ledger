@@ -7,6 +7,15 @@ browserify:
 webpack:
 	@npm run webpack
 
+webpack-dev: ./build/vendor.js
+	@npm run webpack-dev
+
+./build/vendor.js:
+	@npm run webpack-devdeps
+
+webpack-devdeps:
+	@npm run webpack-devdeps
+
 clean:
 	@npm run clean
 
@@ -19,5 +28,5 @@ test:
 test-device:
 	@npm run test-device
 
-.PHONY: all browserify webpack clean lint test test-device
+.PHONY: all browserify webpack webpack-dev webpack-devdeps clean lint test test-device
 
