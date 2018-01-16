@@ -45,7 +45,7 @@ describe('Bitcoin App', function () {
 
     const path = data.path;
     const hd = await bcoinApp.getPublicKey(path);
-    const ring = KeyRing.fromPublic(hd.publicKey, bcoinApp.network);
+    const ring = KeyRing.fromPublic(hd.publicKey);
 
     const deviceCommands = device.getCommands();
 
@@ -61,7 +61,6 @@ describe('Bitcoin App', function () {
 
     // ring checks
     assert.strictEqual(ring.getPublicKey('hex'), data.pubkey);
-    assert.strictEqual(ring.network.toString(), 'testnet');
   });
 
   it('should handle getTrustedInput commands', async () => {
