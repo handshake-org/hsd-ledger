@@ -36,7 +36,8 @@
     "bcrypto": "0.0.1",
     "bmutex": "0.0.0",
     "bufio": "0.0.0",
-    "node-hid": "^0.5.7"
+    "node-hid": "^0.5.7",
+    "u2f-api": "^0.2.7"
   },
   "devDependencies": {
     "babel-core": "^6.26.0",
