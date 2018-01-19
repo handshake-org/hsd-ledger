@@ -6,14 +6,14 @@ const {Device} = bledger.hid;
 
 const KeyRing = require('bcoin/lib/primitives/keyring');
 
-const devices = Device.getDevices();
-
 const NETWORK = 'regtest';
 const XPUBS = 1;
 const ADDRESSES = 4;
 const CHANGE = true;
 
 (async () => {
+  const devices = await Device.getDevices();
+
   const device = new Device({
     device: devices[0],
     timeout: 5000

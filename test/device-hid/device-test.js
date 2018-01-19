@@ -21,24 +21,27 @@ const ADDRESS = '3Bi9H1hzCHWJoFEjc4xzVzEMywi35dyvsV';
 describe('HID Device', function () {
   this.timeout(DEVICE_TIMEOUT);
 
-  let bcoinApp;
+  let bcoinApp, device;
 
-  const devices = Device.getDevices();
-  const device = new Device({
-    device: devices[0],
-    timeout: DEVICE_TIMEOUT
+  before(async () => {
+    const devices = await Device.getDevices();
+
+    device = new Device({
+      device: devices[0],
+      timeout: DEVICE_TIMEOUT
+    });
+
+    await device.open();
   });
 
-  device.open();
-
-  after(() => device.close());
+  after(async () => await device.close());
 
   beforeEach(() => {
     bcoinApp = new LedgerBcoin({ device });
   });
 
-  it('should list devices', () => {
-    const devices = Device.getDevices();
+  it('should list devices', async () => {
+    const devices = await Device.getDevices();
 
     assert.ok(devices.length > 0, 'There should be at least one device');
 
