@@ -16,6 +16,15 @@ webpack-dev: ./build/vendor.js
 webpack-devdeps:
 	@npm run webpack-devdeps
 
+cert: .config/certs/cert.pem
+
+
+.config/certs/cert.pem:
+	@openssl req -x509 -newkey rsa:2048 \
+		-keyout .config/certs/key.pem \
+		-out .config/certs/cert.pem \
+		-days 365 -batch -nodes
+
 clean:
 	@npm run clean
 
@@ -25,8 +34,11 @@ lint:
 test:
 	@npm test
 
-test-device:
-	@npm run test-device
+test-hid:
+	@npm run test-hid
 
-.PHONY: all browserify webpack webpack-dev webpack-devdeps clean lint test test-device
+test-u2f: .config/certs/cert.pem
+	@npm run test-u2f
+
+.PHONY: all browserify webpack webpack-dev webpack-devdeps clean lint test test-u2f test-hid cert
 

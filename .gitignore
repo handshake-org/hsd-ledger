@@ -1,7 +1,9 @@
 build/
 docs/
-certs/
 node_modules/
 npm-debug.log
 package-lock.json
 app.js
+
+.config/certs/*
+!.config/certs/.keep
