@@ -5,9 +5,9 @@ const {LedgerBcoin, LedgerTXInput} = bledger;
 const {Device} = bledger.hid;
 const MTX = require('bcoin/lib/primitives/mtx');
 
-const devices = Device.getDevices();
-
 (async () => {
+  const devices = await Device.getDevices();
+
   const device = new Device({
     device: devices[0],
     timeout: 5000

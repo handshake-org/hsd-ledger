@@ -12,7 +12,7 @@ const vendorManifest = path.join(
 module.exports = {
   target: 'web',
   entry: {
-    vendor: ['bcoin/lib/bcoin-browser', 'bufio', 'bmutex', 'bcrypto']
+    vendor: ['bcoin/lib/bcoin-browser', 'bufio', 'bmutex', 'bcrypto', 'u2f-api']
   },
   output: {
     libraryTarget: 'umd',

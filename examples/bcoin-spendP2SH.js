@@ -10,9 +10,9 @@ const {Device} = bledger.hid;
 
 const fundUtil = require('../test/util/fund');
 
-const devices = Device.getDevices();
-
 (async () => {
+  const devices = await Device.getDevices();
+
   const device = new Device({
     device: devices[0],
     timeout: 5000

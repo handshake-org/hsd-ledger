@@ -4,9 +4,9 @@ const bledger = require('../lib/bledger');
 const {LedgerBTC} = bledger;
 const {Device} = bledger.hid;
 
-const devices = Device.getDevices();
-
 (async () => {
+  const devices = await Device.getDevices();
+
   const device = new Device({
     device: devices[0],
     timeout: 5000

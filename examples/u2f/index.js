@@ -1,8 +1,9 @@
 'use strict';
+/* eslint-env browser */
 
-const bledger = require('../lib/bledger');
+const bledger = require('bledger');
 const {LedgerBcoin} = bledger;
-const {Device} = bledger.hid;
+const {Device} = bledger.U2F;
 
 const KeyRing = require('bcoin/lib/primitives/keyring');
 
@@ -12,10 +13,8 @@ const ADDRESSES = 4;
 const CHANGE = true;
 
 (async () => {
-  const devices = await Device.getDevices();
-
   const device = new Device({
-    device: devices[0],
+    scrambleKey: 'btc',
     timeout: 5000
   });
 
@@ -65,3 +64,4 @@ function deriveAddress(hd, change, index, network) {
 
   return keyring.getAddress().toString();
 }
+/**/
