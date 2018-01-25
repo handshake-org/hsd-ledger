@@ -171,7 +171,7 @@ module.exports = function (Device, DeviceInfo) {
 
       await bcoinApp.signTransaction(mtx, ledgerInputs);
 
-      assert(mtx.verify, 'Transaction was not signed');
+      assert(mtx.verify(), 'Transaction was not signed');
     });
   });
 };
