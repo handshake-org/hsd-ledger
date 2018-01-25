@@ -17,6 +17,11 @@ const ADDRESS = '3Bi9H1hzCHWJoFEjc4xzVzEMywi35dyvsV';
 
 const DEVICE_TIMEOUT = Number(process.env.DEVICE_TIMEOUT) || 15000;
 
+const m = 'm';
+const ACCOUNT = `${m}/44'/0'/0'`;
+const PATH1 = `${ACCOUNT}/0/0`;
+const PATH2 = `${ACCOUNT}/1/0`;
+
 module.exports = function (Device, DeviceInfo) {
   describe('General Device', function () {
     this.timeout(DEVICE_TIMEOUT);
@@ -41,7 +46,7 @@ module.exports = function (Device, DeviceInfo) {
     });
 
     it('should get public key and correctly derive', async () => {
-      const path = 'm/44\'/0\'/0\'';
+      const path = ACCOUNT;
       const xpubHD = await bcoinApp.getPublicKey(path);
 
       // derive addresses
@@ -73,7 +78,7 @@ module.exports = function (Device, DeviceInfo) {
     });
 
     it('should sign simple p2pkh transaction', async () => {
-      const path = 'm/44\'/0\'/0\'/0/0';
+      const path = PATH1;
       const pubHD = await bcoinApp.getPublicKey(path);
       const addr = hd2addr(pubHD);
 
@@ -96,8 +101,8 @@ module.exports = function (Device, DeviceInfo) {
     });
 
     it('should sign simple p2sh transaction', async () => {
-      const path1 = 'm/44\'/0\'/0\'/0/0';
-      const path2 = 'm/44\'/0\'/1\'/0/0';
+      const path1 = PATH1;
+      const path2 = PATH2;
 
       const pubHD1 = await bcoinApp.getPublicKey(path1);
       const pubHD2 = await bcoinApp.getPublicKey(path2);
@@ -143,7 +148,7 @@ module.exports = function (Device, DeviceInfo) {
     });
 
     it('should sign foreign ANYONECANPAY input p2pkh transaction', async () => {
-      const path = 'm/44\'/0\'/0\'/0/0';
+      const path = PATH1;
       const pubHD = await bcoinApp.getPublicKey(path);
       const addr1 = hd2addr(pubHD);
 
@@ -173,6 +178,83 @@ module.exports = function (Device, DeviceInfo) {
 
       assert(mtx.verify(), 'Transaction was not signed');
     });
+
+    it('should sign simple P2WPKH transaction', async () => {
+      const path = PATH1;
+      const pubHD = await bcoinApp.getPublicKey(path);
+      const addr1 = hd2bech32(pubHD);
+
+      const {coins, txs} = await fundUtil.fundAddressFromWitness(addr1, 1);
+
+      const ledgerInput = LedgerTXInput.fromOptions({
+        path: path,
+        tx: txs[0],
+        index: 0,
+        witness: true
+      });
+
+      const mtx = await createTX(coins, addr1);
+
+      await bcoinApp.signTransaction(mtx, [ledgerInput]);
+
+      assert(mtx.verify(), 'Transaction was not signed');
+    });
+
+    it('should sign standard P2WSH transaction', async () => {
+      const path1 = PATH1;
+      const path2 = PATH2;
+
+      const pubHD1 = await bcoinApp.getPublicKey(path1);
+      const pubHD2 = await bcoinApp.getPublicKey(path2);
+
+      const [ring1, ring2] = [hd2ring(pubHD1), hd2ring(pubHD2)];
+
+      ring1.witness = true;
+      ring2.witness = true;
+
+      const [pk1, pk2] = [ring1.publicKey, ring2.publicKey];
+      const [m, n] = [2, 2];
+
+      const multisigScript = Script.fromMultisig(m, n, [pk1, pk2]);
+
+      ring1.script = multisigScript;
+
+      const addr = ring1.getAddress();
+
+      const {txs} = await fundUtil.fundAddress(addr, 1);
+
+      const ledgerInput1 = LedgerTXInput.fromOptions({
+        path:  path1,
+        tx: txs[0],
+        index: 0,
+        redeem: multisigScript,
+        witness: true,
+        publicKey: pk1
+      });
+
+      const ledgerInput2 = LedgerTXInput.fromOptions({
+        path: path2,
+        tx: txs[0],
+        index: 0,
+        redeem: multisigScript,
+        witness: true,
+        publicKey: pk2
+      });
+
+      const tx1 = await createTX([ledgerInput1.getCoin()], addr);
+
+      await bcoinApp.signTransaction(tx1, [ledgerInput1]);
+      await bcoinApp.signTransaction(tx1, [ledgerInput2]);
+
+      assert(tx1.verify(), 'Transaction was not signed');
+
+      // Or sign both together
+      const tx2 = await createTX([ledgerInput1.getCoin()], addr);
+
+      await bcoinApp.signTransaction(tx2, [ledgerInput1, ledgerInput2]);
+
+      assert(tx2.verify(), 'Transaction was not signed');
+    });
   });
 };
 
@@ -180,8 +262,19 @@ module.exports = function (Device, DeviceInfo) {
  * Helpers
  */
 
+function hd2ring(hd) {
+  return KeyRing.fromPublic(hd.publicKey);
+}
+
 function hd2addr(hd, network) {
   return KeyRing.fromPublic(hd.publicKey, network).getAddress(network);
+}
+
+function hd2bech32(hd, network) {
+  const keyring = KeyRing.fromPublic(hd.publicKey);
+  keyring.witness = true;
+
+  return keyring.getAddress(network);
 }
 
 async function createTX(coins, changeAddress) {
