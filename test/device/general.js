@@ -84,7 +84,6 @@ module.exports = function (Device, DeviceInfo) {
 
       const {txs} = await fundUtil.fundAddress(addr, 1);
 
-      // return
       const ledgerInput = LedgerTXInput.fromOptions({
         path: path,
         tx: txs[0],
@@ -254,6 +253,90 @@ module.exports = function (Device, DeviceInfo) {
       await bcoinApp.signTransaction(tx2, [ledgerInput1, ledgerInput2]);
 
       assert(tx2.verify(), 'Transaction was not signed');
+    });
+
+    it('should sign nested P2WPKH transaction', async () => {
+      const path = PATH1;
+      const pubHD = await bcoinApp.getPublicKey(path);
+      const ring = hd2ring(pubHD);
+      ring.witness = true;
+
+      const addr = ring.getNestedAddress();
+
+      const {txs} = await fundUtil.fundAddress(addr, 1);
+
+      const ledgerInput = LedgerTXInput.fromOptions({
+        path: path,
+        tx: txs[0],
+        index: 0,
+        witness: true
+      });
+
+      const coin = ledgerInput.getCoin();
+      const tx = await createTX([coin], addr);
+
+      assert.ok(!tx.verify(), 'Transaction must not be signed');
+
+      await bcoinApp.signTransaction(tx, [ledgerInput]);
+
+      assert.ok(tx.verify(), 'Transaction was not signed');
+    });
+
+    it('should sign nested P2WSH transaction', async () => {
+      const path1 = PATH1;
+      const path2 = PATH2;
+
+      const pubHD1 = await bcoinApp.getPublicKey(path1);
+      const pubHD2 = await bcoinApp.getPublicKey(path2);
+
+      const [ring1, ring2] = [hd2ring(pubHD1), hd2ring(pubHD2)];
+
+      ring1.witness = true;
+      ring2.witness = true;
+
+      const [pk1, pk2] = [ring1.publicKey, ring2.publicKey];
+      const [m, n] = [2, 2];
+
+      const multisigScript = Script.fromMultisig(m, n, [pk1, pk2]);
+
+      ring1.script = multisigScript;
+
+      const addr = ring1.getNestedAddress();
+
+      const {txs} = await fundUtil.fundAddress(addr, 1);
+
+      const ledgerInput1 = LedgerTXInput.fromOptions({
+        path:  path1,
+        tx: txs[0],
+        index: 0,
+        redeem: multisigScript,
+        witness: true,
+        publicKey: pk1
+      });
+
+      const ledgerInput2 = LedgerTXInput.fromOptions({
+        path: path2,
+        tx: txs[0],
+        index: 0,
+        redeem: multisigScript,
+        witness: true,
+        publicKey: pk2
+      });
+
+      const tx1 = await createTX([ledgerInput1.getCoin()], addr);
+
+      await bcoinApp.signTransaction(tx1, [ledgerInput1]);
+      await bcoinApp.signTransaction(tx1, [ledgerInput2]);
+
+      assert(tx1.verify(), 'Transaction was not signed');
+
+      // Or sign both together
+      const tx2 = await createTX([ledgerInput1.getCoin()], addr);
+
+      await bcoinApp.signTransaction(tx2, [ledgerInput1, ledgerInput2]);
+
+      assert(tx2.verify(), 'Transaction was not signed');
+      console.log(tx2);
     });
   });
 };
