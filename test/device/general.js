@@ -82,19 +82,28 @@ module.exports = function (Device, DeviceInfo) {
       const pubHD = await bcoinApp.getPublicKey(path);
       const addr = hd2addr(pubHD);
 
-      const {txs} = await fundUtil.fundAddress(addr, 1);
+      const {txs} = await fundUtil.fundAddress(addr, 2);
 
-      const ledgerInput = LedgerTXInput.fromOptions({
+      const ledgerInput1 = LedgerTXInput.fromOptions({
         path: path,
         tx: txs[0],
         index: 0
       });
 
-      const tx = await createTX([ledgerInput.getCoin()], addr);
+      const ledgerInput2 = LedgerTXInput.fromOptions({
+        path: path,
+        tx: txs[1],
+        index: 0
+      });
+
+      const tx = await createTX([
+        ledgerInput1.getCoin(),
+        ledgerInput2.getCoin()
+      ], addr);
 
       assert.ok(!tx.verify(), 'Transaction does not need signing');
 
-      await bcoinApp.signTransaction(tx, [ledgerInput]);
+      await bcoinApp.signTransaction(tx, [ledgerInput1, ledgerInput2]);
 
       assert.ok(tx.verify(), 'Transaction was not signed');
     });
@@ -181,22 +190,37 @@ module.exports = function (Device, DeviceInfo) {
     it('should sign simple P2WPKH transaction', async () => {
       const path = PATH1;
       const pubHD = await bcoinApp.getPublicKey(path);
-      const addr1 = hd2bech32(pubHD);
+      const addr = hd2bech32(pubHD);
 
-      const {coins, txs} = await fundUtil.fundAddressFromWitness(addr1, 1);
+      const funds = await fundUtil.fundAddress(addr, 2);
 
-      const ledgerInput = LedgerTXInput.fromOptions({
+      const ledgerInput1 = LedgerTXInput.fromOptions({
         path: path,
-        tx: txs[0],
+        tx: funds.txs[0],
         index: 0,
+        publicKey: pubHD.publicKey,
         witness: true
       });
 
-      const mtx = await createTX(coins, addr1);
+      const ledgerInput2 = LedgerTXInput.fromOptions({
+        path: path,
+        tx: funds.txs[1],
+        index: 0,
+        witness: true,
+        publicKey: pubHD.publicKey
+      });
 
-      await bcoinApp.signTransaction(mtx, [ledgerInput]);
+      const mtx = await createTX([
+        ledgerInput1.getCoin(),
+        ledgerInput2.getCoin()
+      ], addr);
 
-      assert(mtx.verify(), 'Transaction was not signed');
+      await bcoinApp.signTransaction(mtx, [
+        ledgerInput1,
+        ledgerInput2
+      ]);
+
+      assert.ok(mtx.verify(), 'Transaction was not signed');
     });
 
     it('should sign standard P2WSH transaction', async () => {
@@ -336,7 +360,48 @@ module.exports = function (Device, DeviceInfo) {
       await bcoinApp.signTransaction(tx2, [ledgerInput1, ledgerInput2]);
 
       assert(tx2.verify(), 'Transaction was not signed');
-      console.log(tx2);
+    });
+
+    it('should sign P2WPKH + P2PKH transaction', async () => {
+      const path1 = PATH1;
+      const path2 = PATH1;
+
+      const pubHD1 = await bcoinApp.getPublicKey(path1);
+      const pubHD2 = await bcoinApp.getPublicKey(path2);
+
+      const addr1 = hd2addr(pubHD1);
+      const addr2 = hd2bech32(pubHD2);
+
+      const funds1 = await fundUtil.fundAddress(addr1, 1);
+      const funds2 = await fundUtil.fundAddress(addr2, 1);
+
+      const ledgerInput1 = LedgerTXInput.fromOptions({
+        path: path1,
+        tx: funds1.txs[0],
+        index: 0
+      });
+
+      const ledgerInput2 = LedgerTXInput.fromOptions({
+        path: path2,
+        tx: funds2.txs[0],
+        index: 0,
+        witness: true
+      });
+
+      const tx = await createTX([
+        ledgerInput1.getCoin(),
+        ledgerInput2.getCoin()
+      ], addr1);
+
+      assert.ok(!tx.verify(), 'Transaction must not be signed');
+
+      await bcoinApp.signTransaction(tx, [ledgerInput2]);
+
+      assert.ok(!tx.verify(), 'Transaction must not be signed');
+
+      await bcoinApp.signTransaction(tx, [ledgerInput1]);
+
+      assert.ok(tx.verify(), 'Transaction was not signed');
     });
   });
 };
