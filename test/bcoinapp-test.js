@@ -84,7 +84,7 @@ describe('Bitcoin App', function () {
     );
   });
 
-  it('should handle hashTransactionStart commands', async () => {
+  it('should handle hashTransactionStart non-segwit commands', async () => {
     const {data, tx, responses, commands} = hashTxStart;
 
     device.set({ responses });
@@ -95,10 +95,11 @@ describe('Bitcoin App', function () {
       tis[tik] = Buffer.from(data.trusted[tik], 'hex');
     }
 
+    const mtx = MTX.fromRaw(tx);
     const pokey = data.prevoutKey;
     const prev = Script.fromRaw(data.prev, 'hex');
 
-    await bcoinApp.hashTransactionStart(tx, pokey, prev, tis, true);
+    await bcoinApp.hashTransactionStartNullify(mtx, pokey, prev, tis, true);
 
     const deviceCommands = device.getCommands();
 
