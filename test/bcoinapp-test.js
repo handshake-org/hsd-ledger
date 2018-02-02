@@ -26,6 +26,7 @@ const tx1 = utils.getCommands('data/tx1.json');
 const tx2 = utils.getCommands('data/tx2.json');
 const multisigTX1 = utils.getCommands('data/tx-p2sh-mulsig.json');
 const wtx1 = utils.getCommands('data/wtx1.json');
+const multisigWTX1 = utils.getCommands('data/tx-p2wsh-mulsig.json');
 
 describe('Bitcoin App', function () {
   let device, bcoinApp;
@@ -236,6 +237,35 @@ describe('Bitcoin App', function () {
 
   it('should sign P2WPKH transaction', async () => {
     const {data, tx, commands, responses} = wtx1;
+
+    device.set({ responses });
+
+    const ledgerInputs = wrapTXInputs(data.ledgerInputs);
+    const mtx = MTX.fromRaw(tx, 'hex');
+
+    updateCoinView(mtx, ledgerInputs);
+
+    await bcoinApp.signTransaction(mtx, ledgerInputs);
+
+    const deviceCommands = device.getCommands();
+
+    for (const [i, deviceCommand] of deviceCommands.entries()) {
+      assert.bufferEqual(deviceCommand, commands[i],
+        `Message ${i} wasn't correct`
+      );
+    }
+
+    assert.strictEqual(deviceCommands.length, commands.length,
+      'Number of messages doesn\'t match'
+    );
+
+    assert.bufferEqual(mtx.toRaw(), Buffer.from(data.signedTX, 'hex'),
+      'Transaction was not signed properly'
+    );
+  });
+
+  it('should sign P2WSH transaction', async () => {
+    const {data, tx, commands, responses } = multisigWTX1;
 
     device.set({ responses });
 
