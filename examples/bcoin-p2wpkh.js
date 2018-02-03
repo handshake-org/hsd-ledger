@@ -33,7 +33,9 @@ const randWitness = ring.getAddress();
   ring.witness = true;
   const address = ring.getAddress();
 
-  // We have got our funding transaction, first output is sent to us
+  // Using our fundUtil we can mock a funding
+  // transaction and use an output from that tx to
+  // create our new transaction
   const {coins, txs} = await fundUtil.fundAddressFromWitness(address, 1);
 
   const mtx = new MTX();
