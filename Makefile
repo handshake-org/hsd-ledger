@@ -40,5 +40,8 @@ test-hid:
 test-u2f: .config/certs/cert.pem
 	@npm run test-u2f
 
-.PHONY: all browserify webpack webpack-dev webpack-devdeps clean lint test test-u2f test-hid cert
+docs:
+	@npm run docs
+
+.PHONY: all browserify webpack webpack-dev webpack-devdeps clean lint test test-u2f test-hid cert docs
 

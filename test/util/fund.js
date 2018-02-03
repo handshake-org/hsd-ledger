@@ -82,3 +82,45 @@ exports.fundAddress = async function (addr, inputs) {
     coins
   };
 };
+
+/*
+ * It will fund 1 btc for each input from segwit address
+ * @param {Address} addr
+ * @param {Number} inputs - Number of inputs we want to generate
+ * @returns {Object} - keys {txList, coinList}
+ */
+exports.fundAddressFromWitness = async (addr, inputs) => {
+  const keyring = KeyRing.generate();
+  keyring.witness = true;
+
+  const tmpaddr = keyring.getAddress();
+  const fundCoinbase = exports.fundAddressCoinbase(tmpaddr, inputs);
+  const cbCoins = fundCoinbase.coins;
+
+  const txs = [];
+  const coins = [];
+
+  for (let i = 0; i < inputs; i++) {
+    const mtx = new MTX();
+
+    mtx.addOutput({
+      address: addr,
+      value: 100000000 + i
+    });
+
+    await mtx.fund([cbCoins[i]], {
+      subtractFee: true,
+      changeAddress: tmpaddr
+    });
+
+    mtx.sign(keyring);
+
+    txs.push(mtx);
+    coins.push(Coin.fromTX(mtx, 0, -1));
+  }
+
+  return {
+    txs,
+    coins
+  };
+};
