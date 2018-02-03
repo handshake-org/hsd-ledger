@@ -6,7 +6,7 @@
 const assert = require('../util/assert');
 const bledger = require('../../lib/bledger');
 
-const {Device, DeviceInfo} = bledger.hid;
+const {Device, DeviceInfo} = bledger.HID;
 
 const DEVICE_TIMEOUT = Number(process.env.DEVICE_TIMEOUT) || 15000;
 describe('HID Device', function () {

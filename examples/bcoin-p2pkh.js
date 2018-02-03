@@ -2,7 +2,7 @@
 
 const bledger = require('../lib/bledger');
 const {LedgerBcoin, LedgerTXInput} = bledger;
-const {Device} = bledger.hid;
+const {Device} = bledger.HID;
 const MTX = require('bcoin/lib/primitives/mtx');
 
 (async () => {

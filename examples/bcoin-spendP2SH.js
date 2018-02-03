@@ -6,7 +6,7 @@ const {Script} = require('bcoin/lib/script');
 
 const bledger = require('../lib/bledger');
 const {LedgerBcoin, LedgerTXInput} = bledger;
-const {Device} = bledger.hid;
+const {Device} = bledger.HID;
 
 const fundUtil = require('../test/util/fund');
 
