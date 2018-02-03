@@ -31,7 +31,7 @@
     "webpack": "webpack --config .config/webpack.js",
     "webpack-dev": "webpack --config .config/webpack.dev.js",
     "webpack-devdeps": "webpack --config .config/webpack.devdeps.js",
-    "docs": "jsdoc -d docs/ lib/"
+    "docs": "jsdoc -c jsdoc.json"
   },
   "dependencies": {
     "bcoin": "^1.0.0-beta.15",
