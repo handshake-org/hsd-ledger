@@ -22,12 +22,9 @@ const {Device} = bledger.HID;
   const account1Path = `${coinTypePath}/0'`;
   const account2Path = `${coinTypePath}/1'`;
 
-  const ledgerBcoin = new LedgerBcoin({
-    path: account1Path,
-    device: device
-  });
+  const ledgerBcoin = new LedgerBcoin({ device });
 
-  const pubkey1 = await ledgerBcoin.getPublicKey();
+  const pubkey1 = await ledgerBcoin.getPublicKey(account1Path);
   const pubkey2 = await ledgerBcoin.getPublicKey(account2Path);
 
   console.log(pubkey1);
