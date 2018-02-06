@@ -8,9 +8,11 @@ const assert = require('./util/assert');
 const utils = require('./util/utils');
 
 const {Device} = require('./util/device');
+const LedgerBTC = require('../lib/ledger');
 const LedgerBcoin = require('../lib/bcoin');
 const LedgerTXInput = require('../lib/txinput');
 
+const TX = require('bcoin/lib/primitives/tx');
 const MTX = require('bcoin/lib/primitives/mtx');
 const KeyRing = require('bcoin/lib/primitives/keyring');
 const {Script} = require('bcoin/lib/script');
@@ -29,11 +31,12 @@ const wtx1 = utils.getCommands('data/wtx1.json');
 const multisigWTX1 = utils.getCommands('data/tx-p2wsh-mulsig.json');
 
 describe('Bitcoin App', function () {
-  let device, bcoinApp;
+  let device, bcoinApp, btcApp;
 
   beforeEach(() => {
     device = new Device();
     bcoinApp = new LedgerBcoin({ device });
+    btcApp = new LedgerBTC(device);
   });
 
   it('should get ring from pubkey', async () => {
@@ -70,7 +73,7 @@ describe('Bitcoin App', function () {
 
     device.set({ responses });
 
-    const response = await bcoinApp.getTrustedInput(tx, 1);
+    const response = await btcApp.getTrustedInput(TX.fromRaw(tx), 1);
     const deviceCommands = device.getCommands();
 
     assert.bufferEqual(response, responses[12].slice(0, -2));
@@ -101,7 +104,7 @@ describe('Bitcoin App', function () {
     const pokey = data.prevoutKey;
     const prev = Script.fromRaw(data.prev, 'hex');
 
-    await bcoinApp.hashTransactionStartNullify(mtx, pokey, prev, tis, true);
+    await btcApp.hashTransactionStartNullify(mtx, pokey, prev, tis, true);
 
     const deviceCommands = device.getCommands();
 
@@ -121,7 +124,7 @@ describe('Bitcoin App', function () {
 
     device.set({ responses });
 
-    const validations = await bcoinApp.hashOutputFinalize(tx);
+    const validations = await btcApp.hashOutputFinalize(TX.fromRaw(tx));
     const deviceCommands = device.getCommands();
 
     for (const [i, deviceCommand] of deviceCommands.entries()) {
@@ -158,7 +161,7 @@ describe('Bitcoin App', function () {
     const path = 'm/44\'/0\'/0\'/0/0';
     const sigType = hashType.ALL;
 
-    const signature = await bcoinApp.hashSign(tx, path, sigType);
+    const signature = await btcApp.hashSign(TX.fromRaw(tx), path, sigType);
 
     const deviceCommands = device.getCommands();
 

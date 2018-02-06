@@ -1,13 +1,13 @@
 /*!
  * device.js - Ledger Test Device
- * Copyright (c) 2017, The Bcoin Developers (MIT License).
+ * Copyright (c) 2018, The Bcoin Developers (MIT License).
  * https://github.com/bcoin-org/bcoin
  */
 
 'use strict';
 
 const assert = require('assert');
-const {Device} = require('../../lib/device');
+const {Device} = require('../../lib/devices/device');
 
 class TestDevice extends Device {
   constructor(options) {

@@ -16,6 +16,6 @@ all code is your original work. `</legalese>`
 
 ## License
 
-- Copyright (c) 2017, The Bcoin Developers (MIT License).
+- Copyright (c) 2018, The Bcoin Developers (MIT License).
 
 See LICENSE for more info.

@@ -2,7 +2,7 @@
 
 const bledger = require('../lib/bledger');
 const {LedgerBcoin} = bledger;
-const {Device} = bledger.hid;
+const {Device} = bledger.HID;
 
 const KeyRing = require('bcoin/lib/primitives/keyring');
 

@@ -2,7 +2,7 @@
 
 const bledger = require('../lib/bledger');
 const {LedgerBcoin} = bledger;
-const {Device} = bledger.hid;
+const {Device} = bledger.HID;
 
 (async () => {
   const devices = await Device.getDevices();
@@ -22,12 +22,9 @@ const {Device} = bledger.hid;
   const account1Path = `${coinTypePath}/0'`;
   const account2Path = `${coinTypePath}/1'`;
 
-  const ledgerBcoin = new LedgerBcoin({
-    path: account1Path,
-    device: device
-  });
+  const ledgerBcoin = new LedgerBcoin({ device });
 
-  const pubkey1 = await ledgerBcoin.getPublicKey();
+  const pubkey1 = await ledgerBcoin.getPublicKey(account1Path);
   const pubkey2 = await ledgerBcoin.getPublicKey(account2Path);
 
   console.log(pubkey1);

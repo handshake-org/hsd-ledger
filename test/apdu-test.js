@@ -4,11 +4,11 @@
 'use strict';
 
 const assert = require('./util/assert');
-const LedgerError = require('../lib/error');
-const APDU = require('../lib/apdu');
-const {APDUCommand} = APDU;
-const {APDUResponse} = APDU;
-const {APDUError} = APDU;
+const LedgerProtocol = require('../lib/protocol');
+const {APDU, LedgerError} = LedgerProtocol;
+const {APDUCommand} = LedgerProtocol;
+const {APDUResponse} = LedgerProtocol;
+const {APDUError} = LedgerProtocol;
 
 const methodByINS = {
   PUBLIC_KEY: 'getPublicKey',

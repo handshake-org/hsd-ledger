@@ -23,7 +23,7 @@
   "homepage": "https://github.com/bcoin-org/bledger#readme",
   "scripts": {
     "browserify": "browserify -s bledger lib/bledger.js | uglifyjs -c > build/bledger.js",
-    "clean": "rm -rf build/bledger.js build/vendor* .config/certs/* ./docs",
+    "clean": "rm -rf build/bledger.js build/vendor* .config/certs/* ./docs ./coverage",
     "lint": "eslint lib/ test/ || exit 0",
     "test": "mocha --reporter spec test/*-test.js",
     "test-hid": "mocha --reporter spec test/device/hid-test.js",
@@ -31,7 +31,8 @@
     "webpack": "webpack --config .config/webpack.js",
     "webpack-dev": "webpack --config .config/webpack.dev.js",
     "webpack-devdeps": "webpack --config .config/webpack.devdeps.js",
-    "docs": "jsdoc -d docs/ lib/"
+    "docs": "jsdoc -c jsdoc.json",
+    "cover": "istanbul cover -x '**/lib/devices/**' node_modules/.bin/_mocha  -- --reporter spec test/*-test.js"
   },
   "dependencies": {
     "bcoin": "^1.0.0-beta.15",
@@ -48,6 +49,7 @@
     "babelify": "^8.0.0",
     "browserify": "^14.5.0",
     "eslint": "^4.9.0",
+    "istanbul": "^1.1.0-alpha.1",
     "jsdoc": "^3.5.5",
     "karma": "^2.0.0",
     "karma-chrome-launcher": "^2.2.0",
