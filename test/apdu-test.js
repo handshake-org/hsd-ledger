@@ -9,6 +9,7 @@ const {APDU, LedgerError} = LedgerProtocol;
 const {APDUCommand} = LedgerProtocol;
 const {APDUResponse} = LedgerProtocol;
 const {APDUError} = LedgerProtocol;
+const {addressFlags} = APDU;
 
 const methodByINS = {
   PUBLIC_KEY: 'getPublicKey',
@@ -32,6 +33,50 @@ describe('APDU', function () {
 
     assert.strictEqual(response.status, APDU.STATUS_WORDS.SUCCESS);
     assert.strictEqual(response.type, APDU.INS.PUBLIC_KEY);
+  });
+
+  it('should encode PUBLIC_KEY addressFlags', () => {
+    const path = 'm/44\'/0\'/0\'/0/0';
+    const flagTests = [{
+      name: 'no verification',
+      addressFlags: 0,
+
+      // expected p1, p2
+      p1: 0,
+      p2: 0
+    }, {
+      name: 'legacy',
+      addressFlags: addressFlags.VERIFY | addressFlags.LEGACY,
+
+      // expected
+      p1: 1,
+      p2: 0
+    }, {
+      name: 'witness',
+      addressFlags: addressFlags.VERIFY | addressFlags.WITNESS,
+
+      // expected
+      p1: 1,
+      p2: 2
+    }, {
+      name: 'nested witness',
+      addressFlags: addressFlags.VERIFY | addressFlags.NESTED_WITNESS,
+
+      // expected
+      p1: 1,
+      p2: 1
+    }];
+
+    for (const flagTest of flagTests) {
+      const command = APDUCommand.getPublicKey(path, flagTest.addressFlags);
+
+      assert.strictEqual(command.p1, flagTest.p1,
+        `P1 for ${flagTest.name} is not correct`
+      );
+      assert.strictEqual(command.p2, flagTest.p2,
+        `P2 for ${flagTest.name} is not correct`
+      );
+    }
   });
 
   it('should encode GET_TRUSTED_INPUT first message', () => {
