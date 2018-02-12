@@ -1,6 +1,6 @@
 {
   "name": "bledger",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Communication and management of ledger devices",
   "keywords": [
     "Bitcoin",
@@ -35,7 +35,7 @@
     "cover": "istanbul cover -x '**/lib/devices/**' node_modules/.bin/_mocha  -- --reporter spec test/*-test.js"
   },
   "dependencies": {
-    "bcoin": "^1.0.0-beta.15",
+    "bcoin": "git+https://github.com/bcoin-org/bcoin.git#wallet-rewrite",
     "bcrypto": "0.0.1",
     "bmutex": "0.0.0",
     "bufio": "0.0.1",
