@@ -1,12 +1,9 @@
 # bledger
 
-Ledger hardware wallet api.
+Ledger hardware wallet api for Bcoin.
 
 ## Usage
-
-``` js
-const ledger = require('bledger');
-```
+You can check [examples/](examples/)
 
 ## Contribution and License Agreement
 
