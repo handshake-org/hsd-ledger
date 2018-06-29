@@ -10,6 +10,7 @@ const vendorManifest = path.join(
 );
 
 module.exports = {
+  mode: 'development',
   target: 'web',
   entry: {
     bledger: './lib/bledger'

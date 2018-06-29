@@ -22,8 +22,8 @@
   },
   "homepage": "https://github.com/bcoin-org/bledger#readme",
   "scripts": {
-    "browserify": "browserify -s bledger lib/bledger.js | uglifyjs -c > build/bledger.js",
-    "clean": "rm -rf build/bledger.js build/vendor* .config/certs/* ./docs ./coverage",
+    "browserify": "browserify -s bledger lib/bledger.js | uglifyjs -c > bledger.js",
+    "clean": "rm -rf bledger.js build/vendor* .config/certs/* ./docs ./coverage",
     "lint": "eslint lib/ test/ || exit 0",
     "test": "mocha --reporter spec test/*-test.js",
     "test-hid": "mocha --reporter spec test/device/hid-test.js",
@@ -35,34 +35,35 @@
     "cover": "istanbul cover -x '**/lib/devices/**' node_modules/.bin/_mocha  -- --reporter spec test/*-test.js"
   },
   "dependencies": {
-    "bcoin": "git+https://github.com/bcoin-org/bcoin.git#wallet-rewrite",
-    "bcrypto": "0.0.1",
-    "bmutex": "0.0.0",
-    "bufio": "0.0.1",
-    "node-hid": "^0.5.7",
-    "u2f-api": "^0.2.7"
+    "bcoin": "git+https://github.com/bcoin-org/bcoin.git",
+    "bcrypto": "0.3.6",
+    "bmutex": "0.1.0",
+    "bufio": "0.2.0",
+    "node-hid": "^0.7.2",
+    "u2f-api": "^1.0.6"
   },
   "devDependencies": {
-    "babel-core": "^6.26.0",
+    "babel-core": "^6.26.3",
     "babel-loader": "^7.1.2",
-    "babel-preset-env": "^1.6.1",
+    "babel-preset-env": "^1.7.0",
     "babelify": "^8.0.0",
-    "browserify": "^14.5.0",
-    "eslint": "^4.9.0",
+    "browserify": "^16.2.2",
+    "eslint": "^5.0.1",
     "istanbul": "^1.1.0-alpha.1",
     "jsdoc": "^3.5.5",
-    "karma": "^2.0.0",
+    "karma": "^2.0.4",
     "karma-chrome-launcher": "^2.2.0",
     "karma-mocha": "^1.3.0",
     "karma-mocha-reporter": "^2.2.5",
-    "karma-webpack": "^2.0.9",
-    "mocha": "^4.0.1",
+    "karma-webpack": "^3.0.0",
+    "mocha": "^5.2.0",
     "uglify-es": "^3.1.3",
-    "uglifyjs-webpack-plugin": "^1.0.0-beta.3",
-    "webpack": "^3.8.1"
+    "uglifyjs-webpack-plugin": "^1.2.7",
+    "webpack": "^4.14.0",
+    "webpack-cli": "^3.0.8"
   },
   "engines": {
-    "node": ">=7.6.0"
+    "node": ">=8.0.0"
   },
   "browserify": {
     "transform": [
