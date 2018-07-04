@@ -94,10 +94,10 @@ describe('Bitcoin App', function () {
 
     device.set({ responses });
 
-    const tis = {};
+    const tis = new Map();
 
     for (const tik of Object.keys(data.trusted)) {
-      tis[tik] = Buffer.from(data.trusted[tik], 'hex');
+      tis.set(tik, Buffer.from(data.trusted[tik], 'hex'));
     }
 
     const mtx = MTX.fromRaw(tx);
