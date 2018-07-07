@@ -103,7 +103,17 @@ module.exports = function (Device, DeviceInfo) {
 
       assert.ok(!tx.verify(), 'Transaction does not need signing');
 
-      await bcoinApp.signTransaction(tx, [ledgerInput1, ledgerInput2]);
+      const ledgerInputs = [ledgerInput1, ledgerInput2];
+      const signatures = await bcoinApp.getTransactionSignatures(
+        tx,
+        tx.view,
+        ledgerInputs
+      );
+
+      await bcoinApp.signTransaction(tx, ledgerInputs);
+
+      for (const [i, input] of tx.inputs.entries())
+        assert.bufferEqual(signatures[i], input.script.getData(0));
 
       assert.ok(tx.verify(), 'Transaction was not signed');
     });
@@ -142,8 +152,24 @@ module.exports = function (Device, DeviceInfo) {
 
       const tx1 = await createTX([ledgerInput1.getCoin()], addr);
 
+      const signatures1 = await bcoinApp.getTransactionSignatures(
+        tx1,
+        tx1.view,
+        [ledgerInput1]
+      );
+
+      const signatures2 = await bcoinApp.getTransactionSignatures(
+        tx1,
+        tx1.view,
+        [ledgerInput2]
+      );
+
       await bcoinApp.signTransaction(tx1, [ledgerInput1]);
       await bcoinApp.signTransaction(tx1, [ledgerInput2]);
+
+      const script = tx1.inputs[0].script;
+      assert.bufferEqual(signatures1[0], script.getData(1));
+      assert.bufferEqual(signatures2[0], script.getData(2));
 
       assert(tx1.verify(), 'Transaction was not signed');
 
@@ -182,7 +208,20 @@ module.exports = function (Device, DeviceInfo) {
 
       mtx.sign(ring, hashType.ALL | hashType.ANYONECANPAY);
 
+      const signatures = await bcoinApp.getTransactionSignatures(
+        mtx,
+        mtx.view,
+        ledgerInputs
+      );
+
       await bcoinApp.signTransaction(mtx, ledgerInputs);
+
+      for (const [i, input] of mtx.inputs.entries()) {
+        if (!signatures[i])
+          continue;
+
+        assert.bufferEqual(signatures[i], input.script.getData(0));
+      }
 
       assert(mtx.verify(), 'Transaction was not signed');
     });
@@ -215,10 +254,17 @@ module.exports = function (Device, DeviceInfo) {
         ledgerInput2.getCoin()
       ], addr);
 
-      await bcoinApp.signTransaction(mtx, [
-        ledgerInput1,
-        ledgerInput2
-      ]);
+      const ledgerInputs = [ledgerInput1, ledgerInput2];
+      const signatures = await bcoinApp.getTransactionSignatures(
+        mtx,
+        mtx.view,
+        ledgerInputs
+      );
+
+      await bcoinApp.signTransaction(mtx, ledgerInputs);
+
+      for (const [i, input] of mtx.inputs.entries())
+        assert.bufferEqual(signatures[i], input.witness.get(0));
 
       assert.ok(mtx.verify(), 'Transaction was not signed');
     });
