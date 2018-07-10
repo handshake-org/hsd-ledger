@@ -82,7 +82,7 @@ const fundUtil = require('../test/util/fund');
   await bcoinApp.signTransaction(mtx, ledgerInputs);
 
   console.log(mtx);
-  console.log(mtx.verify());
+  console.log(`Valid Transaction: ${mtx.verify()}.`);
 
   await device.close();
 })().catch((e) => {

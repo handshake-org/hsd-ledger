@@ -36,10 +36,11 @@ const fundUtil = require('../test/util/fund');
 
   const ledgerBcoin = new LedgerBcoin({ device });
 
+  const account = 'm/44/0\'/0\'';
   const accinfo = [
-    { path: 'm/44\'/0\'/0\'/0/0' },
-    { path: 'm/44\'/0\'/0\'/1/0' },
-    { path: 'm/44\'/0\'/0\'/1/1' }
+    { path: `${account}/0/0` },
+    { path: `${account}/1/0` },
+    { path: `${account}/1/1` }
   ];
 
   // we need address to send tx to ourselves.
@@ -82,7 +83,7 @@ const fundUtil = require('../test/util/fund');
 
   console.log(mtx.toRaw().toString('hex'));
 
-  console.log(mtx.verify());
+  console.log(`Valid Transaction: ${mtx.verify()}.`);
 
   await device.close();
 })().catch((e) => {

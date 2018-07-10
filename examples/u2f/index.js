@@ -15,14 +15,12 @@ const CHANGE = true;
 (async () => {
   const device = new Device({
     scrambleKey: 'btc',
-    timeout: 5000
+    timeout: 20000
   });
 
   await device.open();
 
-  const ledgerBcoin = new LedgerBcoin({
-    device: device
-  });
+  const ledgerBcoin = new LedgerBcoin({ device });
 
   const xpubs = {};
 

@@ -25,7 +25,7 @@ const CHANGE = true;
   const device = new Device({
     device: devices[0],
     timeout: 5000,
-    logger: logger
+    logger
   });
 
   await device.open();
