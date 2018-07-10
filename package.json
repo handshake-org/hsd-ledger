@@ -35,13 +35,15 @@
     "cover": "istanbul cover -x '**/lib/devices/**' node_modules/.bin/_mocha  -- --reporter spec test/*-test.js"
   },
   "dependencies": {
-    "bcoin": "git+https://github.com/bcoin-org/bcoin.git",
     "bcrypto": "0.3.6",
     "blgr": "^0.1.0",
     "bmutex": "0.1.0",
     "bufio": "0.2.0",
     "node-hid": "^0.7.3",
     "u2f-api": "^1.0.6"
+  },
+  "peerDependencies": {
+    "bcoin": "git+https://github.com/bcoin-org/bcoin.git"
   },
   "devDependencies": {
     "babel-core": "^6.26.3",
