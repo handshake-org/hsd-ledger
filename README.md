@@ -5,6 +5,9 @@ Ledger hardware wallet api for Bcoin.
 ## Usage
 You can check [examples/](examples/)
 
+### Note
+- `bcoin` is a peer dependency.
+
 ## Contribution and License Agreement
 
 If you contribute code to this project, you are implicitly allowing your code

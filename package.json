@@ -1,6 +1,6 @@
 {
   "name": "bledger",
-  "version": "0.0.2",
+  "version": "0.1.0",
   "description": "Communication and management of ledger devices",
   "keywords": [
     "Bitcoin",
