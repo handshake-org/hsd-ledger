@@ -66,7 +66,7 @@ const randWitness = ring.getAddress();
 
   await bcoinApp.signTransaction(mtx, ledgerInputs);
 
-  console.log(mtx.verify());
+  console.log(`Valid Transaction: ${mtx.verify()}.`);
 
   await device.close();
 })().catch((e) => {

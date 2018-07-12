@@ -3,6 +3,7 @@
 const bledger = require('../lib/bledger');
 const {LedgerBcoin} = bledger;
 const {Device} = bledger.HID;
+const Logger = require('blgr');
 
 const KeyRing = require('bcoin/lib/primitives/keyring');
 
@@ -14,16 +15,22 @@ const CHANGE = true;
 (async () => {
   const devices = await Device.getDevices();
 
+  const logger = new Logger({
+    console: true,
+    level: 'debug'
+  });
+
+  await logger.open();
+
   const device = new Device({
     device: devices[0],
-    timeout: 5000
+    timeout: 5000,
+    logger
   });
 
   await device.open();
 
-  const ledgerBcoin = new LedgerBcoin({
-    device: device
-  });
+  const ledgerBcoin = new LedgerBcoin({ device });
 
   const xpubs = {};
 

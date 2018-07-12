@@ -14,6 +14,7 @@ const LedgerTXInput = require('../lib/txinput');
 
 const TX = require('bcoin/lib/primitives/tx');
 const MTX = require('bcoin/lib/primitives/mtx');
+const Coin = require('bcoin/lib/primitives/coin');
 const KeyRing = require('bcoin/lib/primitives/keyring');
 const {Script} = require('bcoin/lib/script');
 const hashType = Script.hashType;
@@ -94,10 +95,10 @@ describe('Bitcoin App', function () {
 
     device.set({ responses });
 
-    const tis = {};
+    const tis = new Map();
 
     for (const tik of Object.keys(data.trusted)) {
-      tis[tik] = Buffer.from(data.trusted[tik], 'hex');
+      tis.set(tik, Buffer.from(data.trusted[tik], 'hex'));
     }
 
     const mtx = MTX.fromRaw(tx);
@@ -186,7 +187,7 @@ describe('Bitcoin App', function () {
 
       device.set({ responses });
 
-      const ledgerInputs = wrapTXInputs(data.ledgerInputs);
+      const ledgerInputs = wrapCoinInputs(data.ledgerInputs);
 
       const mtx = MTX.fromRaw(tx, 'hex');
       await bcoinApp.signTransaction(mtx, ledgerInputs);
@@ -215,7 +216,7 @@ describe('Bitcoin App', function () {
 
       device.set({ responses });
 
-      const ledgerInputs = wrapTXInputs(data.ledgerInputs);
+      const ledgerInputs = wrapCoinInputs(data.ledgerInputs);
 
       const mtx = MTX.fromRaw(tx, 'hex');
       await bcoinApp.signTransaction(mtx, ledgerInputs);
@@ -243,7 +244,7 @@ describe('Bitcoin App', function () {
 
     device.set({ responses });
 
-    const ledgerInputs = wrapTXInputs(data.ledgerInputs);
+    const ledgerInputs = wrapCoinInputs(data.ledgerInputs);
     const mtx = MTX.fromRaw(tx, 'hex');
 
     updateCoinView(mtx, ledgerInputs);
@@ -272,7 +273,7 @@ describe('Bitcoin App', function () {
 
     device.set({ responses });
 
-    const ledgerInputs = wrapTXInputs(data.ledgerInputs);
+    const ledgerInputs = wrapCoinInputs(data.ledgerInputs);
     const mtx = MTX.fromRaw(tx, 'hex');
 
     updateCoinView(mtx, ledgerInputs);
@@ -297,19 +298,31 @@ describe('Bitcoin App', function () {
   });
 });
 
-function wrapTXInputs(inputData) {
+function wrapCoinInputs(inputData) {
   const ledgerInputs = [];
 
   for (const ledgerInput of inputData) {
-    ledgerInputs.push(new LedgerTXInput({
-      tx: Buffer.from(ledgerInput.tx, 'hex'),
-      index: ledgerInput.index,
-      path: ledgerInput.path,
-      redeem: ledgerInput.redeem != null
-        ? Script.fromRaw(ledgerInput.redeem, 'hex')
-        : null,
-      witness: ledgerInput.witness
-    }));
+    const tx = TX.fromRaw(Buffer.from(ledgerInput.tx, 'hex'));
+
+    const {
+      index,
+      path,
+      redeem,
+      witness
+    } = ledgerInput;
+
+    const redeemScript = redeem != null ? Script.fromRaw(redeem, 'hex') : null;
+
+    if (witness || redeem) {
+      const coin = Coin.fromTX(tx, index, 0);
+
+      ledgerInputs.push(new LedgerTXInput({
+        coin, index, witness, path,
+        redeem: redeemScript
+      }));
+    } else {
+      ledgerInputs.push(new LedgerTXInput({ tx, index, witness, path }));
+    }
   }
 
   return ledgerInputs;
