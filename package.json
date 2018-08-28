@@ -46,6 +46,7 @@
     "bcoin": "git+https://github.com/bcoin-org/bcoin.git"
   },
   "devDependencies": {
+    "bcoin": "^1.0.2",
     "babel-core": "^6.26.3",
     "babel-loader": "^7.1.2",
     "babel-preset-env": "^1.7.0",
