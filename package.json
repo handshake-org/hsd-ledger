@@ -1,29 +1,31 @@
 {
-  "name": "bledger",
-  "version": "0.1.2",
+  "name": "hns-ledger",
+  "version": "0.1.0",
   "description": "Communication and management of ledger devices",
   "keywords": [
     "Bitcoin",
+    "Handshake",
     "Hardware",
     "Wallet",
     "Ledger",
+    "hsd",
     "bcoin",
     "blockchain"
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/bcoin-org/bledger.git"
+    "url": "git+https://github.com/boymanjor/hns-ledger.git"
   },
-  "main": "./lib/bledger.js",
+  "main": "./lib/hns-ledger.js",
   "license": "MIT",
-  "author": "The Bcoin Developers",
+  "authors": ["Boyma Fahnbulleh", "The Bcoin Developers"],
   "bugs": {
-    "url": "https://github.com/bcoin-org/bledger/issues"
+    "url": "https://github.com/boymanjor/hns-ledger/issues"
   },
-  "homepage": "https://github.com/bcoin-org/bledger#readme",
+  "homepage": "https://github.com/boymanjor/hns-ledger#readme",
   "scripts": {
-    "browserify": "browserify -s bledger lib/bledger.js | uglifyjs -c > bledger.js",
-    "clean": "rm -rf bledger.js build/vendor* .config/certs/* ./docs ./coverage",
+    "browserify": "browserify -s hns-ledger lib/hns-ledger.js | uglifyjs -c > hns-ledger.js",
+    "clean": "rm -rf hns-ledger.js build/vendor* .config/certs/* ./docs ./coverage",
     "lint": "eslint lib/ test/ || exit 0",
     "test": "mocha --reporter spec test/*-test.js",
     "test-hid": "mocha --reporter spec test/device/hid-test.js",
@@ -44,10 +46,9 @@
     "u2f-api": "^1.0.6"
   },
   "peerDependencies": {
-    "bcoin": "^1.0.2"
+    "hsd": "handshake-org/hsd"
   },
   "devDependencies": {
-    "bcoin": "^1.0.2",
     "babel-core": "^6.26.3",
     "babel-loader": "^8.0.0",
     "babel-preset-env": "^1.7.0",
