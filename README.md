@@ -19,7 +19,7 @@ showcase node.js usage:
 [pubkey]: ./examples/getPublicKey.js
 [p2pkh]: ./examples/signTransaction-p2pkh.js
 [p2sh]: ./examples/signTransaction-p2sh.js
-[u2f]: .examples/u2f/index.js
+[u2f]: ./examples/u2f/index.js
 
 >Note: `hsd` is a peer dependency.
 
