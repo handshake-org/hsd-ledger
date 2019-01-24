@@ -18,7 +18,10 @@
   },
   "main": "./lib/hns-ledger.js",
   "license": "MIT",
-  "authors": ["Boyma Fahnbulleh", "The Bcoin Developers"],
+  "authors": [
+    "Boyma Fahnbulleh",
+    "The Bcoin Developers"
+  ],
   "bugs": {
     "url": "https://github.com/boymanjor/hns-ledger/issues"
   },
