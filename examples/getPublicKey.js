@@ -15,10 +15,10 @@ const {Device} = hnsledger.HID;
 
   await device.open();
 
-  const path = `m/44'/5353'/0'/0/0`;
-  const ledger = new LedgerHSD({ device });
-  const display = LedgerHSD.params.CONFIRM_ADDRESS;
-  const result = await ledger.getPublicKey(path, display);
+  const path = `m/44'/5355'/0'/0/0`;
+  const ledger = new LedgerHSD({ device, network: 'regtest' });
+  const confirm = LedgerHSD.params.NO_CONFIRM;
+  const result = await ledger.getPublicKey(path, confirm);
   console.log('result:', result);
 
   await device.close();

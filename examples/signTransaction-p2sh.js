@@ -32,12 +32,12 @@ const util = require('../test/util/fund');
   await device.open();
 
   const accounts = [
-    { path: 'm/44\'/0\'/0\'/0/0' },
-    { path: 'm/44\'/0\'/1\'/0/0' },
-    { path: 'm/44\'/0\'/2\'/0/0' }
+    { path: 'm/44\'/5355\'/0\'/0/0' },
+    { path: 'm/44\'/5355\'/1\'/0/0' },
+    { path: 'm/44\'/5355\'/2\'/0/0' }
   ];
 
-  const ledger = new LedgerHSD({ device });
+  const ledger = new LedgerHSD({ device, network: 'regtest' });
 
   for (const acc of accounts) {
     const data = await ledger.getPublicKey(acc.path);

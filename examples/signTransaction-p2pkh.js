@@ -20,8 +20,8 @@ const {Device} = hnsledger.HID;
 
   await device.open();
 
-  const ledger = new LedgerHSD({ device });
-  const path = `m/44'/5353'/0'/0/0`;
+  const ledger = new LedgerHSD({ device, network: 'regtest' });
+  const path = `m/44'/5355'/0'/0/0`;
   const data = await ledger.getPublicKey(path);
   const ring = await KeyRing.fromPublic(data.xpub.publicKey);
   const addr = ring.getAddress();
