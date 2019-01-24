@@ -15,8 +15,9 @@ const {Device} = hnsledger.HID;
 
   await device.open();
 
+  const path = `m/44'/5355'/0'/0/0`;
   const ledger = new LedgerHSD({ device, network: 'regtest' });
-  const result = await ledger.getPublicKey(0, 0, 0, true);
+  const result = await ledger.getXpub(path);
   console.log('result:', result);
 
   await device.close();
