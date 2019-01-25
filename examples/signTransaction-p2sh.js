@@ -40,8 +40,8 @@ const util = require('../test/util/fund');
   const ledger = new LedgerHSD({ device, network: 'regtest' });
 
   for (const acc of accounts) {
-    const data = await ledger.getPublicKey(acc.path);
-    acc.hd = data.xpub;
+    const xpub = await ledger.getXpub(acc.path);
+    acc.hd = xpub;
     acc.pk = acc.hd.publicKey;
   }
 
