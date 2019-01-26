@@ -31,7 +31,7 @@ const util = require('../test/util/fund');
 
   await device.open();
 
-  const accounts = [
+  const accts = [
     { path: 'm/44\'/5355\'/0\'/0/0' },
     { path: 'm/44\'/5355\'/1\'/0/0' },
     { path: 'm/44\'/5355\'/2\'/0/0' }
@@ -39,7 +39,7 @@ const util = require('../test/util/fund');
 
   const ledger = new LedgerHSD({ device, network: 'regtest' });
 
-  for (const acc of accounts) {
+  for (const acc of accts) {
     const xpub = await ledger.getXpub(acc.path);
     acc.hd = xpub;
     acc.pk = acc.hd.publicKey;
@@ -47,8 +47,8 @@ const util = require('../test/util/fund');
 
   console.log(`Constructing multisig address...`);
 
-  const [m, n] = [2, accounts.length];
-  const [pk1, pk2, pk3] = [ accounts[0].pk, accounts[1].pk, accounts[2].pk];
+  const [m, n] = [2, accts.length];
+  const [pk1, pk2, pk3] = [ accts[0].pk, accts[1].pk, accts[2].pk];
   const redeem = Script.fromMultisig(m, n, [pk1, pk2, pk3]);
   const address = Address.fromScript(redeem);
   const changeAddress = Address.fromScript(redeem);
@@ -68,13 +68,13 @@ const util = require('../test/util/fund');
   const coin = Coin.fromTX(txs[0], 0, -1);
 
   ledgerInputs.push(new LedgerInput({
-    path: accounts[0].path,
+    path: accts[0].path,
     coin,
     redeem
   }));
 
   ledgerInputs.push(new LedgerInput({
-    path: accounts[1].path,
+    path: accts[1].path,
     coin,
     redeem
   }));

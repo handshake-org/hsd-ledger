@@ -21,9 +21,8 @@ const {Device} = hnsledger.HID;
   await device.open();
 
   const ledger = new LedgerHSD({ device, network: 'regtest' });
-  const path = `m/44'/5355'/0'/0/0`;
-  const xpub = await ledger.getXpub(path);
-  const ring = await KeyRing.fromPublic(xpub.publicKey);
+  const pub = await ledger.getPublicKey(0, 0, 0, false);
+  const ring = await KeyRing.fromPublic(pub);
   const addr = ring.getAddress();
   const {coins, txs} = await util.fundAddress(addr, 1);
 
@@ -40,7 +39,7 @@ const {Device} = hnsledger.HID;
   });
 
   const ledgerInput = new LedgerInput({
-    path: path,
+    path: `m/44'/5355'/0'/0/0`,
     coin: Coin.fromTX(txs[0], 0, -1)
   });
 
