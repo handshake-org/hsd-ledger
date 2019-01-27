@@ -14,8 +14,8 @@ const {Device} = hnsledger.HID;
   await device.open();
 
   const ledger = new LedgerHSD({ device })
-  const result = await ledger.getAppVersion();
-  console.log('result: ', result);
+  const version = await ledger.getAppVersion();
+  console.log('version: ', version);
 
   await device.close();
 })().catch((e) => {
