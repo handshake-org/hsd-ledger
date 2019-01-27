@@ -19,7 +19,6 @@ const {Device} = hnsledger.HID;
   const confirm = false;
   const xpub = await ledger.getAccountXpub(0, confirm);
 
-  // 3150513263
   await device.close();
 
 })().catch((e) => {
