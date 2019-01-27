@@ -1,7 +1,5 @@
 'use strict';
 
-const KeyRing = require('hsd/lib/primitives/keyring');
-
 const hnsledger = require('../lib/hns-ledger');
 const {LedgerHSD} = hnsledger;
 const {Device} = hnsledger.HID;

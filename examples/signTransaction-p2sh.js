@@ -4,14 +4,13 @@ const Amount = require('hsd/lib/ui/amount');
 const Address = require('hsd/lib/primitives/address');
 const Coin = require('hsd/lib/primitives/coin');
 const MTX = require('hsd/lib/primitives/mtx');
+const Logger = require('blgr');
 const {Script} = require('hsd/lib/script');
 
 const hnsledger = require('../lib/hns-ledger');
+const util = require('../test/util/fund');
 const {LedgerHSD, LedgerInput} = hnsledger;
 const {Device} = hnsledger.HID;
-const Logger = require('blgr');
-
-const util = require('../test/util/fund');
 
 (async () => {
   const devices = await Device.getDevices();

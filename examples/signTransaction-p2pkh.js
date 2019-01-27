@@ -3,8 +3,6 @@
 const Coin = require('hsd/lib/primitives/coin');
 const MTX = require('hsd/lib/primitives/mtx');
 const KeyRing = require('hsd/lib/primitives/keyring');
-const Script = require('hsd/lib/script/script');
-const {hashType} = Script;
 
 const util = require('../test/util/fund');
 const hnsledger = require('../lib/hns-ledger');
