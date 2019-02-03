@@ -1,17 +1,11 @@
 'use strict';
 
 const assert = require('assert');
-
-// NOTE: these paths will need to change but be
-// sure to depend on the same version of hsd.
-const hsd = require('../node_modules/hsd/lib/hsd');
-const hnsledger = require('../lib/hns-ledger');
+const hsd = require('hsd');
+const hnsledger = require('../../lib/hns-ledger');
 const { LedgerHSD } = hnsledger;
 const { Device } = hnsledger.HID;
-
-// NOTE: this test requires hs-client and this path
-// will need to be changed as well.
-const { NodeClient, WalletClient } = require('../../hs-client/lib/hs-client');
+const { NodeClient, WalletClient } = require('hs-client');
 
 class TestError extends Error {
 
@@ -331,7 +325,7 @@ class LedgerTest extends Test {
       console.log(`Creating send from wallet a to b...`);
 
       await this.selectWallet(wallet_a);
-      let mtx = await this.createSendToAddress('default', b, 1900);
+      let mtx = await this.createSendToAddress('0', b, 1900);
 
       console.log(`Signing transaction with Ledger.`);
       console.log(`Tx hash is ${mtx.txid()}.`);
