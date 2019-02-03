@@ -325,7 +325,7 @@ class LedgerTest extends Test {
       console.log(`Creating send from wallet a to b...`);
 
       await this.selectWallet(wallet_a);
-      let mtx = await this.createSendToAddress('0', b, 1900);
+      let mtx = await this.createSendToAddress('default', b, 1900);
 
       console.log(`Signing transaction with Ledger.`);
       console.log(`Tx hash is ${mtx.txid()}.`);
@@ -340,7 +340,7 @@ class LedgerTest extends Test {
       console.log(`Creating send from wallet b to a...`);
 
       await this.selectWallet(wallet_b);
-      mtx = await this.createSendToAddress('0', a, 1700);
+      mtx = await this.createSendToAddress('default', a, 1700);
 
       console.log(`Signing transaction with Ledger.`);
       console.log(`Tx hash is ${mtx.txid()}.`);
