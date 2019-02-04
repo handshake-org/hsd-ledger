@@ -7,6 +7,8 @@ const {LedgerHSD} = hnsledger;
 const {Device} = hnsledger.HID;
 
 (async () => {
+  const network = 'regtest';
+  const confirm = false;
   const devices = await Device.getDevices();
   const device = new Device({
     device: devices[0],
@@ -15,8 +17,7 @@ const {Device} = hnsledger.HID;
 
   await device.open();
 
-  const ledger = new LedgerHSD({ device, network: 'regtest' });
-  const confirm = false;
+  const ledger = new LedgerHSD({ device, network });
   const address = await ledger.getAddress(0, 0, 0, confirm);
   console.log('address:', address);
   await ledger.getAddress(0, 0, 0, true);

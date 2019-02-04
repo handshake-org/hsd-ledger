@@ -13,6 +13,7 @@ const {Device} = hnsledger.HID;
 
   await device.open();
 
+  // Note: network defaults to 'main'
   const ledger = new LedgerHSD({ device })
   const version = await ledger.getAppVersion();
   console.log('version: ', version);

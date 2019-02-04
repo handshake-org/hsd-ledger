@@ -8,6 +8,8 @@ const {LedgerHSD} = hnsledger;
 const {Device} = hnsledger.HID;
 
 (async () => {
+  const network = 'regtest';
+  const confirm = false;
   const devices = await Device.getDevices();
   const device = new Device({
     device: devices[0],
@@ -16,15 +18,14 @@ const {Device} = hnsledger.HID;
 
   await device.open();
 
-  const ledger = new LedgerHSD({ device, network: 'regtest' });
-  const confirm = false;
+  const ledger = new LedgerHSD({ device, network });
 
   // NOTE: unsafe unhardened derivation will cause confirmation.
   const unsafe = await ledger.getXpub(`m/44'/5353/0'`, confirm);
   console.log('xpub:', unsafe);
 
   // NOTE: longer than usual derivation path will cause confirmation.
-  const long = await ledger.getXpub(`m/44'/5353'/0'/0/0/0'`, confirm);
+  const long = await ledger.getXpub(`m/44'/5353'/0'/0/0/0`, confirm);
   console.log('xpub:', long);
 
   await device.close();
