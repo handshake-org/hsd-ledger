@@ -14,8 +14,9 @@ const {Device} = hnsledger.HID;
   await device.open();
 
   const ledger = new LedgerHSD({ device, network: 'regtest' });
-  const confirm = false;
+  const confirm = true;
   const xpub = await ledger.getAccountXpub(0, confirm);
+  console.log('xpub:', xpub);
 
   await device.close();
 
