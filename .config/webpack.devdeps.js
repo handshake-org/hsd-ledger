@@ -13,7 +13,7 @@ module.exports = {
   mode: 'development',
   target: 'web',
   entry: {
-    vendor: ['bcoin/lib/bcoin-browser', 'bufio', 'bmutex', 'bcrypto', 'u2f-api']
+    vendor: ['hsd/lib/hsd-browser', 'bufio', 'bmutex', 'bcrypto', 'u2f-api']
   },
   output: {
     libraryTarget: 'umd',

@@ -7,10 +7,10 @@ module.exports = {
   mode: 'production',
   target: 'web',
   entry: {
-    bledger: './lib/bledger'
+    hns-ledger: './lib/hns-ledger'
   },
   output: {
-    library: 'bledger',
+    library: 'hns-ledger',
     libraryTarget: 'umd',
     path: path.join(__dirname, '..', 'build'),
     filename: '[name].js'

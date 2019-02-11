@@ -4,7 +4,7 @@
 'use strict';
 
 const assert = require('./util/assert');
-const util = require('../lib/utils/transaction');
+const util = require('../lib/utils/util');
 
 const responseTests = [{
   messages: [
@@ -52,14 +52,26 @@ const responseTests = [{
 }];
 
 describe('utils', function () {
-  it('should split buffer to messages', () => {
-    for (const test of responseTests) {
-      const buf = Buffer.concat(test.messages);
-      const messages = util.splitBuffer(buf, 64);
+  describe('#harden()', () => {
+    it('should harden BIP44 index', () => {
+      const index = 1;
+      const want = 0x80000001;
+      const got = util.harden(index);
 
-      for (let i = 0; i < messages.length; i++) {
-        assert.bufferEqual(messages[i], test.messages[i]);
+      assert.strictEqual(want, got);
+    });
+  });
+
+  describe('#splitBuffer()', () => {
+    it('should split buffer to messages', () => {
+      for (const test of responseTests) {
+        const buf = Buffer.concat(test.messages);
+        const messages = util.splitBuffer(buf, 64);
+
+        for (let i = 0; i < messages.length; i++) {
+          assert.bufferEqual(messages[i], test.messages[i]);
+        }
       }
-    }
+    });
   });
 });

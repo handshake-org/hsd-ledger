@@ -13,7 +13,7 @@ module.exports = {
   mode: 'development',
   target: 'web',
   entry: {
-    bledger: './lib/bledger'
+    hns-ledger: './lib/hns-ledger'
   },
   output: {
     libraryTarget: 'umd',

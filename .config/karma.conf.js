@@ -13,11 +13,11 @@ module.exports = function(config) {
     basePath: '..',
     frameworks: ['mocha'],
     files: [
-      'test/device/u2f-test.js' // u2f
+      'test/devices/u2f-test.js' // u2f
     ],
     exclude: [],
     preprocessors: {
-      'test/device/u2f-test.js': ['webpack']
+      'test/devices/u2f-test.js': ['webpack']
     },
     webpack: webpackConfigs,
 
