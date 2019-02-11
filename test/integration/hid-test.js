@@ -4,12 +4,12 @@
 'use strict';
 
 const assert = require('../util/assert');
-const bledger = require('../../lib/bledger');
-
-const {Device, DeviceInfo} = bledger.HID;
+const {HID} = require('../../lib/hns-ledger');
+const {Device, DeviceInfo} = HID;
 
 const DEVICE_TIMEOUT = Number(process.env.DEVICE_TIMEOUT) || 15000;
-describe('HID Device', function () {
+
+describe('HID', function () {
   this.timeout(DEVICE_TIMEOUT);
 
   it('should list devices', async () => {
@@ -19,7 +19,7 @@ describe('HID Device', function () {
 
     for (const device of devices)
       assert.ok(DeviceInfo.isLedgerDevice(device),
-        'Device should be a ledger device');
+        'Device should be a Ledger device');
   });
 });
 

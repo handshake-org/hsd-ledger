@@ -4,9 +4,9 @@
 'use strict';
 
 const assert = require('../util/assert');
-const bledger = require('../../lib/bledger');
+const {U2F} = require('../../lib/hns-ledger');
+const {Device, DeviceInfo} = U2F;
 
-const {Device, DeviceInfo} = bledger.U2F;
 const DEVICE_TIMEOUT = Number(process.env.DEVICE_TIMEOUT) || 15000;
 
 describe('HID Device', function () {

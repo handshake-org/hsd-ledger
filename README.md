@@ -31,6 +31,18 @@ showcase node.js usage:
 
 More documentation to come...
 
+## Tests
+
+For unit tests run:
+```bash
+$ npm test
+```
+
+For end to end tests using a Ledger device run:
+```bash
+$ node ./test/e2e/index.js
+```
+
 ## Contribution and License Agreement
 
 If you contribute code to this project, you are implicitly allowing your code
