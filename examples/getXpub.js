@@ -1,6 +1,5 @@
 'use strict';
 
-const hash160 = require('bcrypto').hash160;
 const KeyRing = require('hsd/lib/primitives/keyring');
 
 const hnsledger = require('../lib/hns-ledger');
@@ -22,11 +21,11 @@ const {Device} = hnsledger.HID;
 
   // NOTE: unsafe unhardened derivation will cause confirmation.
   const unsafe = await ledger.getXpub(`m/44'/5353/0'`, confirm);
-  console.log('xpub:', unsafe);
+  console.log('xpub:', unsafe.xpubkey('regtest'));
 
   // NOTE: longer than usual derivation path will cause confirmation.
   const long = await ledger.getXpub(`m/44'/5353'/0'/0/0/0`, confirm);
-  console.log('xpub:', long);
+  console.log('xpub:', unsafe.xpubkey('regtest'));
 
   await device.close();
 
