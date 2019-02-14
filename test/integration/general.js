@@ -13,7 +13,7 @@ const MTX = require('hsd/lib/primitives/mtx');
 const {hashType} = require('hsd/lib/script/script');
 
 const DEVICE_TIMEOUT = Number(process.env.DEVICE_TIMEOUT) || 15000;
-const ACCOUNT = `m/44'/0'/0'`;
+const ACCOUNT = `m/44'/5353'/0'`;
 const PATH1 = `${ACCOUNT}/0/0`;
 const PATH2 = `${ACCOUNT}/1/0`;
 
@@ -58,7 +58,6 @@ module.exports = function (Device, DeviceInfo) {
       for (const path of Object.keys(paths)) {
         const want = paths[path];
         const got = await ledger.getXpub(path);
-        console.log(path);
 
         assert.strictEqual(want.depth, got.depth,
           'depth did not match');

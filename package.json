@@ -3,13 +3,11 @@
   "version": "0.1.0",
   "description": "Communication and management of ledger devices",
   "keywords": [
-    "Bitcoin",
     "Handshake",
     "Hardware",
     "Wallet",
     "Ledger",
     "hsd",
-    "bcoin",
     "blockchain"
   ],
   "repository": {

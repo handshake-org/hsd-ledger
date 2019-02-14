@@ -13,7 +13,7 @@ module.exports = {
   mode: 'development',
   target: 'web',
   entry: {
-    hns-ledger: './lib/hns-ledger'
+    hnsledger: './lib/hns-ledger-browser'
   },
   output: {
     libraryTarget: 'umd',

@@ -1,13 +1,13 @@
 'use strict';
 
-const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 const path = require('path');
+const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 
 module.exports = {
   mode: 'production',
   target: 'web',
   entry: {
-    hns-ledger: './lib/hns-ledger'
+    hnsledger: './lib/hns-ledger'
   },
   output: {
     library: 'hns-ledger',
