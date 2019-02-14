@@ -17,7 +17,7 @@ const {Device} = hnsledger.HID;
 
   const ledger = new LedgerHSD({ device, network });
   const pubkey = await ledger.getPublicKey(0, 0, 0, confirm);
-  console.log('pubkey:', pubkey);
+  console.log('pubkey:', pubkey.toString('hex'));
   await ledger.getPublicKey(0, 0, 0, true);
 
   await device.close();

@@ -5,10 +5,11 @@
 
 const assert = require('./util/assert');
 const {
-  common,
+  APDUCommand,
   APDUReader,
   APDUResponse,
-  APDUWriter
+  APDUWriter,
+  common
 } = require('../lib/apdu');
 
 const tests = [
@@ -125,15 +126,72 @@ const responseTests = [{
 describe('apdu', function () {
   describe('apdu.js', () => {
     describe('APDUCommand.getAppVersion()', () => {
-      it('should decode GET_APP_VERSION response', () => {
+      it('should encode commmand', () => {
+        const encoded = APDUCommand.getAppVersion();
+
+        assert.strictEqual(encoded.cla, common.cla.GENERAL,
+          'wrong cla');
+        assert.strictEqual(encoded.ins, common.ins.GET_APP_VERSION,
+          'wrong ins');
+        assert.strictEqual(encoded.p1, 0x00, 'wrong p1');
+        assert.strictEqual(encoded.p2, 0x00, 'wrong p2');
+        assert.strictEqual(encoded.data, common.EMPTY, 'wrong data');
+      });
+    });
+
+    describe('APDUResponse.getAppVersion()', () => {
+      it('should decode response', () => {
         const encoded = Buffer.from('0001009000', 'hex');
         const decoded = APDUResponse.getAppVersion(encoded);
 
         assert.strictEqual(decoded.status, common.status.SUCCESS,
-          'status should be SUCCESS');
+          'wrong status');
         assert.strictEqual(decoded.type, common.ins.GET_APP_VERSION,
-          'type should be GET_PUBLIC_KEY');
-        assert.strictEqual(decoded.data.version, '0.1.0');
+          'wrong type');
+        assert.strictEqual(decoded.data.version, '0.1.0', 'wrong version');
+      });
+    });
+
+    describe('APDUCommand.getPublicKey()', () => {
+      it('should encode commmand', () => {
+        let path = `m/44'/5355'/0'/0/0`;
+        let confirm = true;
+        let net = 'regtest';
+        let xpub = false;
+        let addr = false;
+        let data = Buffer.from([
+          '05',
+          '8000002c800014eb800000000000000000000000'
+        ].join(''), 'hex');
+        let encoded = APDUCommand.getPublicKey(path, confirm, net, xpub, addr);
+
+        assert.strictEqual(encoded.cla, common.cla.GENERAL,
+          'cla should be GENERAL');
+        assert.strictEqual(encoded.ins, common.ins.GET_PUBLIC_KEY,
+          'ins should be GET_PUBLIC_KEY');
+        assert.strictEqual(encoded.p1, 0x05, 'wrong p1');
+        assert.strictEqual(encoded.p2, 0x00, 'wrong p2');
+        assert.deepEqual(encoded.data, data, 'wrong data');
+      });
+    });
+
+    describe('APDUResponse.getPublicKey()', () => {
+      it('should decode response', () => {
+        const pub = '03253ea6d6486d1b9cc3ab01a9a321d65' +
+                    'c350c6c26a9c536633e2ef36163316bf2';
+        const remainder = '0000009000';
+        const encoded = Buffer.from(pub + remainder, 'hex');
+        const decoded = APDUResponse.getPublicKey(encoded);
+
+        assert.strictEqual(decoded.status, common.status.SUCCESS,
+          'wrong status');
+        assert.strictEqual(decoded.type, common.ins.GET_PUBLIC_KEY,
+          'wrong type');
+        assert.deepEqual(decoded.data.publicKey, Buffer.from(pub, 'hex'),
+          'wrong publicKey');
+        assert.ok(!decoded.data.chainCode, 'wrong chainCode');
+        assert.ok(!decoded.data.parentFingerPrint, 'wrong parentFingerPrint');
+        assert.ok(!decoded.data.address, 'wrong address');
       });
     });
   });
