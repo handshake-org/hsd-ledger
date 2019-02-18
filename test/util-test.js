@@ -52,26 +52,44 @@ const responseTests = [{
 }];
 
 describe('utils', function () {
-  describe('#harden()', () => {
-    it('should harden BIP44 index', () => {
-      const index = 1;
-      const want = 0x80000001;
-      const got = util.harden(index);
+  describe('util.js', () => {
+    describe('harden()', () => {
+      it('should harden BIP44 index', () => {
+        const index = 1;
 
-      assert.strictEqual(want, got);
+        const got = util.harden(index);
+        const want = 0x80000001;
+        assert.strictEqual(got, want);
+      });
     });
-  });
 
-  describe('#splitBuffer()', () => {
-    it('should split buffer to messages', () => {
-      for (const test of responseTests) {
-        const buf = Buffer.concat(test.messages);
-        const messages = util.splitBuffer(buf, 64);
+    describe('reverse()', () => {
+      it('should create new object with keys and vals reversed', () => {
+        const had = { a: 'first', b: 'second', c: 'third'};
 
-        for (let i = 0; i < messages.length; i++) {
-          assert.bufferEqual(messages[i], test.messages[i]);
+        let got = util.reverse(had);
+        let want = { 'first': 'a', 'second': 'b', 'third': 'c'};
+        assert.deepEqual(got, want, 'wrong object');
+
+        got = had.a;
+        want = 'first';
+        assert.strictEqual(got, want, 'mutated original object');
+      });
+    });
+
+    describe('splitBuffer()', () => {
+      it('should split buffer to messages', () => {
+        for (const test of responseTests) {
+          const buf = Buffer.concat(test.messages);
+          const messages = util.splitBuffer(buf, 64);
+
+          for (let i = 0; i < messages.length; i++) {
+            let got = messages[i];
+            let want = test.messages[i];
+            assert.bufferEqual(got, want, 'buffers not equal');
+          }
         }
-      }
+      });
     });
   });
 });
