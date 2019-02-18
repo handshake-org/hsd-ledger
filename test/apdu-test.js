@@ -3,9 +3,11 @@
 
 'use strict';
 
-const assert = require('./util/assert');
 const bufio = require('bufio');
-const fund = require('./util/fund');
+const { Coin, KeyRing, MTX, Script } = require('hsd');
+
+const assert = require('./utils/assert');
+const fund = require('./utils/fund');
 const {
   APDUCommand,
   APDUReader,
@@ -15,7 +17,6 @@ const {
 } = require('../lib/apdu');
 const util = require('../lib/utils/util');
 const LedgerInput = require('../lib/ledger/input');
-const { Coin, KeyRing, MTX, Script } = require('hsd');
 
 const tests = [
   {

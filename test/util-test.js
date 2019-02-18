@@ -3,7 +3,7 @@
 
 'use strict';
 
-const assert = require('./util/assert');
+const assert = require('./utils/assert');
 const util = require('../lib/utils/util');
 
 const responseTests = [{

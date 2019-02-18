@@ -3,14 +3,13 @@
 
 'use strict';
 
-const assert = require('../util/assert');
-const fundUtil = require('../util/fund');
-
-const {LedgerHSD, LedgerInput} = require('../../lib/hns-ledger');
-
 const KeyRing = require('hsd/lib/primitives/keyring');
 const MTX = require('hsd/lib/primitives/mtx');
 const {hashType} = require('hsd/lib/script/script');
+
+const assert = require('../utils/assert');
+const fundUtil = require('../utils/fund');
+const {LedgerHSD, LedgerInput} = require('../../lib/hns-ledger');
 
 const DEVICE_TIMEOUT = Number(process.env.DEVICE_TIMEOUT) || 15000;
 const ACCOUNT = `m/44'/5353'/0'`;
