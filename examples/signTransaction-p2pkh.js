@@ -4,7 +4,7 @@ const Coin = require('hsd/lib/primitives/coin');
 const MTX = require('hsd/lib/primitives/mtx');
 const KeyRing = require('hsd/lib/primitives/keyring');
 
-const util = require('../test/util/fund');
+const util = require('../test/utils/fund');
 const hnsledger = require('../lib/hns-ledger');
 const {LedgerHSD, LedgerInput} = hnsledger;
 const {Device} = hnsledger.HID;

@@ -8,7 +8,7 @@ const Logger = require('blgr');
 const {Script} = require('hsd/lib/script');
 
 const hnsledger = require('../lib/hns-ledger');
-const util = require('../test/util/fund');
+const util = require('../test/utils/fund');
 const {LedgerHSD, LedgerInput} = hnsledger;
 const {Device} = hnsledger.HID;
 
