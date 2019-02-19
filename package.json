@@ -29,7 +29,7 @@
     "clean": "rm -rf hns-ledger.js build/vendor* .config/certs/* ./docs ./coverage",
     "lint": "eslint lib/ test/ || exit 0",
     "test": "mocha --reporter spec test/*-test.js",
-    "test-hid": "mocha --reporter spec test/integration/hid-test.js",
+    "test-hid": "mocha --reporter spec test/device/hid-test.js",
     "test-u2f": "karma start .config/karma.conf.js",
     "webpack": "webpack --config .config/webpack.js",
     "webpack-dev": "webpack --config .config/webpack.dev.js",

@@ -3,7 +3,7 @@
 
 'use strict';
 
-const assert = require('../util/assert');
+const assert = require('../utils/assert');
 const {HID} = require('../../lib/hns-ledger');
 const {Device, DeviceInfo} = HID;
 
