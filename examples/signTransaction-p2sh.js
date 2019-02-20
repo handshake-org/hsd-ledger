@@ -1,20 +1,13 @@
 'use strict';
 
-const Amount = require('hsd/lib/ui/amount');
-const Address = require('hsd/lib/primitives/address');
-const Coin = require('hsd/lib/primitives/coin');
-const MTX = require('hsd/lib/primitives/mtx');
 const Logger = require('blgr');
-const {Script} = require('hsd/lib/script');
+const { Amount, Address, Coin, MTX, Script } = require('hsd');
 
-const hnsledger = require('../lib/hns-ledger');
 const util = require('../test/utils/fund');
-const {LedgerHSD, LedgerInput} = hnsledger;
-const {Device} = hnsledger.HID;
+const {HID, LedgerHSD, LedgerInput } = require('../lib/hns-ledger');
+const {Device} = HID;
 
 (async () => {
-  const devices = await Device.getDevices();
-
   const logger = new Logger({
     console: true,
     level: 'info'
@@ -22,13 +15,20 @@ const {Device} = hnsledger.HID;
 
   await logger.open();
 
+  const devices = await Device.getDevices();
+
   const device = new Device({
     device: devices[0],
-    timeout: 60000,
-    logger: logger
+    timeout: 15000, // optional (default is 5000ms)
+    logger: logger  // optional
   });
 
   await device.open();
+
+  const ledger = new LedgerHSD({
+    device: device,
+    network: 'regtest'
+  });
 
   const accts = [
     { path: 'm/44\'/5355\'/0\'/0/0' },
@@ -36,32 +36,31 @@ const {Device} = hnsledger.HID;
     { path: 'm/44\'/5355\'/2\'/0/0' }
   ];
 
-  const ledger = new LedgerHSD({ device, network: 'regtest' });
-
-  for (const acc of accts) {
-    const xpub = await ledger.getXpub(acc.path);
-    acc.hd = xpub;
-    acc.pk = acc.hd.publicKey;
+  for (const acct of accts) {
+    const xpub = await ledger.getXpub(acct.path);
+    acct.xpub = xpub;
+    acct.pub = acct.xpub.publicKey;
   }
 
-  console.log(`Constructing multisig address...`);
+  logger.info(`Constructing multisig address...`);
 
   const [m, n] = [2, accts.length];
-  const [pk1, pk2, pk3] = [ accts[0].pk, accts[1].pk, accts[2].pk];
-  const redeem = Script.fromMultisig(m, n, [pk1, pk2, pk3]);
+  const [pub1, pub2, pub3] = [accts[0].pub, accts[1].pub, accts[2].pub];
+  const redeem = Script.fromMultisig(m, n, [pub1, pub2, pub3]);
   const address = Address.fromScript(redeem);
   const changeAddress = Address.fromScript(redeem);
 
-  console.log('Constructing spend transaction...');
+  logger.info('Constructing spend transaction...');
 
   const {coins, txs} = await util.fundAddress(address, 1);
   const mtx = new MTX();
   const value = Amount.fromCoins(1).toValue();
 
   mtx.addOutput({ address, value });
+
   await mtx.fund(coins, { changeAddress });
 
-  console.log('Constructing LedgerInputs for each input and each signer...');
+  logger.info('Constructing LedgerInputs...');
 
   const ledgerInputs = [];
   const coin = Coin.fromTX(txs[0], 0, -1);
@@ -78,12 +77,12 @@ const {Device} = hnsledger.HID;
     redeem
   }));
 
-  console.log(`txid: ${mtx.txid()}`);
+  logger.info(`TXID: ${mtx.txid()}`);
 
   const part = await ledger.signTransaction(mtx, [ledgerInputs[0]]);
   const full = await ledger.signTransaction(part, [ledgerInputs[1]]);
 
-  console.log(`valid: ${full.verify()}.`);
+  logger.info(`Result of TX.verify(): ${full.verify()}.`);
 
   await device.close();
 })().catch((e) => {

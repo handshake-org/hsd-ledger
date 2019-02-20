@@ -1,25 +1,40 @@
 'use strict';
 
 const KeyRing = require('hsd/lib/primitives/keyring');
-
-const hnsledger = require('../lib/hns-ledger');
-const {LedgerHSD} = hnsledger;
-const {Device} = hnsledger.HID;
+const Logger = require('blgr');
+const {HID, LedgerHSD} = require('../lib/hns-ledger');
+const {Device} = HID;
 
 (async () => {
-  const network = 'regtest';
-  const confirm = false;
+  const logger = new Logger({
+    console: true,
+    level: 'info'
+  });
+
+  await logger.open();
+
   const devices = await Device.getDevices();
+
   const device = new Device({
     device: devices[0],
-    timeout: 60000
+    timeout: 15000, // optional (default is 5000ms)
+    logger: logger  // optional
   });
 
   await device.open();
 
-  const ledger = new LedgerHSD({ device, network });
-  const address = await ledger.getAddress(0, 0, 0, confirm);
-  console.log('address:', address);
+  const ledger = new LedgerHSD({
+    device: device,
+    network: 'regtest'
+  });
+
+  // Do not confirm on-device.
+  const address = await ledger.getAddress(0, 0, 0, false);
+
+  // Log to console for on-device confirmation.
+  logger.info('Address: %s', address);
+
+  // Confirm on-device.
   await ledger.getAddress(0, 0, 0, true);
 
   await device.close();

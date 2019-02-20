@@ -1,31 +1,38 @@
 'use strict';
 
 const KeyRing = require('hsd/lib/primitives/keyring');
-
-const hnsledger = require('../lib/hns-ledger');
-const {LedgerHSD} = hnsledger;
-const {Device} = hnsledger.HID;
+const Logger = require('blgr');
+const {HID, LedgerHSD} = require('../lib/hns-ledger');
+const {Device} = HID;
 
 (async () => {
-  const network = 'regtest';
-  const confirm = false;
+  const logger = new Logger({
+    console: true,
+    level: 'info'
+  });
+
+  await logger.open();
+
   const devices = await Device.getDevices();
+
   const device = new Device({
     device: devices[0],
-    timeout: 60000
+    timeout: 15000, // optional (default is 5000ms)
+    logger: logger  // optional
   });
 
   await device.open();
 
-  const ledger = new LedgerHSD({ device, network });
+  const ledger = new LedgerHSD({
+    device: device,
+    network: 'regtest'
+  });
 
   // NOTE: unsafe unhardened derivation will cause confirmation.
-  const unsafe = await ledger.getXpub(`m/44'/5353/0'`, confirm);
-  console.log('xpub:', unsafe.xpubkey('regtest'));
+  const unsafe = await ledger.getXpub(`m/44'/5353/0'`, false);
 
   // NOTE: longer than usual derivation path will cause confirmation.
-  const long = await ledger.getXpub(`m/44'/5353'/0'/0/0/0`, confirm);
-  console.log('xpub:', unsafe.xpubkey('regtest'));
+  const long = await ledger.getXpub(`m/44'/5353'/0'/0/0/0`, false);
 
   await device.close();
 
