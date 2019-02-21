@@ -30,27 +30,27 @@ const {Device} = HID;
     network: 'regtest'
   });
 
-  const accts = [
-    { path: 'm/44\'/5355\'/0\'/0/0' },
-    { path: 'm/44\'/5355\'/1\'/0/0' },
-    { path: 'm/44\'/5355\'/2\'/0/0' }
+  const signers = [
+    { acct: 0, path: `m/44'/5355'/0'/0/0` },
+    { acct: 1, path: `m/44'/5355'/1'/0/0` },
+    { acct: 2, path: `m/44'/5355'/2'/0/0` },
   ];
 
-  for (const acct of accts) {
-    const xpub = await ledger.getXpub(acct.path);
-    acct.xpub = xpub;
-    acct.pub = acct.xpub.publicKey;
-  }
+  logger.info(`Constructing multisig address.`);
 
-  logger.info(`Constructing multisig address...`);
+  for (const signer of signers)
+    signer.pub = await ledger.getPublicKey(signer.acct, 0, 0);
 
-  const [m, n] = [2, accts.length];
-  const [pub1, pub2, pub3] = [accts[0].pub, accts[1].pub, accts[2].pub];
-  const redeem = Script.fromMultisig(m, n, [pub1, pub2, pub3]);
+  const [m, n] = [2, signers.length];
+  const redeem = Script.fromMultisig(m, n, [
+    signers[0].pub,
+    signers[1].pub,
+    signers[2].pub,
+  ]);
   const address = Address.fromScript(redeem);
   const changeAddress = Address.fromScript(redeem);
 
-  logger.info('Constructing spend transaction...');
+  logger.info('Constructing spend transaction.');
 
   const {coins, txs} = await util.fundAddress(address, 1);
   const mtx = new MTX();
@@ -60,19 +60,17 @@ const {Device} = HID;
 
   await mtx.fund(coins, { changeAddress });
 
-  logger.info('Constructing LedgerInputs...');
-
   const ledgerInputs = [];
   const coin = Coin.fromTX(txs[0], 0, -1);
 
   ledgerInputs.push(new LedgerInput({
-    path: accts[0].path,
+    path: signers[0].path,
     coin,
     redeem
   }));
 
   ledgerInputs.push(new LedgerInput({
-    path: accts[1].path,
+    path: signers[1].path,
     coin,
     redeem
   }));

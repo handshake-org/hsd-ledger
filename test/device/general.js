@@ -4,12 +4,7 @@
 'use strict';
 
 const {
-  Address,
-  Coin,
-  HDPublicKey,
-  HDPrivateKey,
-  KeyRing,
-  MTX
+  Address, Amount, Coin, HDPublicKey, HDPrivateKey, KeyRing, MTX, Script
 } = require('hsd');
 
 const assert = require('../utils/assert');
@@ -28,7 +23,7 @@ const SEED_PHRASE = [
 
 module.exports = function (Device, DeviceInfo) {
   describe('LedgerHSD', function () {
-    const timeout = Number(process.env.DEVICE_TIMEOUT) || 15000;
+    const timeout = Number(process.env.DEVICE_TIMEOUT) || 60000;
     const network = 'regtest';
     let device, ledger;
 
@@ -115,7 +110,7 @@ module.exports = function (Device, DeviceInfo) {
     });
 
     describe('signTransaction()', () => {
-      it('should signatures on p2pkh inputs', async () => {
+      it('should return valid signatures on p2pkh inputs', async () => {
         const addrPub = await ledger.getPublicKey(0, 0, 0, false);
         const changePub = await ledger.getPublicKey(0, 1, 0, false);
         const addrRing = await KeyRing.fromPublic(addrPub);
@@ -128,10 +123,77 @@ module.exports = function (Device, DeviceInfo) {
           path: `m/44'/5355'/0'/0/0`,
           coin: Coin.fromTX(txs[0], 0, -1)
         });
-        console.log(`\tconfirm txid: ${mtx.txid()}`);
+        console.log(`\tConfirm TXID: ${mtx.txid()}`);
         const signed = await ledger.signTransaction(mtx, [ledgerInput]);
 
         assert.ok(signed.verify(), 'validation failed');
+      });
+
+      it('should return valid signatures on p2sh inputs', async () => {
+        // Using 6 pubkeys so the redeem script
+        // exceeds the limit for one APDU message.
+        const signers = [
+          { acct: 0, path: `m/44'/5355'/0'/0/0` },
+          { acct: 1, path: `m/44'/5355'/1'/0/0` },
+          { acct: 2, path: `m/44'/5355'/2'/0/0` },
+          { acct: 3, path: `m/44'/5355'/3'/0/0` },
+          { acct: 4, path: `m/44'/5355'/4'/0/0` },
+          { acct: 5, path: `m/44'/5355'/5'/0/0` },
+        ];
+
+        console.log(`\tConstructing multisig address.`);
+
+        for (const signer of signers)
+          signer.pub = await ledger.getPublicKey(signer.acct, 0, 0);
+
+        const [m, n] = [2, signers.length];
+        const redeem = Script.fromMultisig(m, n, [
+          signers[0].pub,
+          signers[1].pub,
+          signers[2].pub,
+          signers[3].pub,
+          signers[4].pub,
+          signers[5].pub,
+        ]);
+        const address = Address.fromScript(redeem);
+        const changeAddress = Address.fromScript(redeem);
+
+        console.log('\tConstructing spend transaction.');
+
+        const {coins, txs} = await fundUtil.fundAddress(address, 1);
+        const mtx = new MTX();
+        const value = Amount.fromCoins(1).toValue();
+
+        mtx.addOutput({ address, value });
+
+        await mtx.fund(coins, { changeAddress });
+
+        const ledgerInputs = [];
+        const coin = Coin.fromTX(txs[0], 0, -1);
+
+        ledgerInputs.push(new LedgerInput({
+          path: signers[0].path,
+          coin,
+          redeem
+        }));
+
+        ledgerInputs.push(new LedgerInput({
+          path: signers[1].path,
+          coin,
+          redeem
+        }));
+
+        console.log(`\tConfirm TXID: ${mtx.txid()}`);
+
+        const part = await ledger.signTransaction(mtx, [ledgerInputs[0]]);
+
+        assert.ok(!part.verify(), 'validation should failed');
+
+        console.log(`\tConfirm TXID: ${mtx.txid()}`);
+
+        const full = await ledger.signTransaction(part, [ledgerInputs[1]]);
+
+        assert.ok(full.verify(), 'validation failed');
       });
     });
   });
@@ -181,14 +243,6 @@ function getAddress(path) {
 function getPublicKey(path) {
   const xpub = getXPUB(path);
   return xpub.publicKey;
-}
-
-function ringFromHD(hd) {
-  return KeyRing.fromPublic(hd.publicKey);
-}
-
-function addrFromHD(hd, network) {
-  return KeyRing.fromPublic(hd.publicKey, network).getAddress(network);
 }
 
 async function createTX(coins, address, changeAddress) {
