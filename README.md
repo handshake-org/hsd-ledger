@@ -38,9 +38,28 @@ For unit tests run:
 $ npm test
 ```
 
-For end to end tests using a Ledger device run:
+For test using a Ledger device run:
 ```bash
-$ node ./test/e2e/index.js
+$ npm run test-hid
+```
+
+The device tests expect a wallet using the seed phrase:
+```
+abandon abandon abandon abandon
+abandon abandon abandon abandon
+abandon abandon abandon about
+```
+
+For end to end tests using a Ledger device and `hsd` full node run:
+```bash
+$ npm run test-e2e
+```
+
+The end to end tests expect a wallet using the seed phrase:
+```
+abandon abandon abandon abandon
+abandon abandon abandon abandon
+abandon abandon abandon about
 ```
 
 ## Contribution and License Agreement

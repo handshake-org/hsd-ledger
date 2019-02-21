@@ -1,11 +1,15 @@
 'use strict';
 
 const assert = require('assert');
-const hsd = require('hsd');
-const hnsledger = require('../../lib/hns-ledger');
-const { LedgerHSD } = hnsledger;
-const { Device } = hnsledger.HID;
+const Logger = require('blgr');
+const fs = require('fs');
+const os = require('os');
+const path = require('path');
+const walletPlugin = require('hsd/lib/wallet/plugin');
+const { MTX, FullNode } = require('hsd');
 const { NodeClient, WalletClient } = require('hs-client');
+const { HID, LedgerHSD } = require('../../lib/hns-ledger');
+const { Device } = HID;
 
 class TestError extends Error {
 
@@ -15,96 +19,132 @@ class TestError extends Error {
    * @param {String} msg
    */
 
-  constructor(suite, test, msg) {
+  constructor(options) {
     super();
 
-    assert(typeof suite === 'string');
-    assert(typeof test === 'string');
-    assert(typeof msg === 'string');
+    assert(typeof options.suite === 'string');
+    assert(typeof options.test === 'string');
+    assert(typeof options.message === 'string');
 
-    this.testsuite = suite;
-    this.test = test;
-    this.message = msg;
+    this.suite = options.suite;
+    this.test = options.test;
+    this.message = options.message;
 
     if (Error.captureStackTrace)
       Error.captureStackTrace(this, TestError);
   }
 }
 
-class Test {
-  constructor(host) {
-    this.wid = 'primary';
-    this.nodeClient = new NodeClient({ host, port: 14037 });
-    this.walletClient = new WalletClient({ host, port: 14039 });
+class TestSuite {
+  constructor(options) {
+    if (!options.wid)
+      options.wid = 'primary';
+
+    if (!options.host)
+      options.host = 'localhost';
+
+    if (!options.nodePort)
+      options.nodePort = 14037;
+
+    if (!options.walletPort)
+      options.walletPort = 14039;
+
+    this.network = 'regtest';
+
+    this.logger = new Logger({
+      console: true,
+      level: 'info'
+    });
+
+    this.wid = options.wid;
+
+    this.nodeClient = new NodeClient({
+      host: options.host,
+      port: options.nodePort
+    });
+
+    this.walletClient = new WalletClient({
+      host: options.host,
+      port: options.walletPort
+    });
+
+    this.node = new FullNode({
+      memory: true,
+      workers: true,
+      network: this.network,
+      loader: require
+    });
+
+    this.node.use(walletPlugin);
   }
 
   /**
-   * Ensure a promise is rejected.
+   * Ensure an RPC call succeeds.
    * @param {Promise} promise
-   * @returns {Promise} Returns the expected error or a rejected promise.
+   * @param {String} test - name of the test
+   * @returns {Promise} Returns the expected result or a rejected promise.
    */
 
-  async mustRPC(promise, name) {
+  async mustRPC(promise, test) {
     return promise.then(([res, err]) => {
       if (err)
-        return Promise.reject(
-          new TestError(this.constructor.name, name, err.message));
+        return this.reject(this.suite, test, err.message);
 
       return res;
     });
   }
 
   /**
-   * Ensure a promise is rejected.
+   * Ensure an API call succeeds.
    * @param {Promise} promise
-   * @returns {Promise} Returns the expected error or a rejected promise.
+   * @param {String} test - name of the test
+   * @returns {Promise} Returns the expected result or a rejected promise.
    */
 
-  async mustAPI(promise, name) {
+  async mustAPI(promise, test) {
     return promise.then(res => {
       return res;
     })
     .catch(err => {
-      return Promise.reject(
-        new TestError(this.constructor.name, name, err.message));
+      return this.reject(this.suite, test, err.message);
     });
   }
 
   /**
-   * Ensure a promise is rejected.
+   * Ensure an RPC call fails.
    * @param {Promise} promise
+   * @param {String} test - name of the test
    * @returns {Promise} Returns the expected error or a rejected promise.
    */
 
-  async cantRPC(promise, name) {
+  async cantRPC(promise, test) {
     return promise.then(([res, err]) => {
       if (res)
-        return Promise.reject(
-          new TestError(this.constructor.name, name, 'Expected failure'));
+        return this.reject(this.suite, test, 'Expected failure.');
 
       return err;
     });
   }
 
   /**
-   * Ensure a promise is rejected.
+   * Ensure an API call fails.
    * @param {Promise} promise
+   * @param {String} test - name of the test
    * @returns {Promise} Returns the expected error or a rejected promise.
    */
 
-  async cantAPI(promise, name) {
+  async cantAPI(promise, test) {
     return promise.then(res => {
-      return Promise.reject(
-        new TestError(this.constructor.name, name, 'Expected failure'));
+      return this.reject(this.suite, test, 'Expected failure.');
     })
     .catch(err => err);
   }
 
   /**
-   * Execute an rpc using the wallet client.
-   * @param {String}  method - rpc method
+   * Execute an RPC call using the wallet client.
+   * @param {String}  method - RPC method
    * @param {Array}   params - method parameters
-   * @returns {Promise} - Returns a two item array with the rpc's return value
+   * @returns {Promise} - Returns a two item array with the RPC call's return value
    * or null as the first item and an error or null as the second item.
    */
 
@@ -115,10 +155,10 @@ class Test {
   }
 
   /**
-   * Execute an rpc using the node client.
-   * @param {String}  method - rpc method
+   * Execute an RPC call using the node client.
+   * @param {String}  method - RPC method
    * @param {Array}   params - method parameters
-   * @returns {Promise} - Returns a two item array with the rpc's return value
+   * @returns {Promise<Array>} - Returns a two item array with the RPC call's return value
    * or null as the first item and an error or null as the second item.
    */
 
@@ -129,8 +169,59 @@ class Test {
   }
 
   /**
+   * Open the test and all its child objects.
+   */
+  async open() {
+    assert(!this.opened, this.suite + ' is already open.');
+    this.opened = true;
+
+    await this.logger.open();
+    await this.node.ensure();
+    await this.node.open();
+    await this.node.connect();
+
+    const devices = await Device.getDevices();
+
+    this.device = new Device({
+      device: devices[0],
+      timeout: 60000,
+      logger: this.logger.context('device')
+    });
+
+    await this.device.open();
+
+    this.ledger = new LedgerHSD({
+      device: this.device,
+      network: this.network
+    });
+  }
+
+  /**
+   * Close test and all its child objects.
+   */
+  async close() {
+    assert(this.opened, this.suite + ' is not open.');
+    this.opened = false;
+
+    await this.node.close();
+    await this.device.close();
+  }
+
+  /**
+   * Construct a TestError to use in promise rejection.
+   * @param {String} suite - the name of the test suite
+   * @param {String} test - the name of the test
+   * @param {String} message - the error message
+   * @returns {Promise<TestError>}
+   */
+
+  reject(suite, test, message) {
+    return Promise.reject(new TestError({ suite, test, message }));
+  }
+
+  /**
    * Block the main thread.
-   * @param {Number} ms - amount of ms to block.
+   * @param {Number} ms - amount of time to block in milliseconds
    */
 
   wait(ms) {
@@ -139,124 +230,12 @@ class Test {
   }
 }
 
-class MultisigTest extends Test {
-  constructor(host) {
-    super(host);
-    this.id = 'multisig-test';
-  }
-
-  async init() {
-    const acc = await this.mustAPI(
-      this.walletClient.createAccount(this.wid, this.id + Math.floor(Math.random() * 1000000)), 'init');
-
-    this.coinbaseAddress = acc.receiveAddress;
-  }
-
-  // TODO(boymanjor): adapt to use Ledger Nano S
-  async testMultisigSpend() {
-    const name = 'testMultisigSpend';
-
-    // mine some blocks to get funds in the coinbase address
-    let blocks = await this.mustRPC(
-      this.execNodeRPC('generatetoaddress', [2, this.coinbaseAddress]), name);
-
-    // send coins to multisig
-    let [txid0] = await this.execWalletRPC('sendtoaddress', [process.env.MULTI, 500], name);
-
-    // mine a block
-    blocks = await this.mustRPC(
-      this.execNodeRPC('generatetoaddress', [1, this.coinbaseAddress]), name);
-
-    // import three privkeys
-    const ring1 = hsd.KeyRing.fromSecret(process.env.PRV1);
-    const ring2 = hsd.KeyRing.fromSecret(process.env.PRV2);
-    const ring3 = hsd.KeyRing.fromSecret(process.env.PRV3);
-
-    const m = 2;
-    const n = 3;
-
-    const pubkey1 = ring1.publicKey;
-    const pubkey2 = ring2.publicKey;
-    const pubkey3 = ring3.publicKey;
-    const redeem = hsd.Script.fromMultisig(m, n, [pubkey1, pubkey2, pubkey3]);
-
-    const sendTo = process.env.MULTI;
-    const txInfo = {
-      value: hsd.Amount.fromCoins('500').toValue(),
-      address: sendTo,
-      hash: txid0,
-      index: 0
-    }
-
-    const coin = hsd.Coin.fromJSON({
-      version: 1,
-      height: -1,
-      value: txInfo.value,
-      address: txInfo.address,
-      coinbase: false,
-      hash: txInfo.hash,
-      index: txInfo.index
-    }, 'regtest');
-
-    // mine some blocks
-    blocks = await this.mustRPC(
-      this.execNodeRPC('generatetoaddress', [2, this.coinbaseAddress]), name);
-
-    // spend coins from multisig to coinbase address: signmessagewithprivkey
-    const spend = new hsd.MTX();
-    // spend
-    spend.addOutput({
-      address: sendTo,
-      value: hsd.Amount.fromCoins('250').toValue()
-    });
-
-    // change
-    spend.addOutput({
-      address: sendTo,
-      value: hsd.Amount.fromCoins('250').toValue()
-    });
-
-
-    ring1.script = redeem;
-    spend.addCoin(coin);
-    spend.scriptInput(0, coin, ring1);
-    spend.signInput(0, coin, ring1);
-
-    ring2.script = redeem;
-    // spend.signInput(0, coin, ring2);
-
-    ring3.script = redeem;
-    spend.signInput(0, coin, ring3);
-
-    assert(spend.verify());
-  }
-
-  async run() {
-    await this.init();
-    await this.testMultisigSpend();
-  }
-}
-
-class LedgerTest extends Test {
-  constructor(host) {
-    super(host);
+class BasicSuite extends TestSuite {
+  constructor(options) {
+    super(options);
     this.id = 'ledger-test';
-  }
-
-  async initLedger() {
-    const devices = await Device.getDevices();
-
-    this.device = new Device({
-      device: devices[0],
-      timeout: 60000
-    });
-
-    await this.device.open();
-
-    return new LedgerHSD({
-      device: this.device,
-      network: 'regtest'
-    });
+    this.suite = this.constructor.name;
+    this.logger = this.logger.context(this.suite);
   }
 
   async createWallet(ledger, index) {
@@ -264,7 +243,7 @@ class LedgerTest extends Test {
     const xpub = await ledger.getAccountXpub(index);
     const options = {
       watchOnly: true,
-      accountKey: xpub.xpubkey('regtest')
+      accountKey: xpub.xpubkey(this.network)
     };
 
     const wallet = await this.walletClient.createWallet(id, options);
@@ -292,7 +271,7 @@ class LedgerTest extends Test {
     const json = await this.mustRPC(
       this.execWalletRPC('createsendtoaddress', [addr, amt, "", "", false, id]), 'Ledger.createSend');
 
-    return hsd.MTX.fromJSON(json);
+    return MTX.fromJSON(json);
   }
 
   async send(mtx) {
@@ -303,67 +282,66 @@ class LedgerTest extends Test {
 
   async run() {
     try {
-      console.log(`Initializing Ledger connection...`);
+      this.logger.info(`Creating wallet a...`);
 
-      let ledger = await this.initLedger();
+      let wallet_a = await this.createWallet(this.ledger, 0);
+      let a = await this.ledger.getAddress(0, 0, 0);
 
-      console.log(`Creating wallet a...`);
+      this.logger.info(`Creating wallet b...`);
 
-      let wallet_a = await this.createWallet(ledger, 0);
-      let a = await ledger.getAddress(0, 0, 0);
+      let wallet_b = await this.createWallet(this.ledger, 1);
+      let b = await this.ledger.getAddress(1, 0, 0);
 
-      console.log(`Creating wallet b...`);
-
-      let wallet_b = await this.createWallet(ledger, 1);
-      let b = await ledger.getAddress(1, 0, 0);
-
-      console.log(`Mining to address in wallet a...`);
+      this.logger.info(`Mining to address in wallet a...`);
 
       await this.selectWallet(wallet_a);
       await this.mine(a, 3);
 
-      console.log(`Creating send from wallet a to b...`);
+      this.logger.info(`Creating send from wallet a to b...`);
 
       await this.selectWallet(wallet_a);
       let mtx = await this.createSendToAddress('default', b, 1900);
 
-      console.log(`Signing transaction with Ledger.`);
-      console.log(`Tx hash is ${mtx.txid()}.`);
+      this.logger.info(`Signing transaction with Ledger.`);
+      this.logger.info(`Tx hash is ${mtx.txid()}.`);
 
-      let signed = await ledger.signTransaction(mtx);
+      let signed = await this.ledger.signTransaction(mtx);
       let result = await this.send(signed);
 
-      console.log(`Mining to address in wallet a...`);
+      this.logger.info(`Mining to address in wallet a...`);
 
       await this.mine(a, 1);
 
-      console.log(`Creating send from wallet b to a...`);
+      this.logger.info(`Creating send from wallet b to a...`);
 
       await this.selectWallet(wallet_b);
       mtx = await this.createSendToAddress('default', a, 1700);
 
-      console.log(`Signing transaction with Ledger.`);
-      console.log(`Tx hash is ${mtx.txid()}.`);
+      this.logger.info(`Signing transaction with Ledger.`);
+      this.logger.info(`Tx hash is ${mtx.txid()}.`);
 
-      signed = await ledger.signTransaction(mtx);
+      signed = await this.ledger.signTransaction(mtx);
       result = await this.send(signed);
 
-      console.log(`Mining to address in wallet a...`);
-      this.mine(a, 1);
+      this.logger.info(`Mining to address in wallet a...`);
+      await this.mine(a, 1);
     } catch(err) {
       throw(err);
-    } finally {
-      this.device.close();
     }
   }
 }
 
 // Run tests
 (async function(){
+  const basic = new BasicSuite({});
+
   try {
-    await new LedgerTest('127.0.0.1').run();
-    console.log('Tests finished successfully.');
+    await basic.open();
+    await basic.run();
+    basic.logger.info('Tests finished successfully.');
   } catch (err) {
-    console.log(err);
+    basic.logger.error(err);
+  } finally {
+    await basic.close();
   }
 }());
