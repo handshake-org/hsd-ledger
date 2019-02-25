@@ -28,13 +28,13 @@ const {Device} = HID;
   });
 
   // Do not confirm on-device.
-  const xpub = await ledger.getAccountXpub(0, false);
+  const xpub = await ledger.getAccountXPUB(0, false);
 
   // Log to console for on-device confirmation.
   logger.info('XPUB: %s', xpub.xpubkey('regtest'));
 
   // Confirm on-device.
-  await ledger.getAccountXpub(0, true);
+  await ledger.getAccountXPUB(0, true);
 
   await device.close();
 

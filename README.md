@@ -10,8 +10,8 @@ using `HID` and from the browser using `u2f`. Most of the examples
 showcase node.js usage:
 
 - [examples/getAppVersion.js][app] - Get the application version number.
-- [examples/getAccountXpub.js][acc] - Get a BIP44 account xpub.
-- [examples/getXpub.js][xpub] - Get an arbitrary xpub.
+- [examples/getAccountXPUB.js][acc] - Get a BIP44 account xpub.
+- [examples/getXPUB.js][xpub] - Get an arbitrary xpub.
 - [examples/getAddress.js][addr] - Get a BIP44 compliant address.
 - [examples/getPublicKey.js][pub] - Get a BIP44 compliant address.
 - [examples/signTransaction-p2pkh.js][p2pkh] - Sign P2PKH transaction.
@@ -19,8 +19,8 @@ showcase node.js usage:
 - [examples/u2f/index.js][u2f] - U2F usage in the browser.
 
 [app]: ./examples/getAppVersion.js
-[acc]: ./examples/getAccountXpub.js
-[xpub]: ./examples/getXpub.js
+[acc]: ./examples/getAccountXPUB.js
+[xpub]: ./examples/getXPUB.js
 [addr]: ./examples/getAddress.js
 [pub]: ./examples/getPublicKey.js
 [p2pkh]: ./examples/signTransaction-p2pkh.js

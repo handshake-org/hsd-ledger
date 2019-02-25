@@ -240,7 +240,7 @@ class BasicSuite extends TestSuite {
 
   async createWallet(ledger, index) {
     const id = this.id + Math.floor(Math.random(0) * 1000000).toString(10);
-    const xpub = await ledger.getAccountXpub(index);
+    const xpub = await ledger.getAccountXPUB(index);
     const options = {
       watchOnly: true,
       accountKey: xpub.xpubkey(this.network)

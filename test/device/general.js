@@ -55,9 +55,9 @@ module.exports = function (Device, DeviceInfo) {
       });
     });
 
-    describe('getAccountXpub()', () => {
+    describe('getAccountXPUB()', () => {
       it('should derive account xpub', async () => {
-        const got = await ledger.getAccountXpub(0);
+        const got = await ledger.getAccountXPUB(0);
         const want = getAccountXPUB(0);
 
         assert.strictEqual(got.depth, want.depth,
@@ -73,9 +73,9 @@ module.exports = function (Device, DeviceInfo) {
       });
     });
 
-    describe('getXpub()', () => {
+    describe('getXPUB()', () => {
       it('should derive xpub', async () => {
-        const got = await ledger.getXpub(ACCOUNT);
+        const got = await ledger.getXPUB(ACCOUNT);
         const want = getXPUB(ACCOUNT);
 
         assert.strictEqual(got.depth, want.depth,
