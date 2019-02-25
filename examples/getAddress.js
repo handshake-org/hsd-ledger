@@ -29,13 +29,13 @@ const {Device} = HID;
   });
 
   // Do not confirm on-device.
-  const address = await ledger.getAddress(0, 0, 0, false);
+  const address = await ledger.getAddress(0, 0, 0);
 
   // Log to console for on-device confirmation.
   logger.info('Address: %s', address);
 
   // Confirm on-device.
-  await ledger.getAddress(0, 0, 0, true);
+  await ledger.getAddress(0, 0, 0, { confirm: true });
 
   await device.close();
 

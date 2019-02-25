@@ -39,7 +39,7 @@ const {Device} = HID;
   logger.info(`Constructing multisig address.`);
 
   for (const signer of signers)
-    signer.pub = await ledger.getPublicKey(signer.acct, 0, 0);
+    signer.pub = await ledger.getPublicKey(signer.path);
 
   const [m, n] = [2, signers.length];
   const redeem = Script.fromMultisig(m, n, [
@@ -75,9 +75,12 @@ const {Device} = HID;
     redeem
   }));
 
-  logger.info(`TXID: ${mtx.txid()}`);
+  logger.info(`Confirm TXID: ${mtx.txid()}`);
 
   const part = await ledger.signTransaction(mtx, [ledgerInputs[0]]);
+
+  logger.info(`Confirm TXID: ${mtx.txid()}`);
+
   const full = await ledger.signTransaction(part, [ledgerInputs[1]]);
 
   logger.info(`Result of TX.verify(): ${full.verify()}.`);

@@ -28,13 +28,13 @@ const {Device} = HID;
   });
 
   // Do not confirm on-device.
-  const pubkey = await ledger.getPublicKey(0, 0, 0, false);
+  const pubkey = await ledger.getPublicKey(`m/44'/5355'/0'/0/0`);
 
   // Log to console for on-device confirmation.
   logger.info('Public Key:', pubkey.toString('hex'));
 
   // Confirm on-device.
-  await ledger.getPublicKey(0, 0, 0, true);
+  await await ledger.getPublicKey(`m/44'/5355'/0'/0/0`, { confirm: true });
 
   await device.close();
 

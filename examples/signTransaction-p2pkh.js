@@ -34,7 +34,7 @@ const { Device } = HID;
   // Creating a test transaction using testing utils.
   // '../test/e2e/index.js' has examples using an `hsd` full node.
   const mtx = new MTX();
-  const pubkey = await ledger.getPublicKey(0, 0, 0, false);
+  const pubkey = await ledger.getPublicKey(`m/44'/5355'/0'/0/0`);
   const ring = await KeyRing.fromPublic(pubkey);
   const addr = ring.getAddress();
   const {coins, txs} = await util.fundAddress(addr, 1);

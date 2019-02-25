@@ -18,6 +18,23 @@ const {
 const util = require('../lib/utils/util');
 const LedgerInput = require('../lib/ledger/input');
 
+function encodePath(path) {
+  if (typeof path === 'string') {
+    path = util.parsePath(path, true);
+  }
+
+  const parts = path;
+  const bw = bufio.write(1 + parts.length * 4);
+
+  bw.writeU8(parts.length);
+
+  for (const index of parts) {
+    bw.writeU32BE(index);
+  }
+
+  return bw.render();
+};
+
 const tests = [
   {
     buffer: Buffer.from('1234'),
@@ -162,23 +179,28 @@ describe('apdu', function () {
     describe('APDUCommand.getPublicKey()', () => {
       it('should encode commmand', () => {
         let path = `m/44'/5355'/0'/0/0`;
-        let confirm = true;
-        let net = 'regtest';
-        let xpub = false;
-        let addr = false;
-        let data = Buffer.from([
+        let got = APDUCommand.getPublicKey(path, {
+          network: 'regtest',
+          confirm: true,
+          xpub: false,
+          address: false
+        });
+
+        let want = Object.create(null);
+        want.p1 = 0x05;
+        want.p2 = 0x00;
+        want.data = Buffer.from([
           '05',
           '8000002c800014eb800000000000000000000000'
         ].join(''), 'hex');
-        let encoded = APDUCommand.getPublicKey(path, confirm, net, xpub, addr);
 
-        assert.strictEqual(encoded.cla, common.cla.GENERAL,
+        assert.strictEqual(got.cla, common.cla.GENERAL,
           'cla should be GENERAL');
-        assert.strictEqual(encoded.ins, common.ins.GET_PUBLIC_KEY,
+        assert.strictEqual(got.ins, common.ins.GET_PUBLIC_KEY,
           'ins should be GET_PUBLIC_KEY');
-        assert.strictEqual(encoded.p1, 0x05, 'wrong p1');
-        assert.strictEqual(encoded.p2, 0x00, 'wrong p2');
-        assert.deepEqual(encoded.data, data, 'wrong data');
+        assert.strictEqual(got.p1, want.p1, 'wrong p1');
+        assert.strictEqual(got.p2, want.p2, 'wrong p2');
+        assert.deepEqual(got.data, want.data, 'wrong data');
       });
     });
 
@@ -235,7 +257,8 @@ describe('apdu', function () {
 
     describe('APDUCommand.getInputSignature', () => {
       it('should encode command', async () => {
-        let hex = '03253ea6d6486d1b9cc3ab01a9a321d65c350c6c26a9c536633e2ef36163316bf2';
+        let hex = '03253ea6d6486d1b9cc3ab01a9a321d65' +
+                  'c350c6c26a9c536633e2ef36163316bf2';
         let pub = Buffer.from(hex, 'hex');
         let ring = await KeyRing.fromPublic(pub);
         let addr = ring.getAddress();
@@ -252,24 +275,36 @@ describe('apdu', function () {
           subtractFee: true
         });
 
-        let confirm = true;
-        let index = 0;
-        let input = new LedgerInput({
+        let initial = true;
+        let hsdInput = mtx.inputs[0];
+        let ledgerInput = new LedgerInput({
           path: `m/44'/5355'/0'/0/0`,
           coin: Coin.fromTX(txs[0], 0, -1),
           publicKey: pub
         });
 
-        let raw = input.getPrevRedeem();
+        let raw = ledgerInput.getPrevRedeem();
         let bw = bufio.write(raw.getVarSize());
         raw.write(bw);
         let script = bw.render();
         let encoded = APDUCommand.getInputSignature(
-          input, index, script, confirm);
+          ledgerInput, hsdInput, script, initial);
 
-        hex = '058000002c800014eb8000000000000000000000000001000000' +
-              '1976c014a8d9028425a9740eb82a11001146057a649b474a88ac';
-        let data = Buffer.from(hex, 'hex');
+        // Create expected output
+        let path = encodePath(ledgerInput.path);
+        let size = path.length + hsdInput.getSize() + script.length + 12;
+
+        // Init
+        let data = bufio.write(size);
+
+        // Update
+        data.writeBytes(path);
+        data.writeU32(ledgerInput.type);
+        hsdInput.prevout.write(data);
+        data.writeU64(ledgerInput.coin.value);
+        data.writeU32(hsdInput.sequence);
+        data.writeBytes(script);
+        data = data.render();
 
         assert.strictEqual(encoded.cla, common.cla.GENERAL,
           'cla should be GENERAL');
