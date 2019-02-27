@@ -29,12 +29,8 @@
     "clean": "rm -rf hns-ledger.js build/vendor* .config/certs/* ./docs ./coverage",
     "lint": "eslint lib/ test/ || exit 0",
     "test": "mocha --reporter spec test/*-test.js",
-    "test-hid": "mocha --reporter spec test/device/hid-test.js",
+    "test-hid": "mocha --reporter spec test/e2e/hid-test.js",
     "test-hsd": "mocha --reporter spec test/e2e/hsd-test.js",
-    "test-u2f": "karma start .config/karma.conf.js",
-    "webpack": "webpack --config .config/webpack.js",
-    "webpack-dev": "webpack --config .config/webpack.dev.js",
-    "webpack-devdeps": "webpack --config .config/webpack.devdeps.js",
     "docs": "jsdoc -c jsdoc.json",
     "cover": "istanbul cover -x '**/lib/devices/**' node_modules/.bin/_mocha  -- --reporter spec test/*-test.js"
   },
@@ -43,8 +39,7 @@
     "bmutex": "0.1.2",
     "bsert": "0.0.4",
     "bufio": "1.0.1",
-    "node-hid": "^0.7.3",
-    "u2f-api": "^1.0.6"
+    "node-hid": "^0.7.3"
   },
   "peerDependencies": {
     "hsd": "handshake-org/hsd"

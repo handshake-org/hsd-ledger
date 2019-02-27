@@ -5,9 +5,9 @@ from [hsd][hsd].
 
 ## Usage
 
-There are two ways to communicate with the Ledger Device. From nodejs
-using `HID` and from the browser using `u2f`. Most of the examples
-showcase node.js usage:
+Currently, we only support Node.js. We have plans to support browser
+usage through WebUSB. Example usage can be found and run using the
+following files:
 
 - [examples/getAppVersion.js][app] - Get the application version number.
 - [examples/getAccountXPUB.js][acc] - Get a BIP44 account xpub.
@@ -16,7 +16,6 @@ showcase node.js usage:
 - [examples/getPublicKey.js][pub] - Get a BIP44 compliant address.
 - [examples/signTransaction-p2pkh.js][p2pkh] - Sign P2PKH transaction.
 - [examples/signTransaction-p2sh.js][p2sh] - Sign P2SH transaction.
-- [examples/u2f/index.js][u2f] - U2F usage in the browser.
 
 [app]: ./examples/getAppVersion.js
 [acc]: ./examples/getAccountXPUB.js
@@ -25,7 +24,6 @@ showcase node.js usage:
 [pub]: ./examples/getPublicKey.js
 [p2pkh]: ./examples/signTransaction-p2pkh.js
 [p2sh]: ./examples/signTransaction-p2sh.js
-[u2f]: ./examples/u2f/index.js
 
 >Note: `hsd` is a peer dependency.
 
@@ -38,7 +36,7 @@ For unit tests run:
 $ npm test
 ```
 
-For test using a Ledger device run:
+For end to end tests using a Ledger device run:
 ```bash
 $ npm run test-hid
 ```
@@ -50,9 +48,9 @@ abandon abandon abandon abandon
 abandon abandon abandon about
 ```
 
-For end to end tests using a Ledger device and `hsd` full node run:
+For end to end tests using a Ledger device and an `hsd` full node run:
 ```bash
-$ npm run test-e2e
+$ npm run test-hsd
 ```
 
 The end to end tests expect a wallet using the seed phrase:
