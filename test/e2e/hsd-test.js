@@ -6,7 +6,7 @@
 const assert = require('assert');
 const Logger = require('blgr');
 const walletPlugin = require('hsd/lib/wallet/plugin');
-const { MTX, FullNode } = require('hsd');
+const { Amount, MTX, FullNode } = require('hsd');
 const { NodeClient, WalletClient } = require('hs-client');
 const { HID, LedgerHSD } = require('../../lib/hns-ledger');
 const { Device } = HID;
@@ -63,15 +63,6 @@ class TestUtil {
       console: true,
       level: 'info'
     });
-
-    this.node = new FullNode({
-      memory: true,
-      workers: true,
-      network: this.network,
-      loader: require
-    });
-
-    this.node.use(walletPlugin);
   }
 
   /**
@@ -174,9 +165,6 @@ class TestUtil {
     this.opened = true;
 
     await this.logger.open();
-    await this.node.ensure();
-    await this.node.open();
-    await this.node.connect();
 
     const devices = await Device.getDevices();
 
@@ -202,7 +190,6 @@ class TestUtil {
     this.opened = false;
 
     await this.logger.close();
-    await this.node.close();
     await this.device.close();
   }
 
@@ -331,12 +318,187 @@ class TestUtil {
     return this.mustRPC(promise, caller);
   }
 
+  async grindName(size, shouldFail) {
+    const args = [size];
+    const promise = this.execNodeRPC('grindname', args);
+    const caller = 'grindName';
+
+    if (shouldFail)
+      return this.cantRPC(promise, caller);
+
+    return this.mustRPC(promise, caller);
+  }
+
+  async getAuctionInfo(name, shouldFail) {
+    const args = [name];
+    const promise = this.execWalletRPC('getauctioninfo', args);
+    const caller = 'getAuctionInfo';
+
+    if (shouldFail)
+      return this.cantRPC(promise, caller);
+
+    return this.mustRPC(promise, caller);
+  }
+
+  async getNameInfo(name, shouldFail) {
+    const args = [name];
+    const promise = this.execNodeRPC('getnameinfo', args);
+    const caller = 'getNameInfo';
+
+    if (shouldFail)
+      return this.cantRPC(promise, caller);
+
+    return this.mustRPC(promise, caller);
+  }
+
+  async createClaim(name, shouldFail) {
+    const args = [name];
+    const promise = this.execWalletRPC('createclaim', args);
+    const caller = 'createClaim';
+
+    if (shouldFail)
+      return this.cantRPC(promise, caller);
+
+    return this.mustRPC(promise, caller);
+  }
+
+  async createOpen(name, force, account, shouldFail) {
+    const args = [name, force, account];
+    const promise = this.execWalletRPC('createopen', args);
+    const caller = 'createOpen';
+
+    if (shouldFail)
+      return this.cantRPC(promise, caller);
+
+    const json = await this.mustRPC(promise, caller);
+
+    return MTX.fromJSON(json);
+  }
+
+  async createBid(name, bid, value, account, shouldFail) {
+    const args = [name, bid, value, account];
+    const promise = this.execWalletRPC('createbid', args);
+    const caller = 'createBid';
+
+    if (shouldFail)
+      return this.cantRPC(promise, caller);
+
+    const json = await this.mustRPC(promise, caller);
+
+    return MTX.fromJSON(json);
+  }
+
+  async createReveal(name, account, shouldFail) {
+    const args = [name, account];
+    const promise = this.execWalletRPC('createreveal', args);
+    const caller = 'createReveal';
+
+    if (shouldFail)
+      return this.cantRPC(promise, caller);
+
+    const json = await this.mustRPC(promise, caller);
+
+    return MTX.fromJSON(json);
+  }
+
+  async createRedeem(name, account, shouldFail) {
+    const args = [name, account];
+    const promise = this.execWalletRPC('createredeem', args);
+    const caller = 'createRedeem';
+
+    if (shouldFail)
+      return this.cantRPC(promise, caller);
+
+    const json = await this.mustRPC(promise, caller);
+
+    return MTX.fromJSON(json);
+  }
+
+  async createUpdate(name, data, account, shouldFail) {
+    const args = [name, data, account];
+    const promise = this.execWalletRPC('createupdate', args);
+    const caller = 'createUpdate';
+
+    if (shouldFail)
+      return this.cantRPC(promise, caller);
+
+    const json = await this.mustRPC(promise, caller);
+
+    return MTX.fromJSON(json);
+  }
+
+  async createRenewal(name, account, shouldFail) {
+    const args = [name, account];
+    const promise = this.execWalletRPC('createrenewal', args);
+    const caller = 'createRenewal';
+
+    if (shouldFail)
+      return this.cantRPC(promise, caller);
+
+    const json = await this.mustRPC(promise, caller);
+
+    return MTX.fromJSON(json);
+  }
+
+  async createTransfer(name, address, account, shouldFail) {
+    const args = [name, address, account];
+    const promise = this.execWalletRPC('createtransfer', args);
+    const caller = 'createTransfer';
+
+    if (shouldFail)
+      return this.cantRPC(promise, caller);
+
+    const json = await this.mustRPC(promise, caller);
+
+    return MTX.fromJSON(json);
+  }
+
+  async createCancel(name, account, shouldFail) {
+    const args = [name, account];
+    const promise = this.execWalletRPC('createcancel', args);
+    const caller = 'createCancel';
+
+    if (shouldFail)
+      return this.cantRPC(promise, caller);
+
+    const json = await this.mustRPC(promise, caller);
+
+    return MTX.fromJSON(json);
+  }
+
+  async createFinalize(name, account, shouldFail) {
+    const args = [name, account];
+    const promise = this.execWalletRPC('createfinalize', args);
+    const caller = 'createFinalize';
+
+    if (shouldFail)
+      return this.cantRPC(promise, caller);
+
+    const json = await this.mustRPC(promise, caller);
+
+    return MTX.fromJSON(json);
+  }
+
+  async createRevoke(name, account, shouldFail) {
+    const args = [name, account];
+    const promise = this.execWalletRPC('createrevoke', args);
+    const caller = 'createRevoke';
+
+    if (shouldFail)
+      return this.cantRPC(promise, caller);
+
+    const json = await this.mustRPC(promise, caller);
+
+    return MTX.fromJSON(json);
+  }
+
   /**
    * Logs TXID before signing transaction with Ledger Nanos S.
    */
 
-  async signTransaction(mtx) {
-    this.logger.info(`Confirm TXID: ${mtx.txid()}`);
+  async signTransaction(mtx, msg) {
+    if (msg)
+      this.logger.info(msg);
 
     return this.ledger.signTransaction(mtx);
   }
@@ -354,56 +516,308 @@ class TestUtil {
 }
 
 
-describe('Hardware signing with Ledger Nano S', function() {
-  const util = new TestUtil();
+describe('Ledger Nano S', function() {
   this.timeout(60000);
 
+  let alice, bob, util;
+
   before(async () => {
+    util = new TestUtil();
     await util.open();
+
+    // Create first wallet.
+    alice = Object.create(null);
+    alice.xpub = await util.ledger.getAccountXPUB(0);
+    alice.wallet = await util.createWallet(null, {
+      watchOnly: true,
+      accountKey: alice.xpub.xpubkey(util.network)
+    });
+    alice.acct = await util.getAccount(alice.wallet.id, 'default');
+    alice.addr = alice.acct.receiveAddress;
+
+    // Fund first wallet.
+    await util.selectWallet(alice.wallet.id);
+    await util.generateToAddress(3, alice.addr);
+    util.wait(500);
+
+    // Create second wallet.
+    bob = Object.create(null);
+    bob.xpub = await util.ledger.getAccountXPUB(1);
+    bob.wallet = await util.createWallet(null, {
+      watchOnly: true,
+      accountKey: bob.xpub.xpubkey(util.network)
+    });
+    bob.acct = await util.getAccount(bob.wallet.id, 'default');
+    bob.addr = bob.acct.receiveAddress;
+
+    // Fund second wallet.
+    await util.generateToAddress(3, bob.addr);
+    util.wait(500);
   });
 
   after(async () => {
-    util.close();
+    await util.close();
   });
 
-  describe('RPC: createsendtoaddress', () => {
-    it('should create valid signature', async () => {
-      // Create first wallet.
-      const alice = Object.create(null);
-      alice.xpub = await util.ledger.getAccountXPUB(0);
-      alice.wallet = await util.createWallet(null, {
-        watchOnly: true,
-        accountKey: alice.xpub.xpubkey(util.network)
-      });
-      alice.acct = await util.getAccount(alice.wallet.id, 'default');
-      alice.addr = alice.acct.receiveAddress;
-
-      // Create second wallet.
-      const bob = Object.create(null);
-      bob.xpub = await util.ledger.getAccountXPUB(1);
-      bob.wallet = await util.createWallet(null, {
-        watchOnly: true,
-        accountKey: bob.xpub.xpubkey(util.network)
-      });
-      bob.acct = await util.getAccount(bob.wallet.id, 'default');
-      bob.addr = bob.acct.receiveAddress;
-
-      // Fund first wallet.
-      await util.generateToAddress(3, alice.addr);
-
+  describe('Signing regular transactions', () => {
+    it('should spend p2pkh output', async () => {
       // Create send from first wallet to second.
       await util.selectWallet(alice.wallet.id);
       let mtx = await util.createSendToAddress('default', bob.addr, 1900);
-      let signed = await util.signTransaction(mtx);
+      let msg = `Confirm TXID: ${mtx.txid()}`;
+      let signed = await util.signTransaction(mtx, msg);
       await util.sendRawTX(signed);
+
+      // Mine send.
       await util.generateToAddress(1, alice.addr);
+      util.wait(500);
 
       // Create send from second wallet back to the first.
       await util.selectWallet(bob.wallet.id);
       mtx = await util.createSendToAddress('default', alice.addr, 1800);
-      signed = await util.signTransaction(mtx);
+      msg = `Confirm TXID: ${mtx.txid()}`;
+      signed = await util.signTransaction(mtx, msg);
+      await util.sendRawTX(signed);
+
+      // Check balance before send.
+      let acct = await util.getAccount(bob.wallet.id, 'default');
+      const before = acct.balance.unconfirmed;
+      // Mine send.
+      await util.generateToAddress(1, alice.addr);
+      util.wait(500);
+
+      // Assert balance before send.
+      acct = await util.getAccount(bob.wallet.id, 'default');
+      const after = acct.balance.unconfirmed;
+      assert.ok(before > after, 'send failed');
+    });
+  });
+
+  describe('Signing covenants', async () => {
+    let name;
+
+    it(`should submit OPEN`, async () => {
+      name = await util.grindName(3);
+
+      // Submit OPEN.
+      const mtx = await util.createOpen(name);
+      const msg = `Confirm OPEN TXID: ${mtx.txid()}`;
+      const signed = await util.signTransaction(mtx, msg);
       await util.sendRawTX(signed);
       await util.generateToAddress(1, alice.addr);
+
+      // Assert OPEN.
+      const n = await util.getNameInfo(name);
+      assert.deepEqual(n.info.state, 'OPENING', 'wrong state');
+    });
+
+    it('should submit BID', async () => {
+      // Advance past the open period.
+      await util.generateToAddress(7, alice.addr);
+      util.wait(500);
+
+      // Submit winning BID.
+      await util.selectWallet(alice.wallet.id);
+      let mtx = await util.createBid(name, 5, 10);
+      let msg = `Confirm winning BID TXID: ${mtx.txid()}`;
+      let signed = await util.signTransaction(mtx, msg);
+      await util.sendRawTX(signed);
+
+      // Submit losing BID.
+      await util.selectWallet(bob.wallet.id);
+      mtx = await util.createBid(name, 4, 10);
+      msg = `Confirm losing BID TXID: ${mtx.txid()}`;
+      signed = await util.signTransaction(mtx, msg);
+      await util.sendRawTX(signed);
+
+      // Mine BID.
+      await util.generateToAddress(1, alice.addr);
+      util.wait(500);
+
+      // Assert BID covenants.
+      const info = await util.getAuctionInfo(name);
+      assert.deepEqual(info.bids.length, 2, 'wrong number of bids');
+    });
+
+    it('should submit REVEAL', async () => {
+      // Advance past the bidding period.
+      await util.generateToAddress(5, alice.addr);
+      util.wait(500);
+
+      // Submit winning REVEAL.
+      await util.selectWallet(alice.wallet.id);
+      let mtx = await util.createReveal(name);
+      let msg = `Confirm winning REVEAL TXID: ${mtx.txid()}`;
+      let signed = await util.signTransaction(mtx, msg);
+      await util.sendRawTX(signed);
+
+      // Submit losing REVEAL.
+      await util.selectWallet(bob.wallet.id);
+      mtx = await util.createReveal(name);
+      msg = `Confirm losing REVEAL TXID: ${mtx.txid()}`;
+      signed = await util.signTransaction(mtx, msg);
+      await util.sendRawTX(signed);
+
+      // Mine REVEAL covenants.
+      await util.generateToAddress(1, alice.addr);
+      util.wait(500);
+
+      // Assert REVEAL covenants.
+      const info = await util.getAuctionInfo(name);
+      assert.deepEqual(info.reveals.length, 2, 'wrong number of bids');
+    });
+
+    it('should submit REDEEM', async () => {
+      // Advance past the reveal period.
+      await util.generateToAddress(10, alice.addr);
+      util.wait(500);
+
+      // Submit REDEEM.
+      await util.selectWallet(bob.wallet.id);
+      const mtx = await util.createRedeem(name);
+      const msg = `Confirm REDEEM TXID: ${mtx.txid()}`;
+      const signed = await util.signTransaction(mtx, msg);
+      await util.sendRawTX(signed);
+
+      // Assert lockup.
+      const before = await util.getAccount(bob.wallet.id, bob.acct.name);
+      assert.ok(before.balance.lockedConfirmed);
+
+      // Mine REDEEM.
+      await util.generateToAddress(1, alice.addr);
+      util.wait(500);
+
+      // Assert REDEEM.
+      const after = await util.getAccount(bob.wallet.id, bob.acct.name);
+      assert.ok(!after.balance.lockedConfirmed);
+    });
+
+    it('should submit REGISTER', async () => {
+      // Submit REGISTER.
+      await util.selectWallet(alice.wallet.id);
+      const text = Buffer.alloc(100).toString('hex');
+      const mtx = await util.createUpdate(name, {
+        version: 0,
+        ttl: 6000,
+        compat: true,
+        canonical: 'example.com'
+      });
+      const msg = `Confirm REGISTER TXID: ${mtx.txid()}`;
+      const signed = await util.signTransaction(mtx, msg);
+      await util.sendRawTX(signed);
+
+      // Mine REGISTER.
+      await util.generateToAddress(1, alice.addr);
+      util.wait(500);
+
+      // Assert REGISTER.
+      const n = await util.getNameInfo(name);
+      const got = n.info.data;
+      const want = '00805d000705076578616d706c6503636f6d00';
+      assert.deepEqual(got, want, 'wrong data');
+    });
+
+    it('should submit createRenewal', async () => {
+      // Advance 10 blocks.
+      await util.generateToAddress(10, alice.addr);
+      util.wait(500);
+
+      // Check name expiration.
+      const before = await util.getNameInfo(name);
+      const had = before.info.stats.blocksUntilExpire;
+
+      // Submit RENEWAL.
+      await util.selectWallet(alice.wallet.id);
+      const mtx = await util.createRenewal(name);
+      const msg = `Confirm RENEWAL TXID: ${mtx.txid()}`;
+      const signed = await util.signTransaction(mtx, msg);
+      await util.sendRawTX(signed);
+
+      // Mine RENEWAL.
+      await util.generateToAddress(1, alice.addr);
+      util.wait(500);
+
+      // Assert RENEWAL.
+      const after = await util.getNameInfo(name);
+      const got = after.info.stats.blocksUntilExpire;
+      assert.ok(got > had, 'wrong name expiry');
+    });
+
+    it('should submit TRANSFER', async () => {
+      // Submit TRANSFER.
+      const mtx = await util.createTransfer(name, bob.addr);
+      const msg = `Confirm TRANSFER TXID: ${mtx.txid()}`;
+      const signed = await util.signTransaction(mtx, msg);
+      await util.sendRawTX(signed);
+
+      // Mine TRANSFER.
+      await util.generateToAddress(1, alice.addr);
+      util.wait(500);
+
+      // Assert TRANSFER.
+      const n = await util.getNameInfo(name);
+      assert.ok(n.info.transfer, 'wrong transfer');
+    });
+
+    it('Should submit TRANSFER cancellation', async () => {
+      // Submit cancellation.
+      const mtx = await util.createCancel(name);
+      const msg = `Confirm TRANSFER cancellation TXID: ${mtx.txid()}`;
+      const signed = await util.signTransaction(mtx, msg);
+      await util.sendRawTX(signed);
+
+      // Mine cancellation.
+      await util.generateToAddress(1, alice.addr);
+      util.wait(500);
+
+      // Assert cancellation.
+      const n = await util.getNameInfo(name);
+      assert.ok(!n.info.transfer, 'wrong transfer');
+    });
+
+    it('should submit FINALIZE', async () => {
+      // Submit TRANSFER.
+      let mtx = await util.createTransfer(name, bob.addr);
+      let msg = `Confirm TRANSFER TXID: ${mtx.txid()}`;
+      let signed = await util.signTransaction(mtx, msg);
+      await util.sendRawTX(signed);
+
+      // Mine TRANSFER and past the lockup period.
+      await util.generateToAddress(11, alice.addr);
+      util.wait(500);
+
+      // Submit FINALIZE.
+      mtx = await util.createFinalize(name);
+      msg = `Confirm FINALIZE TXID: ${mtx.txid()}`;
+      signed = await util.signTransaction(mtx, msg);
+      const txid = await util.sendRawTX(signed);
+
+      // Mine FINALIZE.
+      await util.generateToAddress(1, alice.addr);
+      util.wait(500);
+
+      // Assert FINALIZE.
+      const n = await util.getNameInfo(name);
+      const got = n.info.owner;
+      const want = { hash: txid, index: 0 };
+      assert.deepEqual(got, want, 'wrong transfer');
+    });
+
+    it('should submit REVOKE', async () => {
+      // Submit REVOKE.
+      await util.selectWallet(bob.wallet.id);
+      const mtx = await util.createRevoke(name);
+      const msg = `Confirm REVOKE TXID: ${mtx.txid()}`;
+      const signed = await util.signTransaction(mtx, msg);
+      await util.sendRawTX(signed);
+
+      // Mine REVOKE and advance past revocation delay.
+      await util.generateToAddress(51, alice.addr);
+      util.wait(500);
+
+      // Assert REVOKE.
+      const n = await util.getNameInfo(name);
+      assert.ok(n.info.revoked, 'wrong revoke');
     });
   });
 });
