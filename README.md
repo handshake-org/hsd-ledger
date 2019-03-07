@@ -30,34 +30,27 @@ following files:
 More documentation to come...
 
 ## Tests
-
-For unit tests run:
+### Unit tests
 ```bash
 $ npm test
 ```
 
-For end to end tests using a Ledger device run:
+### End to end tests
+
+>Note: the end to end tests require a connected Ledger Nano S using the seed phrase:
+```
+abandon abandon abandon abandon abandon abandon
+abandon abandon abandon abandon abandon about
+```
+
+#### Using Ledger Nano S
 ```bash
 $ npm run test-hid
 ```
 
-The device tests expect a wallet using the seed phrase:
-```
-abandon abandon abandon abandon
-abandon abandon abandon abandon
-abandon abandon abandon about
-```
-
-For end to end tests using a Ledger device and an `hsd` full node run:
+#### Using Ledger Nano S and hsd
 ```bash
 $ npm run test-hsd
-```
-
-The end to end tests expect a wallet using the seed phrase:
-```
-abandon abandon abandon abandon
-abandon abandon abandon abandon
-abandon abandon abandon about
 ```
 
 ## Contribution and License Agreement
