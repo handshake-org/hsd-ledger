@@ -7,7 +7,7 @@ const {Device} = HID;
 (async () => {
   const logger = new Logger({
     console: true,
-    level: 'info'
+    level: 'debug'
   });
 
   await logger.open();
@@ -23,7 +23,7 @@ const {Device} = HID;
   await device.open();
 
   // Note: network defaults to 'main'
-  const ledger = new LedgerHSD({ device })
+  const ledger = new LedgerHSD({ device, logger }); // logger optional
   const version = await ledger.getAppVersion();
   logger.info('Version: %s', version);
 

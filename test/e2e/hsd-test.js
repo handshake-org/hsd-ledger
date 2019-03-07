@@ -6,8 +6,9 @@
 const assert = require('assert');
 const bio = require('bufio');
 const plugin = require('hsd/lib/wallet/plugin');
+const rules = require('hsd/lib/covenants/rules');
 const Logger = require('blgr');
-const { Amount, ChainEntry, MTX, FullNode } = require('hsd');
+const { Amount, ChainEntry, FullNode, MTX, Network } = require('hsd');
 const { NodeClient, WalletClient } = require('hs-client');
 const { HID, LedgerHSD } = require('../../lib/hns-ledger');
 const { Device } = HID;
@@ -643,6 +644,10 @@ describe('Ledger Nano S', function() {
       await util.generateToAddress(1, alice.addr);
       await util.confirmTX(mtx.txid());
 
+      // Check balance before send.
+      let acct = await util.getAccount(bob.wallet.id, 'default');
+      const before = acct.balance.unconfirmed;
+
       // Create send from second wallet back to the first.
       await util.selectWallet(bob.wallet.id);
       mtx = await util.createSendToAddress('default', alice.addr, 1800);
@@ -650,15 +655,11 @@ describe('Ledger Nano S', function() {
       signed = await util.signTransaction(mtx, msg);
       await util.sendRawTX(signed);
 
-      // Check balance before send.
-      let acct = await util.getAccount(bob.wallet.id, 'default');
-      const before = acct.balance.unconfirmed;
-
       // Mine send.
       await util.generateToAddress(1, alice.addr);
       await util.confirmTX(mtx.txid());
 
-      // Assert balance before send.
+      // Assert balance has updated.
       acct = await util.getAccount(bob.wallet.id, 'default');
       const after = acct.balance.unconfirmed;
       assert.ok(before > after, 'send failed');
@@ -666,7 +667,7 @@ describe('Ledger Nano S', function() {
   });
 
   describe('Signing covenants', async () => {
-    let name;
+    const name = rules.grindName(2, 0, Network.get('regtest'));;
 
     it(`should submit OPEN`, async () => {
       // Grind name for test.

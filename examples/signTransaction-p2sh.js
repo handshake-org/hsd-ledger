@@ -10,7 +10,7 @@ const {Device} = HID;
 (async () => {
   const logger = new Logger({
     console: true,
-    level: 'info'
+    level: 'debug'
   });
 
   await logger.open();
@@ -27,7 +27,8 @@ const {Device} = HID;
 
   const ledger = new LedgerHSD({
     device: device,
-    network: 'regtest'
+    network: 'regtest',
+    logger: logger // optional
   });
 
   const signers = [
