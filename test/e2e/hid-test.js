@@ -10,7 +10,7 @@ const {
 const assert = require('../utils/assert');
 const fundUtil = require('../utils/fund');
 const util = require('../../lib/utils/util');
-const {HID, LedgerHSD, LedgerInput} = require('../../lib/hns-ledger');
+const {HID, LedgerHSD, LedgerInput} = require('../../lib/hsd-ledger');
 const {Device, DeviceInfo} = HID;
 
 const ACCOUNT = `m/44'/5355'/0'`;

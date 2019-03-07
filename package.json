@@ -1,5 +1,5 @@
 {
-  "name": "hns-ledger",
+  "name": "hsd-ledger",
   "version": "0.1.0",
   "description": "Communication and management of ledger devices",
   "keywords": [
@@ -12,21 +12,20 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/boymanjor/hns-ledger.git"
+    "url": "git+https://github.com/boymanjor/hsd-ledger.git"
   },
-  "main": "./lib/hns-ledger.js",
+  "main": "./lib/hsd-ledger.js",
   "license": "MIT",
   "authors": [
     "Boyma Fahnbulleh",
-    "The Bcoin Developers"
+    "The Handshake Developers"
   ],
   "bugs": {
-    "url": "https://github.com/boymanjor/hns-ledger/issues"
+    "url": "https://github.com/boymanjor/hsd-ledger/issues"
   },
-  "homepage": "https://github.com/boymanjor/hns-ledger#readme",
+  "homepage": "https://github.com/boymanjor/hsd-ledger#readme",
   "scripts": {
-    "browserify": "browserify -s hns-ledger lib/hns-ledger.js | uglifyjs -c > hns-ledger.js",
-    "clean": "rm -rf hns-ledger.js build/vendor* .config/certs/* ./docs ./coverage",
+    "clean": "rm -rf hsd-ledger.js ./docs ./coverage",
     "lint": "eslint lib/ test/ || exit 0",
     "test": "mocha --reporter spec test/*-test.js",
     "test-hid": "mocha --reporter spec test/e2e/hid-test.js",
@@ -45,32 +44,13 @@
     "hsd": "handshake-org/hsd"
   },
   "devDependencies": {
-    "babel-core": "^6.26.3",
-    "babel-loader": "^8.0.0",
-    "babel-preset-env": "^1.7.0",
-    "babelify": "^8.0.0",
-    "browserify": "^16.2.2",
     "eslint": "^5.4.0",
     "hs-client": "0.0.5",
     "istanbul": "^1.1.0-alpha.1",
     "jsdoc": "^3.5.5",
-    "karma": "^3.0.0",
-    "karma-chrome-launcher": "^2.2.0",
-    "karma-mocha": "^1.3.0",
-    "karma-mocha-reporter": "^2.2.5",
-    "karma-webpack": "^3.0.0",
-    "mocha": "^5.2.0",
-    "uglify-es": "^3.1.3",
-    "uglifyjs-webpack-plugin": "^1.3.0",
-    "webpack": "^4.17.1",
-    "webpack-cli": "^3.1.0"
+    "mocha": "^5.2.0"
   },
   "engines": {
     "node": ">=8.0.0"
-  },
-  "browserify": {
-    "transform": [
-      "babelify"
-    ]
   }
 }

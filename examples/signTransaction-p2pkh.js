@@ -4,7 +4,7 @@ const Logger = require('blgr');
 const { Coin, MTX, KeyRing } = require('hsd');
 
 const util = require('../test/utils/fund');
-const { HID, LedgerHSD, LedgerInput } = require('../lib/hns-ledger');
+const { HID, LedgerHSD, LedgerInput } = require('../lib/hsd-ledger');
 const { Device } = HID;
 
 

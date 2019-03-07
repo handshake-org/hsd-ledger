@@ -2,7 +2,7 @@
 
 const KeyRing = require('hsd/lib/primitives/keyring');
 const Logger = require('blgr');
-const {HID, LedgerHSD} = require('../lib/hns-ledger');
+const {HID, LedgerHSD} = require('../lib/hsd-ledger');
 const {Device} = HID;
 
 (async () => {

@@ -10,7 +10,7 @@ const rules = require('hsd/lib/covenants/rules');
 const Logger = require('blgr');
 const { Amount, ChainEntry, FullNode, MTX, Network } = require('hsd');
 const { NodeClient, WalletClient } = require('hs-client');
-const { HID, LedgerHSD } = require('../../lib/hns-ledger');
+const { HID, LedgerHSD } = require('../../lib/hsd-ledger');
 const { Device } = HID;
 
 class TestUtilError extends Error {
@@ -670,9 +670,6 @@ describe('Ledger Nano S', function() {
     const name = rules.grindName(2, 0, Network.get('regtest'));;
 
     it(`should submit OPEN`, async () => {
-      // Grind name for test.
-      name = await util.grindName(3);
-
       // Submit OPEN.
       const mtx = await util.createOpen(name);
       const msg = `Confirm OPEN TXID: ${mtx.txid()}`;

@@ -1,4 +1,4 @@
-# hns-ledger
+# hsd-ledger
 
 This is a client library for [ledger-app-hns][hns]. It uses primitives
 from [hsd][hsd].
