@@ -4,9 +4,10 @@
 'use strict';
 
 const assert = require('assert');
+const bio = require('bufio');
+const plugin = require('hsd/lib/wallet/plugin');
 const Logger = require('blgr');
-const walletPlugin = require('hsd/lib/wallet/plugin');
-const { Amount, MTX, FullNode } = require('hsd');
+const { Amount, ChainEntry, MTX, FullNode } = require('hsd');
 const { NodeClient, WalletClient } = require('hs-client');
 const { HID, LedgerHSD } = require('../../lib/hns-ledger');
 const { Device } = HID;
@@ -48,6 +49,18 @@ class TestUtil {
       options.walletPort = 14039;
 
     this.network = 'regtest';
+
+    this.txs = {};
+
+    this.blocks = {};
+
+    this.node = new FullNode({
+      memory: true,
+      workers: true,
+      network: 'regtest',
+    });
+
+    this.node.use(plugin);
 
     this.nodeClient = new NodeClient({
       host: options.host,
@@ -174,6 +187,39 @@ class TestUtil {
     });
 
     await this.device.open();
+    await this.node.ensure();
+    await this.node.open();
+    await this.node.connect();
+    this.node.startSync();
+
+    await this.nodeClient.open();
+    await this.walletClient.open();
+
+    this.node.plugins.walletdb.wdb.on('confirmed', (details, tx) => {
+      const txid = tx.txid();
+
+      if (!this.txs[txid]) {
+        this.txs[txid] = 1;
+      } else if (this.txs[txid] == 1) {
+        this.txs[txid] = 2;
+      } else {
+        throw(new TestError({ message: 'error', caller: 'cb' }));
+      }
+    });
+
+    this.nodeClient.bind('block connect', (data) => {
+      const br = bio.read(data);
+      const entry = (new ChainEntry()).read(br);
+       const hash = entry.hash.toString('hex');
+
+      if (!this.blocks[hash]) {
+        this.blocks[hash] = 1;
+      } else if (this.blocks[hash] == 1) {
+        this.blocks[hash] = 2;
+      } else {
+        throw(new TestError({ message: 'error', caller: 'cb' }));
+      }
+    });
 
     this.ledger = new LedgerHSD({
       device: this.device,
@@ -191,16 +237,41 @@ class TestUtil {
 
     await this.logger.close();
     await this.device.close();
+    await this.nodeClient.close();
+    await this.walletClient.close();
+    await this.node.close();
   }
 
-  /**
-   * Block the main thread.
-   * @param {Number} ms - amount of time to block in milliseconds
-   */
+  async confirmTX(txid, timeout = 5000) {
+    return new Promise((resolve, reject) => {
+      const stop = setInterval(() => {
+        if (this.txs.hasOwnProperty(txid)) {
+          clearInterval(stop);
+          resolve(txid);
+        }
+      }, 500)
 
-  async wait(ms) {
-    const start = Date.now();
-    while (Date.now() - start < ms);
+      setTimeout(() => {
+        clearInterval(stop);
+        reject(null);
+      }, timeout);
+    });
+  }
+
+  async confirmBlock(hash, timeout = 5000) {
+    return new Promise((resolve, reject) => {
+      const stop = setInterval(() => {
+        if (this.blocks.hasOwnProperty(hash)) {
+          clearInterval(stop);
+          resolve(hash);
+        }
+      }, 500)
+
+      setTimeout(() => {
+        clearInterval(stop);
+        reject(null);
+      }, timeout);
+    });
   }
 
   /**
@@ -537,8 +608,8 @@ describe('Ledger Nano S', function() {
 
     // Fund first wallet.
     await util.selectWallet(alice.wallet.id);
-    await util.generateToAddress(3, alice.addr);
-    util.wait(500);
+    let hashes = await util.generateToAddress(3, alice.addr);
+    await util.confirmBlock(hashes.pop());
 
     // Create second wallet.
     bob = Object.create(null);
@@ -551,8 +622,8 @@ describe('Ledger Nano S', function() {
     bob.addr = bob.acct.receiveAddress;
 
     // Fund second wallet.
-    await util.generateToAddress(3, bob.addr);
-    util.wait(500);
+    hashes = await util.generateToAddress(3, bob.addr);
+    await util.confirmBlock(hashes.pop());
   });
 
   after(async () => {
@@ -564,27 +635,28 @@ describe('Ledger Nano S', function() {
       // Create send from first wallet to second.
       await util.selectWallet(alice.wallet.id);
       let mtx = await util.createSendToAddress('default', bob.addr, 1900);
-      let msg = `Confirm TXID: ${mtx.txid()}`;
+      let msg = `Confirm first spend TXID: ${mtx.txid()}`;
       let signed = await util.signTransaction(mtx, msg);
       await util.sendRawTX(signed);
 
       // Mine send.
       await util.generateToAddress(1, alice.addr);
-      util.wait(500);
+      await util.confirmTX(mtx.txid());
 
       // Create send from second wallet back to the first.
       await util.selectWallet(bob.wallet.id);
       mtx = await util.createSendToAddress('default', alice.addr, 1800);
-      msg = `Confirm TXID: ${mtx.txid()}`;
+      msg = `Confirm second spend TXID: ${mtx.txid()}`;
       signed = await util.signTransaction(mtx, msg);
       await util.sendRawTX(signed);
 
       // Check balance before send.
       let acct = await util.getAccount(bob.wallet.id, 'default');
       const before = acct.balance.unconfirmed;
+
       // Mine send.
       await util.generateToAddress(1, alice.addr);
-      util.wait(500);
+      await util.confirmTX(mtx.txid());
 
       // Assert balance before send.
       acct = await util.getAccount(bob.wallet.id, 'default');
@@ -597,6 +669,7 @@ describe('Ledger Nano S', function() {
     let name;
 
     it(`should submit OPEN`, async () => {
+      // Grind name for test.
       name = await util.grindName(3);
 
       // Submit OPEN.
@@ -604,7 +677,10 @@ describe('Ledger Nano S', function() {
       const msg = `Confirm OPEN TXID: ${mtx.txid()}`;
       const signed = await util.signTransaction(mtx, msg);
       await util.sendRawTX(signed);
+
+      // Mine OPEN.
       await util.generateToAddress(1, alice.addr);
+      await util.confirmTX(mtx.txid());
 
       // Assert OPEN.
       const n = await util.getNameInfo(name);
@@ -613,12 +689,13 @@ describe('Ledger Nano S', function() {
 
     it('should submit BID', async () => {
       // Advance past the open period.
-      await util.generateToAddress(7, alice.addr);
-      util.wait(500);
+      const hashes = await util.generateToAddress(7, alice.addr);
+      await util.confirmBlock(hashes.pop());
 
       // Submit winning BID.
       await util.selectWallet(alice.wallet.id);
       let mtx = await util.createBid(name, 5, 10);
+      let txid = mtx.txid();
       let msg = `Confirm winning BID TXID: ${mtx.txid()}`;
       let signed = await util.signTransaction(mtx, msg);
       await util.sendRawTX(signed);
@@ -630,9 +707,10 @@ describe('Ledger Nano S', function() {
       signed = await util.signTransaction(mtx, msg);
       await util.sendRawTX(signed);
 
-      // Mine BID.
+      // Mine BID covenants.
       await util.generateToAddress(1, alice.addr);
-      util.wait(500);
+      await util.confirmTX(mtx.txid());
+      await util.confirmTX(txid);
 
       // Assert BID covenants.
       const info = await util.getAuctionInfo(name);
@@ -641,12 +719,13 @@ describe('Ledger Nano S', function() {
 
     it('should submit REVEAL', async () => {
       // Advance past the bidding period.
-      await util.generateToAddress(5, alice.addr);
-      util.wait(500);
+      const hashes = await util.generateToAddress(5, alice.addr);
+      await util.confirmBlock(hashes.pop());
 
       // Submit winning REVEAL.
       await util.selectWallet(alice.wallet.id);
       let mtx = await util.createReveal(name);
+      let txid = mtx.txid();
       let msg = `Confirm winning REVEAL TXID: ${mtx.txid()}`;
       let signed = await util.signTransaction(mtx, msg);
       await util.sendRawTX(signed);
@@ -660,17 +739,18 @@ describe('Ledger Nano S', function() {
 
       // Mine REVEAL covenants.
       await util.generateToAddress(1, alice.addr);
-      util.wait(500);
+      await util.confirmTX(mtx.txid());
+      await util.confirmTX(txid);
 
       // Assert REVEAL covenants.
       const info = await util.getAuctionInfo(name);
-      assert.deepEqual(info.reveals.length, 2, 'wrong number of bids');
+      assert.deepEqual(info.reveals.length, 2, 'wrong number of reveals');
     });
 
     it('should submit REDEEM', async () => {
       // Advance past the reveal period.
-      await util.generateToAddress(10, alice.addr);
-      util.wait(500);
+      const hashes = await util.generateToAddress(10, alice.addr);
+      await util.confirmBlock(hashes.pop());
 
       // Submit REDEEM.
       await util.selectWallet(bob.wallet.id);
@@ -685,7 +765,7 @@ describe('Ledger Nano S', function() {
 
       // Mine REDEEM.
       await util.generateToAddress(1, alice.addr);
-      util.wait(500);
+      await util.confirmTX(mtx.txid());
 
       // Assert REDEEM.
       const after = await util.getAccount(bob.wallet.id, bob.acct.name);
@@ -708,7 +788,7 @@ describe('Ledger Nano S', function() {
 
       // Mine REGISTER.
       await util.generateToAddress(1, alice.addr);
-      util.wait(500);
+      await util.confirmTX(mtx.txid());
 
       // Assert REGISTER.
       const n = await util.getNameInfo(name);
@@ -717,27 +797,27 @@ describe('Ledger Nano S', function() {
       assert.deepEqual(got, want, 'wrong data');
     });
 
-    it('should submit createRenewal', async () => {
+    it('should submit RENEW', async () => {
       // Advance 10 blocks.
-      await util.generateToAddress(10, alice.addr);
-      util.wait(500);
+      const hashes = await util.generateToAddress(10, alice.addr);
+      await util.confirmBlock(hashes.pop());
 
       // Check name expiration.
       const before = await util.getNameInfo(name);
       const had = before.info.stats.blocksUntilExpire;
 
-      // Submit RENEWAL.
+      // Submit RENEW.
       await util.selectWallet(alice.wallet.id);
       const mtx = await util.createRenewal(name);
       const msg = `Confirm RENEWAL TXID: ${mtx.txid()}`;
       const signed = await util.signTransaction(mtx, msg);
       await util.sendRawTX(signed);
 
-      // Mine RENEWAL.
+      // Mine RENEW.
       await util.generateToAddress(1, alice.addr);
-      util.wait(500);
+      await util.confirmTX(mtx.txid());
 
-      // Assert RENEWAL.
+      // Assert RENEW.
       const after = await util.getNameInfo(name);
       const got = after.info.stats.blocksUntilExpire;
       assert.ok(got > had, 'wrong name expiry');
@@ -752,7 +832,7 @@ describe('Ledger Nano S', function() {
 
       // Mine TRANSFER.
       await util.generateToAddress(1, alice.addr);
-      util.wait(500);
+      await util.confirmTX(mtx.txid());
 
       // Assert TRANSFER.
       const n = await util.getNameInfo(name);
@@ -768,7 +848,7 @@ describe('Ledger Nano S', function() {
 
       // Mine cancellation.
       await util.generateToAddress(1, alice.addr);
-      util.wait(500);
+      await util.confirmTX(mtx.txid());
 
       // Assert cancellation.
       const n = await util.getNameInfo(name);
@@ -783,8 +863,8 @@ describe('Ledger Nano S', function() {
       await util.sendRawTX(signed);
 
       // Mine TRANSFER and past the lockup period.
-      await util.generateToAddress(11, alice.addr);
-      util.wait(500);
+      const hashes = await util.generateToAddress(11, alice.addr);
+      await util.confirmBlock(hashes.pop());
 
       // Submit FINALIZE.
       mtx = await util.createFinalize(name);
@@ -794,7 +874,7 @@ describe('Ledger Nano S', function() {
 
       // Mine FINALIZE.
       await util.generateToAddress(1, alice.addr);
-      util.wait(500);
+      await util.confirmTX(txid);
 
       // Assert FINALIZE.
       const n = await util.getNameInfo(name);
@@ -812,8 +892,8 @@ describe('Ledger Nano S', function() {
       await util.sendRawTX(signed);
 
       // Mine REVOKE and advance past revocation delay.
-      await util.generateToAddress(51, alice.addr);
-      util.wait(500);
+      const hashes = await util.generateToAddress(51, alice.addr);
+      await util.confirmBlock(hashes.pop());
 
       // Assert REVOKE.
       const n = await util.getNameInfo(name);
