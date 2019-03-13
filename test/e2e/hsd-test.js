@@ -13,6 +13,8 @@ const { NodeClient, WalletClient } = require('hs-client');
 const { HID, LedgerHSD } = require('../../lib/hsd-ledger');
 const { Device } = HID;
 
+const LOG_LEVEL = process.env.LOG_LEVEL || 'info';
+
 class TestUtilError extends Error {
 
   /**
@@ -75,7 +77,7 @@ class TestUtil {
 
     this.logger = new Logger({
       console: true,
-      level: 'info'
+      level: LOG_LEVEL
     });
   }
 
@@ -185,6 +187,7 @@ class TestUtil {
     this.device = new Device({
       device: devices[0],
       timeout: 60000,
+      logger: this.logger
     });
 
     await this.device.open();
@@ -224,7 +227,8 @@ class TestUtil {
 
     this.ledger = new LedgerHSD({
       device: this.device,
-      network: this.network
+      network: this.network,
+      logger: this.logger
     });
   }
 

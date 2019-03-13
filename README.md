@@ -30,6 +30,9 @@ following files:
 More documentation to come...
 
 ## Tests
+For all tests, a LOG_LEVEL environment variable can be set to specify the log
+level. Possible log levels include: 'info', 'warning', 'debug', 'error'.
+
 ### Unit tests
 ```bash
 $ npm test
