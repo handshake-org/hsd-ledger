@@ -10,12 +10,14 @@ const {
 const assert = require('../utils/assert');
 const fundUtil = require('../utils/fund');
 const util = require('../../lib/utils/util');
+const Logger = require('blgr');
 const {HID, LedgerHSD, LedgerInput} = require('../../lib/hsd-ledger');
 const {Device, DeviceInfo} = HID;
 
 const ACCOUNT = `m/44'/5355'/0'`;
 const ADDRESS = `${ACCOUNT}/0/0`;
 const CHANGE = `${ACCOUNT}/1/0`;
+const LOG_LEVEL = process.env.LOG_LEVEL || 'info';
 const SEED_PHRASE = [
   'abandon abandon abandon abandon',
   'abandon abandon abandon abandon',
@@ -39,25 +41,38 @@ describe('HID', function () {
 describe('LedgerHSD', function () {
   const timeout = Number(process.env.DEVICE_TIMEOUT) || 60000;
   const network = 'regtest';
-  let device, ledger;
+  let device, ledger, logger;
 
   this.timeout(timeout);
 
   before(async () => {
     const devices = await Device.getDevices();
 
+    logger = new Logger({
+      console: true,
+      level: LOG_LEVEL
+    });
+
+    await logger.open();
+
     device = new Device({
       device: devices[0],
-      timeout: timeout
+      timeout,
+      logger
     });
 
     await device.open();
+
+    ledger = new LedgerHSD({
+      device,
+      network,
+      logger
+    });
   });
 
-  after(async () => await device.close());
-
-  beforeEach(() => {
-    ledger = new LedgerHSD({ device, network });
+  after(async () => {
+    await device.close();
+    await logger.close();
   });
 
   describe('getAppVersion()', () => {
@@ -137,7 +152,7 @@ describe('LedgerHSD', function () {
         path: `m/44'/5355'/0'/0/0`,
         coin: Coin.fromTX(txs[0], 0, -1)
       });
-      console.log(`\tConfirm TXID: ${mtx.txid()}`);
+      logger.info(`Confirm TXID: ${mtx.txid()}`);
       const signed = await ledger.signTransaction(mtx, [ledgerInput]);
 
       assert.ok(signed.verify(), 'validation failed');
@@ -155,7 +170,7 @@ describe('LedgerHSD', function () {
         { acct: 5, path: `m/44'/5355'/5'/0/0` },
       ];
 
-      console.log(`\tConstructing multisig address.`);
+      logger.info(`Constructing multisig address.`);
 
       for (const signer of signers)
         signer.pub = await ledger.getPublicKey(signer.path);
@@ -172,7 +187,7 @@ describe('LedgerHSD', function () {
       const address = Address.fromScript(redeem);
       const changeAddress = Address.fromScript(redeem);
 
-      console.log('\tConstructing spend transaction.');
+      logger.info('Constructing spend transaction.');
 
       const {coins, txs} = await fundUtil.fundAddress(address, 1);
       const mtx = new MTX();
@@ -197,13 +212,13 @@ describe('LedgerHSD', function () {
         redeem
       }));
 
-      console.log(`\tConfirm TXID: ${mtx.txid()}`);
+      logger.info(`Confirm TXID (1st signer): ${mtx.txid()}`);
 
       const part = await ledger.signTransaction(mtx, [ledgerInputs[0]]);
 
       assert.ok(!part.verify(), 'validation should failed');
 
-      console.log(`\tConfirm TXID: ${mtx.txid()}`);
+      logger.info(`Confirm TXID (2nd signer): ${mtx.txid()}`);
 
       const full = await ledger.signTransaction(part, [ledgerInputs[1]]);
 

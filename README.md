@@ -30,17 +30,20 @@ following files:
 More documentation to come...
 
 ## Tests
-For all tests, a LOG_LEVEL environment variable can be set to specify the log
-level. Possible log levels include: 'info', 'warning', 'debug', 'error'.
-
 ### Unit tests
 ```bash
 $ npm test
 ```
 
-### End to end tests
+### End-to-end tests
 
->Note: the end to end tests require a connected Ledger Nano S using the seed phrase:
+For all end-to-end tests, a `LOG_LEVEL` environment variable can be set
+to control the log output. Possible log levels include: `none`, `info`,
+`warning`, `debug`, `error`, `spam`.
+
+
+>Note: the end-to-end tests require a connected Ledger Nano S using the
+seed phrase:
 ```
 abandon abandon abandon abandon abandon abandon
 abandon abandon abandon abandon abandon about
