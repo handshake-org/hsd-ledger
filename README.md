@@ -3,6 +3,17 @@
 This is a client library for [ledger-app-hns][hns]. It uses primitives
 from [hsd][hsd].
 
+## Install
+```
+$ git clone https://github.com/boymanjor/hsd-ledger.git
+$ cd hsd-ledger
+$ npm install
+$ npm install --no-save path/to/hsd
+```
+
+>Note: `hsd` is a peer dependency. The above command assumes you already
+have an `hsd` repository cloned on your development machine.
+
 ## Usage
 
 Currently, we only support Node.js. We have plans to support browser
@@ -24,10 +35,6 @@ following files:
 [pub]: ./examples/getPublicKey.js
 [p2pkh]: ./examples/signTransaction-p2pkh.js
 [p2sh]: ./examples/signTransaction-p2sh.js
-
->Note: `hsd` is a peer dependency.
-
-More documentation to come...
 
 ## Tests
 ### Unit tests
