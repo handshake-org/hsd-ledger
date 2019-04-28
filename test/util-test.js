@@ -84,8 +84,8 @@ describe('utils', function () {
           const messages = util.splitBuffer(buf, 64);
 
           for (let i = 0; i < messages.length; i++) {
-            let got = messages[i];
-            let want = test.messages[i];
+            const got = messages[i];
+            const want = test.messages[i];
             assert.bufferEqual(got, want, 'buffers not equal');
           }
         }

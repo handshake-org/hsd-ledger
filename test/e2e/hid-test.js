@@ -4,7 +4,7 @@
 'use strict';
 
 const {
-  Address, Amount, Coin, HDPublicKey, HDPrivateKey, KeyRing, MTX, Script
+  Address, Amount, Coin, HDPrivateKey, KeyRing, MTX, Script
 } = require('hsd');
 
 const assert = require('../utils/assert');
@@ -14,7 +14,7 @@ const Logger = require('blgr');
 const {HID, LedgerHSD, LedgerInput} = require('../../lib/hsd-ledger');
 const {Device, DeviceInfo} = HID;
 
-const ACCOUNT = `m/44'/5355'/0'`;
+const ACCOUNT = 'm/44\'/5355\'/0\'';
 const ADDRESS = `${ACCOUNT}/0/0`;
 const CHANGE = `${ACCOUNT}/1/0`;
 const LOG_LEVEL = process.env.LOG_LEVEL || 'info';
@@ -147,9 +147,9 @@ describe('LedgerHSD', function () {
       const addr = addrRing.getAddress();
       const change = changeRing.getAddress();
       const {coins, txs} = await fundUtil.fundAddress(addr, 1);
-      const mtx = await createTX(coins, addr, change)
+      const mtx = await createTX(coins, addr, change);
       const ledgerInput = new LedgerInput({
-        path: `m/44'/5355'/0'/0/0`,
+        path: 'm/44\'/5355\'/0\'/0/0',
         coin: Coin.fromTX(txs[0], 0, -1)
       });
       logger.info(`Confirm TXID: ${mtx.txid()}`);
@@ -162,15 +162,15 @@ describe('LedgerHSD', function () {
       // Using 6 pubkeys so the redeem script
       // exceeds the limit for one APDU message.
       const signers = [
-        { acct: 0, path: `m/44'/5355'/0'/0/0` },
-        { acct: 1, path: `m/44'/5355'/1'/0/0` },
-        { acct: 2, path: `m/44'/5355'/2'/0/0` },
-        { acct: 3, path: `m/44'/5355'/3'/0/0` },
-        { acct: 4, path: `m/44'/5355'/4'/0/0` },
-        { acct: 5, path: `m/44'/5355'/5'/0/0` },
+        { acct: 0, path: 'm/44\'/5355\'/0\'/0/0' },
+        { acct: 1, path: 'm/44\'/5355\'/1\'/0/0' },
+        { acct: 2, path: 'm/44\'/5355\'/2\'/0/0' },
+        { acct: 3, path: 'm/44\'/5355\'/3\'/0/0' },
+        { acct: 4, path: 'm/44\'/5355\'/4\'/0/0' },
+        { acct: 5, path: 'm/44\'/5355\'/5\'/0/0' }
       ];
 
-      logger.info(`Constructing multisig address.`);
+      logger.info('Constructing multisig address.');
 
       for (const signer of signers)
         signer.pub = await ledger.getPublicKey(signer.path);
@@ -182,7 +182,7 @@ describe('LedgerHSD', function () {
         signers[2].pub,
         signers[3].pub,
         signers[4].pub,
-        signers[5].pub,
+        signers[5].pub
       ]);
       const address = Address.fromScript(redeem);
       const changeAddress = Address.fromScript(redeem);
