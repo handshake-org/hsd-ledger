@@ -4,7 +4,7 @@
 'use strict';
 
 const bufio = require('bufio');
-const { Coin, KeyRing, MTX, Script } = require('hsd');
+const {Coin, KeyRing, MTX} = require('hsd');
 
 const assert = require('./utils/assert');
 const fund = require('./utils/fund');
@@ -178,15 +178,15 @@ describe('apdu', function () {
 
     describe('APDUCommand.getPublicKey()', () => {
       it('should encode commmand', () => {
-        let path = `m/44'/5355'/0'/0/0`;
-        let got = APDUCommand.getPublicKey(path, {
+        const path = 'm/44\'/5355\'/0\'/0/0';
+        const got = APDUCommand.getPublicKey(path, {
           network: 'regtest',
           confirm: true,
           xpub: false,
           address: false
         });
 
-        let want = Object.create(null);
+        const want = Object.create(null);
         want.p1 = 0x05;
         want.p2 = 0x00;
         want.data = Buffer.from([
@@ -226,10 +226,10 @@ describe('apdu', function () {
 
     describe('APDUCommand.parseTX', () => {
       it('should encode command', () => {
-        let first = true;
-        let hex = '00000000000000000102587d4f3ed666cf9186aeddc72663df' +
+        const first = true;
+        const hex = '00000000000000000102587d4f3ed666cf9186aeddc72663df' +
                   '2e1d58b0245a9ae742e6b985d6079445d7730000000010dbf5';
-        let data = Buffer.from(hex, 'hex');
+        const data = Buffer.from(hex, 'hex');
         const encoded = APDUCommand.parseTX(data, first);
 
         assert.strictEqual(encoded.cla, common.cla.GENERAL,
@@ -244,8 +244,8 @@ describe('apdu', function () {
 
     describe('APDUResponse.parseTX', () => {
       it('should decode response', () => {
-        let encoded = Buffer.from('9000', 'hex');
-        let decoded = APDUResponse.parseTX(encoded);
+        const encoded = Buffer.from('9000', 'hex');
+        const decoded = APDUResponse.parseTX(encoded);
 
         assert.strictEqual(decoded.status, common.status.SUCCESS,
           'wrong status');
@@ -257,13 +257,13 @@ describe('apdu', function () {
 
     describe('APDUCommand.getInputSignature', () => {
       it('should encode command', async () => {
-        let hex = '03253ea6d6486d1b9cc3ab01a9a321d65' +
+        const hex = '03253ea6d6486d1b9cc3ab01a9a321d65' +
                   'c350c6c26a9c536633e2ef36163316bf2';
-        let pub = Buffer.from(hex, 'hex');
-        let ring = await KeyRing.fromPublic(pub);
-        let addr = ring.getAddress();
-        let {coins, txs} = await fund.fundAddress(addr, 1);
-        let mtx = new MTX();
+        const pub = Buffer.from(hex, 'hex');
+        const ring = await KeyRing.fromPublic(pub);
+        const addr = ring.getAddress();
+        const {coins, txs} = await fund.fundAddress(addr, 1);
+        const mtx = new MTX();
 
         mtx.addOutput({
           address: KeyRing.generate().getAddress(),
@@ -275,24 +275,24 @@ describe('apdu', function () {
           subtractFee: true
         });
 
-        let initial = true;
-        let hsdInput = mtx.inputs[0];
-        let ledgerInput = new LedgerInput({
-          path: `m/44'/5355'/0'/0/0`,
+        const initial = true;
+        const hsdInput = mtx.inputs[0];
+        const ledgerInput = new LedgerInput({
+          path: 'm/44\'/5355\'/0\'/0/0',
           coin: Coin.fromTX(txs[0], 0, -1),
           publicKey: pub
         });
 
-        let raw = ledgerInput.getPrevRedeem();
-        let bw = bufio.write(raw.getVarSize());
+        const raw = ledgerInput.getPrevRedeem();
+        const bw = bufio.write(raw.getVarSize());
         raw.write(bw);
-        let script = bw.render();
-        let encoded = APDUCommand.getInputSignature(
+        const script = bw.render();
+        const encoded = APDUCommand.getInputSignature(
           ledgerInput, hsdInput, script, initial);
 
         // Create expected output
-        let path = encodePath(ledgerInput.path);
-        let size = path.length + hsdInput.getSize() + script.length + 12;
+        const path = encodePath(ledgerInput.path);
+        const size = path.length + hsdInput.getSize() + script.length + 12;
 
         // Init
         let data = bufio.write(size);
@@ -327,8 +327,8 @@ describe('apdu', function () {
           'wrong type');
         assert.deepEqual(decoded.data, {}, 'wrong data');
 
-        let res = '9000';
-        let sig = '317b0972986a0307b7bb13f624a0f5949' +
+        const res = '9000';
+        const sig = '317b0972986a0307b7bb13f624a0f5949' +
                   'e656fdc4b0d9b2bb57efb0ce2b050655d' +
                   'b4ec67e327e8a231c606b7aa93a661366' +
                   'b049d208d61a08e336ce2b8dbc65401';
@@ -341,7 +341,8 @@ describe('apdu', function () {
         assert.strictEqual(decoded.type, common.ins.GET_INPUT_SIGNATURE,
           'wrong type');
         assert.deepEqual(decoded.data.signature.length, 65, 'wrong data');
-        assert.deepEqual(decoded.data.signature, Buffer.from(sig, 'hex'), 'wrong data');
+        assert.deepEqual(decoded.data.signature, Buffer.from(sig, 'hex'),
+          'wrong data');
       });
     });
   });

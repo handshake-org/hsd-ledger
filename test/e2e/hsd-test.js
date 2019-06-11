@@ -8,15 +8,14 @@ const bio = require('bufio');
 const plugin = require('hsd/lib/wallet/plugin');
 const rules = require('hsd/lib/covenants/rules');
 const Logger = require('blgr');
-const { Amount, ChainEntry, FullNode, MTX, Network } = require('hsd');
-const { NodeClient, WalletClient } = require('hs-client');
-const { HID, LedgerHSD } = require('../../lib/hsd-ledger');
-const { Device } = HID;
+const {ChainEntry, FullNode, MTX, Network} = require('hsd');
+const {NodeClient, WalletClient} = require('hs-client');
+const {HID, LedgerHSD} = require('../../lib/hsd-ledger');
+const {Device} = HID;
 
 const LOG_LEVEL = process.env.LOG_LEVEL || 'info';
 
 class TestUtilError extends Error {
-
   /**
    * Create a Test error.
    * @param {Object} options
@@ -60,7 +59,7 @@ class TestUtil {
     this.node = new FullNode({
       memory: true,
       workers: true,
-      network: 'regtest',
+      network: 'regtest'
     });
 
     this.node.use(plugin);
@@ -105,10 +104,10 @@ class TestUtil {
    */
 
   async mustAPI(promise, caller) {
-    return promise.then(res => {
+    return promise.then((res) => {
       return res;
     })
-    .catch(err => {
+    .catch((err) => {
       return this.reject(err.message, caller);
     });
   }
@@ -137,7 +136,7 @@ class TestUtil {
    */
 
   async cantAPI(promise, caller) {
-    return promise.then(res => {
+    return promise.then((res) => {
       return this.reject('Expected failure.', caller);
     })
     .catch(err => err);
@@ -204,10 +203,10 @@ class TestUtil {
 
       if (!this.txs[txid]) {
         this.txs[txid] = 1;
-      } else if (this.txs[txid] == 1) {
+      } else if (this.txs[txid] === 1) {
         this.txs[txid] = 2;
       } else {
-        throw(new TestError({ message: 'error', caller: 'cb' }));
+        throw(new TestUtilError({ message: 'error', caller: 'cb' }));
       }
     });
 
@@ -218,10 +217,10 @@ class TestUtil {
 
       if (!this.blocks[hash]) {
         this.blocks[hash] = 1;
-      } else if (this.blocks[hash] == 1) {
+      } else if (this.blocks[hash] === 1) {
         this.blocks[hash] = 2;
       } else {
-        throw(new TestError({ message: 'error', caller: 'cb' }));
+        throw(new TestUtilError({ message: 'error', caller: 'cb' }));
       }
     });
 
@@ -254,7 +253,7 @@ class TestUtil {
           clearInterval(stop);
           resolve(txid);
         }
-      }, 500)
+      }, 500);
 
       setTimeout(() => {
         clearInterval(stop);
@@ -270,7 +269,7 @@ class TestUtil {
           clearInterval(stop);
           resolve(hash);
         }
-      }, 500)
+      }, 500);
 
       setTimeout(() => {
         clearInterval(stop);
@@ -331,14 +330,14 @@ class TestUtil {
     if (!acct)
       failed = true;
 
-    const message = 'Account not found.'
+    const message = 'Account not found.';
     const caller = 'getAccount';
 
     if (failed && shouldFail)
       return new TestUtilError({ message, caller });
 
     if (failed && !shouldFail)
-      return this.reject(message, caller)
+      return this.reject(message, caller);
 
     if (shouldFail)
       return this.reject('Expected failure.', caller);
@@ -347,7 +346,7 @@ class TestUtil {
   }
 
   async createSendToAddress(id, addr, amt, shouldFail) {
-    const args = [addr, amt, "", "", false, id];
+    const args = [addr, amt, '', '', false, id];
     const promise = this.execWalletRPC('createsendtoaddress', args);
     const caller = 'createSendToAddress';
 
@@ -591,7 +590,6 @@ class TestUtil {
   }
 }
 
-
 describe('Ledger Nano S', function() {
   this.timeout(60000);
 
@@ -673,7 +671,7 @@ describe('Ledger Nano S', function() {
   describe('Signing covenants', async () => {
     const name = rules.grindName(2, 0, Network.get('regtest'));;
 
-    it(`should submit OPEN`, async () => {
+    it('should submit OPEN', async () => {
       // Submit OPEN.
       const mtx = await util.createOpen(name);
       const msg = `Confirm OPEN TXID: ${mtx.txid()}`;
@@ -697,7 +695,7 @@ describe('Ledger Nano S', function() {
       // Submit winning BID.
       await util.selectWallet(alice.wallet.id);
       let mtx = await util.createBid(name, 5, 10);
-      let txid = mtx.txid();
+      const txid = mtx.txid();
       let msg = `Confirm winning BID TXID: ${mtx.txid()}`;
       let signed = await util.signTransaction(mtx, msg);
       await util.sendRawTX(signed);
@@ -727,7 +725,7 @@ describe('Ledger Nano S', function() {
       // Submit winning REVEAL.
       await util.selectWallet(alice.wallet.id);
       let mtx = await util.createReveal(name);
-      let txid = mtx.txid();
+      const txid = mtx.txid();
       let msg = `Confirm winning REVEAL TXID: ${mtx.txid()}`;
       let signed = await util.signTransaction(mtx, msg);
       await util.sendRawTX(signed);
@@ -777,7 +775,6 @@ describe('Ledger Nano S', function() {
     it('should submit REGISTER', async () => {
       // Submit REGISTER.
       await util.selectWallet(alice.wallet.id);
-      const text = Buffer.alloc(100).toString('hex');
       const mtx = await util.createUpdate(name, {
         version: 0,
         ttl: 6000,

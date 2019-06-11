@@ -1,7 +1,6 @@
 'use strict';
 
 const MTX = require('hsd/lib/primitives/mtx');
-const HD = require('hsd/lib/hd');
 const Outpoint = require('hsd/lib/primitives/outpoint');
 const Coin = require('hsd/lib/primitives/coin');
 const KeyRing = require('hsd/lib/primitives/keyring');
