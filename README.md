@@ -12,11 +12,7 @@ $ npm install --no-save path/to/hsd
 ```
 
 >Note: `hsd` is a peer dependency. The above command assumes you already
-have an `hsd` repository cloned on your development machine and have checked
-out the following commit: `ff133262ae7b83dbe86c4d96c55cca5451743bf0`.
-Currently, the hsd `master` branch does not support hardware signing.
-The aforementioned commit supports hardware signing, but **should only be
-used to test this library**.
+have an `hsd` repository cloned on your development machine.
 
 ## Usage
 
