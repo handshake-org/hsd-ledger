@@ -7,7 +7,6 @@ const util = require('../test/utils/fund');
 const { HID, LedgerHSD, LedgerInput } = require('../lib/hsd-ledger');
 const { Device } = HID;
 
-
 (async () => {
   const logger = new Logger({
     console: true,
