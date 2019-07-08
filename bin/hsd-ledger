@@ -8,28 +8,13 @@
 
 const Config = require('bcfg');
 const {NodeClient, WalletClient} = require('hs-client');
-const {HDPublicKey, MTX} = require('hsd');
+const {HDPublicKey, MTX, Network} = require('hsd');
 const {HID, LedgerHSD} = require('..');
 const {Device} = HID;
 
 /**
  * Global constants
  */
-
-const ports = {
-  node: {
-    main: 12037,
-    testnet: 13037,
-    regtest: 14037,
-    simnet: 15037
-  },
-  wallet: {
-    main: 12039,
-    testnet: 13039,
-    regtest: 14039,
-    simnet: 15039
-  }
-};
 
 const VALID_CMDS = [
   'createwallet',
@@ -189,7 +174,8 @@ async function main() {
   });
 
   const argv = config.argv;
-  const network = config.str('network');
+  const type = config.str('network');
+  const network = Network.get(type);
   const id = config.str('wallet');
   const token = config.str('token');
 
@@ -205,7 +191,7 @@ async function main() {
 
   const ledger = new LedgerHSD({
     device: device,
-    network: network
+    network: type
   });
 
   const nclient = new NodeClient({
@@ -213,7 +199,7 @@ async function main() {
     apiKey: config.str('api-key') || config.str('node-api-key'),
     ssl: config.bool('ssl') || config.str('node-ssl'),
     host: config.str('http-host') || config.str('node-http-host'),
-    port: config.uint('node-http-port') || ports.node[network]
+    port: config.uint('node-http-port') || network.rpcPort
   });
 
   const wclient = new WalletClient({
@@ -221,7 +207,7 @@ async function main() {
     apiKey: config.str('api-key') || config.str('wallet-api-key'),
     ssl: config.bool('ssl') || config.bool('wallet-ssl'),
     host: config.str('http-host') || config.str('wallet-http-host'),
-    port: config.uint('wallet-http-port') || ports.wallet[network],
+    port: config.uint('wallet-http-port') || network.walletPort,
     token
   });
 
