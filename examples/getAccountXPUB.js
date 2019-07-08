@@ -38,7 +38,6 @@ const {Device} = HID;
   await ledger.getAccountXPUB(0, { confirm: true });
 
   await device.close();
-
 })().catch((e) => {
   console.error(e);
   process.exit(1);

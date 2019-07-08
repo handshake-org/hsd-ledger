@@ -1,6 +1,5 @@
 'use strict';
 
-const KeyRing = require('hsd/lib/primitives/keyring');
 const Logger = require('blgr');
 const {HID, LedgerHSD} = require('../lib/hsd-ledger');
 const {Device} = HID;
@@ -39,7 +38,6 @@ const {Device} = HID;
   await ledger.getAddress(0, 0, 0, { confirm: true });
 
   await device.close();
-
 })().catch((e) => {
   console.error(e);
   process.exit(1);

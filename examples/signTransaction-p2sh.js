@@ -32,12 +32,12 @@ const {Device} = HID;
   });
 
   const signers = [
-    { acct: 0, path: `m/44'/5355'/0'/0/0` },
-    { acct: 1, path: `m/44'/5355'/1'/0/0` },
-    { acct: 2, path: `m/44'/5355'/2'/0/0` },
+    { acct: 0, path: 'm/44\'/5355\'/0\'/0/0' },
+    { acct: 1, path: 'm/44\'/5355\'/1\'/0/0' },
+    { acct: 2, path: 'm/44\'/5355\'/2\'/0/0' }
   ];
 
-  logger.info(`Constructing multisig address.`);
+  logger.info('Constructing multisig address.');
 
   for (const signer of signers)
     signer.pub = await ledger.getPublicKey(signer.path);
@@ -46,7 +46,7 @@ const {Device} = HID;
   const redeem = Script.fromMultisig(m, n, [
     signers[0].pub,
     signers[1].pub,
-    signers[2].pub,
+    signers[2].pub
   ]);
   const address = Address.fromScript(redeem);
   const changeAddress = Address.fromScript(redeem);
