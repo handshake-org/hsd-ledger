@@ -168,7 +168,7 @@ async function main() {
   });
 
   config.inject({
-    network: 'regtest',
+    network: 'testnet',
     wallet: 'hsd-ledger',
     token: ''
   });
