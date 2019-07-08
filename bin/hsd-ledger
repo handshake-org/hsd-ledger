@@ -34,7 +34,7 @@ async function createWallet(client, config, ledger, args) {
     throw new Error('Invalid arguments');
 
   const id = args[0];
-  const index = config.uint('account-index') || 0;
+  const index = config.uint('account-index');
   const xpub = await ledger.getAccountXPUB(index);
   const wallet = await client.createWallet(id, {
     watchOnly: true,
@@ -49,7 +49,7 @@ async function createAccount(client, config, ledger, args) {
   if (args.length !== 2)
     throw new Error('Invalid arguments');
 
-  const id = config.str('wallet');
+  const id = config.str('wallet-id');
   const name = args[0];
   const index = parseInt(args[1], 10);
   const xpub = await ledger.getAccountXPUB(index);
@@ -65,7 +65,7 @@ async function createAddress(client, config, ledger, args) {
   if (args.length !== 1)
     throw new Error('Invalid arguments');
 
-  const id = config.str('wallet');
+  const id = config.str('wallet-id');
   const name = args[0];
   const addr = await client.createAddress(id, name);
   const acct = await client.getAccount(id, name);
@@ -81,7 +81,7 @@ async function sendToAddress(wclient, nclient, config, ledger, args) {
   if (args.length !== 3)
     throw new Error('Invalid arguments');
 
-  const id = config.str('wallet');
+  const id = config.str('wallet-id');
   const account = args[0];
   const address = args[1];
   const amount = parseFloat(args[2]);
@@ -114,7 +114,7 @@ async function getAccounts(client, config, args) {
   if (args.length)
     throw new Error('Too many arguments');
 
-  const id = config.str('wallet');
+  const id = config.str('wallet-id');
   const accounts = await client.getAccounts(id);
 
   console.log(accounts);
@@ -124,7 +124,7 @@ async function getAccount(client, config, args) {
   if (args.length !== 1)
     throw new Error('Invalid arguments');
 
-  const id = config.str('wallet');
+  const id = config.str('wallet-id');
   const name = args[0];
   const account = await client.getAccount(id, name);
 
@@ -135,7 +135,7 @@ async function getBalance(client, config, args) {
   if (args.length !== 1)
     throw new Error('Invalid arguments');
 
-  const id = config.str('wallet');
+  const id = config.str('wallet-id');
   const name = args[0];
   const balance = await client.getBalance(id, name);
 
@@ -157,8 +157,10 @@ async function main() {
     suffix: 'network',
     fallback: 'main',
     alias: {
+      'h': 'help',
+      'i': 'account-index',
       'n': 'network',
-      'h': 'help'
+      'w': 'wallet-id'
     }
   });
 
@@ -168,15 +170,16 @@ async function main() {
   });
 
   config.inject({
+    accountIndex: 0,
     network: 'testnet',
-    wallet: 'hsd-ledger',
+    walletId: 'hsd-ledger',
     token: ''
   });
 
   const argv = config.argv;
   const type = config.str('network');
   const network = Network.get(type);
-  const id = config.str('wallet');
+  const id = config.str('wallet-id');
   const token = config.str('token');
 
   if(config.str('help') && argv.length === 0) {
@@ -305,7 +308,7 @@ function usage(err) {
   console.log('  $ hsd-ledger createaddress <account-name>');
   console.log('  $ hsd-ledger sendtoaddress <account-name> <address> <amount>');
   console.log('  $ hsd-ledger getwallets');
-  console.log('  $ hsd-ledger getaccounts <wallet-id>');
+  console.log('  $ hsd-ledger getaccounts');
   console.log('  $ hsd-ledger getaccount <account-name>');
   console.log('  $ hsd-ledger getbalance <account-name>');
   console.log('');
@@ -313,7 +316,8 @@ function usage(err) {
   console.log('  --help');
   console.log('  --version');
   console.log('  --network <id> (default "testnet")');
-  console.log('  --wallet <id> (default "hsd-ledger")');
+  console.log('  --wallet-id <id> (default "hsd-ledger")');
+  console.log('  --account-index <index> (default 0)');
   console.log('');
   console.log('The following options configure the node and wallet clients.');
   console.log('  --ssl');
