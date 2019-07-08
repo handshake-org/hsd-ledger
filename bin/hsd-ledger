@@ -314,7 +314,6 @@ function usage(err) {
   console.log('  --version');
   console.log('  --network <id> (default "testnet")');
   console.log('  --wallet <id> (default "hsd-ledger")');
-  console.log('  --account <name> (default "default")');
   console.log('');
   console.log('The following options configure the node and wallet clients.');
   console.log('  --ssl');
