@@ -8,7 +8,7 @@
 
 const Config = require('bcfg');
 const {NodeClient, WalletClient} = require('hs-client');
-const {HDPublicKey, MTX, Network} = require('hsd');
+const {HD, MTX, Network} = require('hsd');
 const {HID, LedgerHSD} = require('..');
 const {Device} = HID;
 
@@ -69,8 +69,8 @@ async function createAddress(client, config, ledger, args) {
   const name = args[0];
   const addr = await client.createAddress(id, name);
   const acct = await client.getAccount(id, name);
-  const xpub = HDPublicKey.fromBase58(acct.accountKey, config.str('network'));
-  const account = xpub.childIndex ^ 0x80000000;
+  const xpub = HD.PublicKey.fromBase58(acct.accountKey, config.str('network'));
+  const account = (xpub.childIndex ^ HD.common.HARDENED) >>> 0;
 
   console.log(`Verify address on Ledger device: ${addr.address}`);
 
@@ -316,12 +316,20 @@ function usage(err) {
   console.log('  --wallet <id> (default "hsd-ledger")');
   console.log('  --account <name> (default "default")');
   console.log('');
+  console.log('The following options configure the node and wallet clients.');
+  console.log('  --ssl');
+  console.log('  --url <url>');
+  console.log('  --api-key <api-key>');
+  console.log('  --host <host> (default "localhost")');
+  console.log('');
+  console.log('The following options configure the node client only.');
   console.log('  --node-ssl');
   console.log('  --node-url <url>');
   console.log('  --node-api-key <api-key>');
   console.log('  --node-host <host> (default "localhost")');
   console.log('  --node-port <port> (default 14037)');
   console.log('');
+  console.log('The following options configure the wallet client only.');
   console.log('  --wallet-ssl');
   console.log('  --wallet-url <url>');
   console.log('  --wallet-api-key <api-key>');
