@@ -4,7 +4,8 @@
 'use strict';
 
 const bufio = require('bufio');
-const {Coin, KeyRing, MTX} = require('hsd');
+const {encoding} = bufio;
+const {Coin, KeyRing, MTX, Script} = require('hsd');
 
 const assert = require('./utils/assert');
 const fund = require('./utils/fund');
@@ -255,13 +256,13 @@ describe('apdu', function () {
 
     describe('APDUCommand.getInputSignature', () => {
       it('should encode command', async () => {
+        const mtx = new MTX();
         const hex = '03253ea6d6486d1b9cc3ab01a9a321d65' +
                   'c350c6c26a9c536633e2ef36163316bf2';
-        const pub = Buffer.from(hex, 'hex');
-        const ring = await KeyRing.fromPublic(pub);
+        const pubkey = Buffer.from(hex, 'hex');
+        const ring = await KeyRing.fromPublic(pubkey);
         const addr = ring.getAddress();
         const {coins, txs} = await fund.fundAddress(addr, 1);
-        const mtx = new MTX();
 
         mtx.addOutput({
           address: KeyRing.generate().getAddress(),
@@ -273,46 +274,72 @@ describe('apdu', function () {
           subtractFee: true
         });
 
-        const initial = true;
-        const hsdInput = mtx.inputs[0];
         const ledgerInput = new LedgerInput({
-          input: hsdInput,
+          input: mtx.inputs[0],
           index: 0,
           path: 'm/44\'/5355\'/0\'/0/0',
           coin: Coin.fromTX(txs[0], 0, -1),
-          publicKey: pub
+          publicKey: pubkey
         });
 
+        let size = 0;
+
+        const path = encodePath(ledgerInput.path);
+        const hsdInput = ledgerInput.input;
+        size += path.length + hsdInput.getSize() + 12; // value + sighash type
+
+        // Create varbytes input script.
         const raw = ledgerInput.getPrevRedeem();
         const bw = bufio.write(raw.getVarSize());
         raw.write(bw);
         const script = bw.render();
-        const encoded = APDUCommand.getInputSignature(
-          ledgerInput, script, initial);
+        size += script.length;
 
-        // Create expected output
-        const path = encodePath(ledgerInput.path);
-        const size = path.length + hsdInput.getSize() + script.length + 12;
+        let output;
+        let outsz = 0;
 
-        // Init
-        let data = bufio.write(size);
+        if ((ledgerInput.type & 0x1f) === Script.hashType.SINGLE)
+          output = mtx.outputs[ledgerInput.index];
 
-        // Update
-        data.writeBytes(path);
-        data.writeU32(ledgerInput.type);
-        hsdInput.prevout.write(data);
-        data.writeU64(ledgerInput.coin.value);
-        data.writeU32(hsdInput.sequence);
-        data.writeBytes(script);
-        data = data.render();
+        if (output) {
+          outsz += 8; // value
+          outsz += output.address.getSize();
+          outsz += output.covenant.getVarSize();
+          size += encoding.sizeVarint(outsz);
+          size += outsz;
+        } else {
+          // size += 1;
+          size += 0;
+        }
 
-        assert.strictEqual(encoded.cla, common.cla.GENERAL,
+        // Create main data buffer.
+        const buf = bufio.write(size);
+        buf.writeBytes(path);
+        buf.writeU32(ledgerInput.type);
+        hsdInput.prevout.write(buf);
+        buf.writeU64(ledgerInput.coin.value);
+        buf.writeU32(hsdInput.sequence);
+        buf.writeBytes(script);
+
+        if (output) {
+          buf.writeVarint(outsz);
+          buf.writeU64(output.value);
+          output.address.write(buf);
+          output.covenant.write(buf);
+        } else {
+          // buf.writeU8(0);
+        }
+
+        const data = buf.render();
+        const encoded = APDUCommand.getInputSignature(data);
+
+        assert.strictEqual(encoded[0].cla, common.cla.GENERAL,
           'cla should be GENERAL');
-        assert.strictEqual(encoded.ins, common.ins.GET_INPUT_SIGNATURE,
+        assert.strictEqual(encoded[0].ins, common.ins.GET_INPUT_SIGNATURE,
           'ins should be GET_INPUT_SIGNATURE');
-        assert.strictEqual(encoded.p1, 0x01, 'wrong p1');
-        assert.strictEqual(encoded.p2, 0x01, 'wrong p2');
-        assert.deepEqual(encoded.data, data, 'wrong data');
+        assert.strictEqual(encoded[0].p1, 0x01, 'wrong p1');
+        assert.strictEqual(encoded[0].p2, 0x01, 'wrong p2');
+        assert.deepEqual(encoded[0].data, data, 'wrong data');
       });
     });
 

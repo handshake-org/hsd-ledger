@@ -149,8 +149,11 @@ describe('LedgerHSD', function () {
       const {coins, txs} = await fundUtil.fundAddress(addr, 1);
       const mtx = await createTX(coins, addr, change);
       const ledgerInput = new LedgerInput({
+        input: mtx.inputs[0],
+        index: 0,
         path: 'm/44\'/5355\'/0\'/0/0',
-        coin: Coin.fromTX(txs[0], 0, -1)
+        coin: Coin.fromTX(txs[0], 0, -1),
+        publicKey: addrPub
       });
       logger.info(`Confirm TXID: ${mtx.txid()}`);
       const signed = await ledger.signTransaction(mtx, [ledgerInput]);
@@ -201,13 +204,19 @@ describe('LedgerHSD', function () {
       const coin = Coin.fromTX(txs[0], 0, -1);
 
       ledgerInputs.push(new LedgerInput({
+        input: mtx.inputs[0],
+        index: 0,
         path: signers[0].path,
+        publicKey: signers[0].pub,
         coin,
         redeem
       }));
 
       ledgerInputs.push(new LedgerInput({
+        input: mtx.inputs[0],
+        index: 0,
         path: signers[1].path,
+        publicKey: signers[1].pub,
         coin,
         redeem
       }));
