@@ -226,19 +226,17 @@ describe('apdu', function () {
 
     describe('APDUCommand.parseTX', () => {
       it('should encode command', () => {
-        const first = true;
         const hex = '00000000000000000102587d4f3ed666cf9186aeddc72663df' +
                   '2e1d58b0245a9ae742e6b985d6079445d7730000000010dbf5';
         const data = Buffer.from(hex, 'hex');
-        const encoded = APDUCommand.parseTX(data, first);
-
-        assert.strictEqual(encoded.cla, common.cla.GENERAL,
+        const encoded = APDUCommand.parseTX(data);
+        assert.strictEqual(encoded[0].cla, common.cla.GENERAL,
           'cla should be GENERAL');
-        assert.strictEqual(encoded.ins, common.ins.GET_INPUT_SIGNATURE,
+        assert.strictEqual(encoded[0].ins, common.ins.GET_INPUT_SIGNATURE,
           'ins should be GET_INPUT_SIGNATURE');
-        assert.strictEqual(encoded.p1, 0x01, 'wrong p1');
-        assert.strictEqual(encoded.p2, 0x00, 'wrong p2');
-        assert.deepEqual(encoded.data, data, 'wrong data');
+        assert.strictEqual(encoded[0].p1, 0x01, 'wrong p1');
+        assert.strictEqual(encoded[0].p2, 0x00, 'wrong p2');
+        assert.deepEqual(encoded[0].data, data, 'wrong data');
       });
     });
 
