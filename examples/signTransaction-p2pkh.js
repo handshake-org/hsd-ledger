@@ -50,6 +50,9 @@ const { Device } = HID;
   });
 
   const ledgerInput = new LedgerInput({
+    input: mtx.inputs[0],
+    index: 0,
+    publicKey: pubkey,
     path: 'm/44\'/5355\'/0\'/0/0',
     coin: Coin.fromTX(txs[0], 0, -1)
   });

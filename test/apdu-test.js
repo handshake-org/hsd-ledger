@@ -278,6 +278,8 @@ describe('apdu', function () {
         const initial = true;
         const hsdInput = mtx.inputs[0];
         const ledgerInput = new LedgerInput({
+          input: hsdInput,
+          index: 0,
           path: 'm/44\'/5355\'/0\'/0/0',
           coin: Coin.fromTX(txs[0], 0, -1),
           publicKey: pub
@@ -288,7 +290,7 @@ describe('apdu', function () {
         raw.write(bw);
         const script = bw.render();
         const encoded = APDUCommand.getInputSignature(
-          ledgerInput, hsdInput, script, initial);
+          ledgerInput, script, initial);
 
         // Create expected output
         const path = encodePath(ledgerInput.path);

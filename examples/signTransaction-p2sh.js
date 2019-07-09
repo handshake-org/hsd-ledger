@@ -67,12 +67,18 @@ const {Device} = HID;
   ledgerInputs.push(new LedgerInput({
     path: signers[0].path,
     coin,
+    input: mtx.inputs[0],
+    index: 0,
+    publicKey: signers[0].pub,
     redeem
   }));
 
   ledgerInputs.push(new LedgerInput({
     path: signers[1].path,
     coin,
+    input: mtx.inputs[0],
+    index: 0,
+    publicKey: signers[1].pub,
     redeem
   }));
 
