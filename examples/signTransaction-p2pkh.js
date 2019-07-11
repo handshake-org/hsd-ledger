@@ -1,11 +1,11 @@
 'use strict';
 
 const Logger = require('blgr');
-const { Coin, MTX, KeyRing } = require('hsd');
+const {Coin, MTX, KeyRing, Script} = require('hsd');
 
 const util = require('../test/utils/fund');
-const { HID, LedgerHSD, LedgerInput } = require('../lib/hsd-ledger');
-const { Device } = HID;
+const {HID, LedgerHSD, LedgerInput} = require('../lib/hsd-ledger');
+const {Device} = HID;
 
 (async () => {
   const logger = new Logger({
@@ -50,11 +50,12 @@ const { Device } = HID;
   });
 
   const ledgerInput = new LedgerInput({
+    coin: Coin.fromTX(txs[0], 0, -1),
     input: mtx.inputs[0],
     index: 0,
-    publicKey: pubkey,
     path: 'm/44\'/5355\'/0\'/0/0',
-    coin: Coin.fromTX(txs[0], 0, -1)
+    publicKey: pubkey,
+    type: Script.hashType.ANYONECANPAY | Script.hashType.NONE
   });
 
   logger.info(`TXID: ${mtx.txid()}`);
