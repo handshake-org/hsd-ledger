@@ -6,9 +6,14 @@
  * Module imports
  */
 
+const fs = require('fs');
+const os = require('os');
+const openpgp = require('openpgp');
 const Config = require('bcfg');
+const QRCode = require('qrcode');
 const {NodeClient, WalletClient} = require('hs-client');
 const {HD, MTX, Network} = require('hsd');
+const {PGP_PUBKEY} = require('../data/pgp');
 const {HID, LedgerHSD} = require('..');
 const {Device} = HID;
 
@@ -24,9 +29,12 @@ const VALID_CMDS = [
   'getwallets',
   'getaccounts',
   'getaccount',
-  'getbalance'
+  'getbalance',
+  'getairdropaddress'
 ];
 
+const AIRDROP_ADDR_PATH = 'm/44\'/5353\'/0\'/0/0';
+const HSD_LEDGER_DIR = os.homedir() + '/.hsd-ledger/';
 const VERSION = require('../package').version;
 
 async function createWallet(client, config, ledger, args) {
@@ -142,6 +150,88 @@ async function getBalance(client, config, args) {
   console.log(balance);
 }
 
+async function getAirdropAddress(config, ledger, args) {
+  if (args.length !== 0)
+    throw new Error('Invalid arguments');
+
+  let pubkey, ciphertext;
+  const addr = await ledger.getAddress(0, 0, 0);
+  const xpub = await ledger.getAccountXPUB(0);
+
+  // Confirm Address.
+  console.log('Address (confirm on device):');
+  console.log(addr);
+  await ledger.getAddress(0, 0, 0, {confirm: true});
+
+  if(config.str('show-key')) {
+    const publicKey = await ledger.getPublicKey(AIRDROP_ADDR_PATH);
+    pubkey = publicKey;
+
+    // Confirm Public Key.
+    console.log('\nPublic Key (confirm on device):');
+    console.log(pubkey.toString('hex'));
+    await ledger.getPublicKey(AIRDROP_ADDR_PATH, {confirm: true});
+  }
+
+  if(config.str('project-sponsor')) {
+    const keys = (await openpgp.key.readArmored(PGP_PUBKEY)).keys;
+    ciphertext = (await openpgp.encrypt({
+      message: openpgp.message.fromText(addr),
+      publicKeys: keys
+    })).data;
+
+    // Display Encrypted Address.
+    console.log('\nEncrypted Address:');
+    console.log(ciphertext);
+  }
+
+  // Confirm XPUB.
+  console.log('\nXpub (confirm on device):');
+  console.log(xpub.xpubkey(config.str('network')));
+  await ledger.getAccountXPUB(0, {confirm: true});
+
+  if (config.str('qrcode')) {
+    if (!fs.existsSync(HSD_LEDGER_DIR))
+      fs.mkdirSync(HSD_LEDGER_DIR);
+
+    const prefix = HSD_LEDGER_DIR + addr;
+    const addrSuffix = '_address_QR_code.png';
+    const xpubSuffix = '_xpub_QR_code.png';
+    const pubkeySuffix = '_pubkey_QR_code.png';
+    const cipherSuffix = '_encrypted_address_QR_code.png';
+
+    console.log('\nThe following files were generated:');
+
+    {
+      const details = addr;
+      const file = prefix + addrSuffix;
+      await QRCode.toFile(file, details);
+      console.log(`- ${file}`);
+    }
+
+    {
+      const details = xpub.xpubkey(config.str('network'));
+      const file = prefix + xpubSuffix;
+      await QRCode.toFile(file, details);
+      console.log(`- ${file}`);
+    }
+
+    if (pubkey) {
+      const details = pubkey.toString('hex');
+      const file = prefix + pubkeySuffix;
+      await QRCode.toFile(file, details);
+      console.log(`- ${file}`);
+    }
+
+    if (ciphertext) {
+      const details = ciphertext;
+      const file = prefix + cipherSuffix;
+      await QRCode.toFile(file, details);
+      console.log(`- ${file}`);
+    }
+  }
+}
+
 async function main() {
   const devices = await Device.getDevices();
 
@@ -153,6 +243,8 @@ async function main() {
     timeout: 15000
   });
 
+  await device.open();
+
   const config = new Config('hsd', {
     suffix: 'network',
     fallback: 'main',
@@ -160,6 +252,9 @@ async function main() {
       'h': 'help',
       'i': 'account-index',
       'n': 'network',
+      'p': 'project-sponsor',
+      'q': 'qrcode',
+      'k': 'show-key',
       'w': 'wallet-id'
     }
   });
@@ -197,39 +292,43 @@ async function main() {
     network: type
   });
 
-  const nclient = new NodeClient({
-    url: config.str('url') || config.str('node-url'),
-    apiKey: config.str('api-key') || config.str('node-api-key'),
-    ssl: config.bool('ssl') || config.str('node-ssl'),
-    host: config.str('http-host') || config.str('node-http-host'),
-    port: config.uint('node-http-port') || network.rpcPort
-  });
-
-  const wclient = new WalletClient({
-    url: config.str('url') || config.str('wallet-url'),
-    apiKey: config.str('api-key') || config.str('wallet-api-key'),
-    ssl: config.bool('ssl') || config.bool('wallet-ssl'),
-    host: config.str('http-host') || config.str('wallet-http-host'),
-    port: config.uint('wallet-http-port') || network.walletPort,
-    token
-  });
+  let nclient, wclient;
 
   try {
-    await device.open();
-    await nclient.open();
-    await wclient.open();
-
-    const wallets = await wclient.getWallets();
     const cmd = argv.shift();
     const args = argv;
 
-    if (!wallets.includes(id)) {
-      if (id !== 'hsd-ledger')
-        throw new Error(`Wallet "${id}" does not exist.`);
+    if (cmd !== VALID_CMDS[8]) {
+      nclient = new NodeClient({
+        url: config.str('url') || config.str('node-url'),
+        apiKey: config.str('api-key') || config.str('node-api-key'),
+        ssl: config.bool('ssl') || config.str('node-ssl'),
+        host: config.str('http-host') || config.str('node-http-host'),
+        port: config.uint('node-http-port') || network.rpcPort
+      });
 
-      console.log('Default hsd-ledger wallet not detected.');
+      wclient = new WalletClient({
+        url: config.str('url') || config.str('wallet-url'),
+        apiKey: config.str('api-key') || config.str('wallet-api-key'),
+        ssl: config.bool('ssl') || config.bool('wallet-ssl'),
+        host: config.str('http-host') || config.str('wallet-http-host'),
+        port: config.uint('wallet-http-port') || network.walletPort,
+        token
+      });
 
-      await createWallet(wclient, config, ledger, [id]);
+      await nclient.open();
+      await wclient.open();
+
+      const wallets = await wclient.getWallets();
+
+      if (!wallets.includes(id)) {
+        if (id !== 'hsd-ledger')
+          throw new Error(`Wallet "${id}" does not exist.`);
+
+        console.log('Default hsd-ledger wallet not detected.');
+
+        await createWallet(wclient, config, ledger, [id]);
+      }
     }
 
     switch (cmd) {
@@ -265,6 +364,10 @@ async function main() {
         await getBalance(wclient, config, args);
         break;
 
+      case VALID_CMDS[8]:
+        await getAirdropAddress(config, ledger, args);
+        break;
+
       default:
         usage(new Error('Must provide valid command.'));
         process.exit(1);
@@ -273,8 +376,12 @@ async function main() {
   } catch(e) {
     throw(e);
   } finally {
-    await wclient.close();
-    await nclient.close();
+    if (wclient)
+      await wclient.close();
+
+    if (nclient)
+      await nclient.close();
+
     await device.close();
   }
 
@@ -338,6 +445,10 @@ function usage(err) {
   console.log('  --wallet-api-key <api-key>');
   console.log('  --wallet-host <host> (default "localhost")');
   console.log('  --wallet-port <port> (default 14039)');
+  console.log('The following options are for the getairdropaddress command:');
+  console.log('  --project-sponsor (encrypts address for project sponsors)');
+  console.log('  --qrcode (generates a QR encoded address)');
+  console.log('  --show-key (show address public key)');
 }
 
 /*
