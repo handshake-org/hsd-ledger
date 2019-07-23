@@ -579,11 +579,11 @@ class TestUtil {
    * Logs TXID before signing transaction with Ledger Nanos S.
    */
 
-  async signTransaction(mtx, msg) {
+  async signTransaction(mtx, inputs, msg) {
     if (msg)
       this.logger.info(msg);
 
-    return this.ledger.signTransaction(mtx);
+    return this.ledger.signTransaction(mtx, inputs);
   }
 
   /**
