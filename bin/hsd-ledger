@@ -272,6 +272,8 @@ async function main() {
   });
 
   const argv = config.argv;
+  const cmd = argv.shift();
+  const args = argv;
   const type = config.str('network');
   const network = Network.get(type);
   const id = config.str('wallet-id');
@@ -292,43 +294,41 @@ async function main() {
     network: type
   });
 
-  let nclient, wclient;
+  if (cmd === VALID_CMDS[8]) {
+    await getAirdropAddress(config, ledger, args);
+    process.exit(0);
+  }
+
+  const nclient = new NodeClient({
+    url: config.str('url') || config.str('node-url'),
+    apiKey: config.str('api-key') || config.str('node-api-key'),
+    ssl: config.bool('ssl') || config.str('node-ssl'),
+    host: config.str('http-host') || config.str('node-http-host'),
+    port: config.uint('node-http-port') || network.rpcPort
+  });
+
+  const wclient = new WalletClient({
+    url: config.str('url') || config.str('wallet-url'),
+    apiKey: config.str('api-key') || config.str('wallet-api-key'),
+    ssl: config.bool('ssl') || config.bool('wallet-ssl'),
+    host: config.str('http-host') || config.str('wallet-http-host'),
+    port: config.uint('wallet-http-port') || network.walletPort,
+    token
+  });
+
+  await nclient.open();
+  await wclient.open();
 
   try {
-    const cmd = argv.shift();
-    const args = argv;
+    const wallets = await wclient.getWallets();
 
-    if (cmd !== VALID_CMDS[8]) {
-      nclient = new NodeClient({
-        url: config.str('url') || config.str('node-url'),
-        apiKey: config.str('api-key') || config.str('node-api-key'),
-        ssl: config.bool('ssl') || config.str('node-ssl'),
-        host: config.str('http-host') || config.str('node-http-host'),
-        port: config.uint('node-http-port') || network.rpcPort
-      });
+    if (!wallets.includes(id)) {
+      if (id !== 'hsd-ledger')
+        throw new Error(`Wallet "${id}" does not exist.`);
 
-      wclient = new WalletClient({
-        url: config.str('url') || config.str('wallet-url'),
-        apiKey: config.str('api-key') || config.str('wallet-api-key'),
-        ssl: config.bool('ssl') || config.bool('wallet-ssl'),
-        host: config.str('http-host') || config.str('wallet-http-host'),
-        port: config.uint('wallet-http-port') || network.walletPort,
-        token
-      });
+      console.log('Default hsd-ledger wallet not detected.');
 
-      await nclient.open();
-      await wclient.open();
-
-      const wallets = await wclient.getWallets();
-
-      if (!wallets.includes(id)) {
-        if (id !== 'hsd-ledger')
-          throw new Error(`Wallet "${id}" does not exist.`);
-
-        console.log('Default hsd-ledger wallet not detected.');
-
-        await createWallet(wclient, config, ledger, [id]);
-      }
+      await createWallet(wclient, config, ledger, [id]);
     }
 
     switch (cmd) {
@@ -364,10 +364,6 @@ async function main() {
         await getBalance(wclient, config, args);
         break;
 
-      case VALID_CMDS[8]:
-        await getAirdropAddress(config, ledger, args);
-        break;
-
       default:
         usage(new Error('Must provide valid command.'));
         process.exit(1);
@@ -376,12 +372,8 @@ async function main() {
   } catch(e) {
     throw(e);
   } finally {
-    if (wclient)
-      await wclient.close();
-
-    if (nclient)
-      await nclient.close();
-
+    await wclient.close();
+    await nclient.close();
     await device.close();
   }
 
@@ -450,6 +442,7 @@ function usage(err) {
   console.log('  --project-sponsor (encrypts address for project sponsors)');
   console.log('  --qrcode (generates a QR encoded address)');
   console.log('  --show-key (show address public key)');
+  console.log('');
 }
 
 /*
