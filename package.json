@@ -27,11 +27,10 @@
   "scripts": {
     "clean": "rm -rf hsd-ledger.js ./docs ./coverage",
     "lint": "eslint lib/ test/ || exit 0",
-    "test": "mocha --reporter spec test/*-test.js",
-    "test-hid": "mocha --reporter spec test/e2e/hid-test.js",
-    "test-hsd": "mocha --reporter spec test/e2e/hsd-test.js",
-    "docs": "jsdoc -c jsdoc.json",
-    "cover": "istanbul cover -x '**/lib/devices/**' node_modules/.bin/_mocha  -- --reporter spec test/*-test.js"
+    "test": "bmocha --reporter spec test/*-test.js",
+    "test-hid": "bmocha --allow-multiple --reporter spec test/e2e/hid-test.js",
+    "test-hsd": "bmocha --allow-multiple --reporter spec test/e2e/hsd-test.js",
+    "docs": "jsdoc -c jsdoc.json"
   },
   "dependencies": {
     "blgr": "^0.1.1",
@@ -46,11 +45,10 @@
     "hsd": "handshake-org/hsd"
   },
   "devDependencies": {
-    "eslint": "^5.4.0",
-    "hs-client": "0.0.5",
-    "istanbul": "^1.1.0-alpha.1",
-    "jsdoc": "^3.5.5",
-    "mocha": "^5.2.0"
+    "bmocha": "^2.1.1",
+    "bslint": "^5.15.3",
+    "hs-client": "^0.0.5",
+    "jsdoc": "^3.5.5"
   },
   "engines": {
     "node": ">=8.0.0"

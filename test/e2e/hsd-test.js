@@ -87,7 +87,7 @@ describe('Ledger Nano S', function() {
     });
   });
 
-  describe('Signing covenants', async () => {
+  describe('Signing covenants', () => {
     const name = rules.grindName(2, 0, util.network);;
 
     it('should submit OPEN', async () => {
