@@ -7,7 +7,7 @@ const bufio = require('bufio');
 const {encoding} = bufio;
 const {Coin, KeyRing, MTX, Script} = require('hsd');
 
-const assert = require('./utils/assert');
+const assert = require('bsert');
 const fund = require('./utils/fund');
 const {
   APDUCommand,
@@ -201,7 +201,7 @@ describe('apdu', function () {
           'ins should be GET_PUBLIC_KEY');
         assert.strictEqual(got.p1, want.p1, 'wrong p1');
         assert.strictEqual(got.p2, want.p2, 'wrong p2');
-        assert.deepEqual(got.data, want.data, 'wrong data');
+        assert.bufferEqual(got.data, want.data, 'wrong data');
       });
     });
 
@@ -217,7 +217,7 @@ describe('apdu', function () {
           'wrong status');
         assert.strictEqual(decoded.type, common.ins.GET_PUBLIC_KEY,
           'wrong type');
-        assert.deepEqual(decoded.data.publicKey, Buffer.from(pub, 'hex'),
+        assert.bufferEqual(decoded.data.publicKey, Buffer.from(pub, 'hex'),
           'wrong publicKey');
         assert.ok(!decoded.data.chainCode, 'wrong chainCode');
         assert.ok(!decoded.data.parentFingerPrint, 'wrong parentFingerPrint');
@@ -237,7 +237,7 @@ describe('apdu', function () {
           'ins should be GET_INPUT_SIGNATURE');
         assert.strictEqual(encoded[0].p1, 0x01, 'wrong p1');
         assert.strictEqual(encoded[0].p2, 0x00, 'wrong p2');
-        assert.deepEqual(encoded[0].data, data, 'wrong data');
+        assert.bufferEqual(encoded[0].data, data, 'wrong data');
       });
     });
 
@@ -245,12 +245,13 @@ describe('apdu', function () {
       it('should decode response', () => {
         const encoded = Buffer.from('9000', 'hex');
         const decoded = APDUResponse.parseTX(encoded);
+        const expected = Buffer.from([]);
 
         assert.strictEqual(decoded.status, common.status.SUCCESS,
           'wrong status');
         assert.strictEqual(decoded.type, common.ins.GET_INPUT_SIGNATURE,
           'wrong type');
-        assert.deepEqual(decoded.data, {}, 'wrong data');
+        assert.bufferEqual(decoded.data, expected, 'wrong data');
       });
     });
 
@@ -308,8 +309,7 @@ describe('apdu', function () {
           size += encoding.sizeVarint(outsz);
           size += outsz;
         } else {
-          // size += 1;
-          size += 0;
+          size += 1;
         }
 
         // Create main data buffer.
@@ -327,7 +327,7 @@ describe('apdu', function () {
           output.address.write(buf);
           output.covenant.write(buf);
         } else {
-          // buf.writeU8(0);
+          buf.writeU8(0);
         }
 
         const data = buf.render();
@@ -339,7 +339,7 @@ describe('apdu', function () {
           'ins should be GET_INPUT_SIGNATURE');
         assert.strictEqual(encoded[0].p1, 0x01, 'wrong p1');
         assert.strictEqual(encoded[0].p2, 0x01, 'wrong p2');
-        assert.deepEqual(encoded[0].data, data, 'wrong data');
+        assert.bufferEqual(encoded[0].data, data, 'wrong data');
       });
     });
 
@@ -352,7 +352,7 @@ describe('apdu', function () {
           'wrong status');
         assert.strictEqual(decoded.type, common.ins.GET_INPUT_SIGNATURE,
           'wrong type');
-        assert.deepEqual(decoded.data, {}, 'wrong data');
+        assert.deepEqual(decoded.data, Buffer.from([]), 'wrong data');
 
         const res = '9000';
         const sig = '317b0972986a0307b7bb13f624a0f5949' +
@@ -367,8 +367,8 @@ describe('apdu', function () {
           'wrong status');
         assert.strictEqual(decoded.type, common.ins.GET_INPUT_SIGNATURE,
           'wrong type');
-        assert.deepEqual(decoded.data.signature.length, 65, 'wrong data');
-        assert.deepEqual(decoded.data.signature, Buffer.from(sig, 'hex'),
+        assert.strictEqual(decoded.data.signature.length, 65, 'wrong data');
+        assert.bufferEqual(decoded.data.signature, Buffer.from(sig, 'hex'),
           'wrong data');
       });
     });

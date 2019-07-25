@@ -7,7 +7,7 @@ const {
   Address, Amount, Coin, HDPrivateKey, KeyRing, MTX, Script
 } = require('hsd');
 
-const assert = require('../utils/assert');
+const assert = require('bsert');
 const fundUtil = require('../utils/fund');
 const util = require('../../lib/utils/util');
 const Logger = require('blgr');

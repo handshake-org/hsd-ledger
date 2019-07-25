@@ -1,6 +1,6 @@
 'use strict';
 
-const assert = require('assert');
+const assert = require('bsert');
 const bio = require('bufio');
 const plugin = require('hsd/lib/wallet/plugin');
 const Logger = require('blgr');

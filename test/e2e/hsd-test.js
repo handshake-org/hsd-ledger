@@ -3,7 +3,7 @@
 
 'use strict';
 
-const assert = require('assert');
+const assert = require('bsert');
 const rules = require('hsd/lib/covenants/rules');
 const {hashType} = require('hsd/lib/script/common');
 const {LedgerInput} = require('../..');
