@@ -38,7 +38,6 @@
     "bmutex": "0.1.2",
     "bsert": "^0.0.10",
     "bufio": "1.0.1",
-    "hsd": "file:../hsd",
     "node-hid": "^0.7.3",
     "openpgp": "^4.5.5",
     "qrcode": "^1.4.1"
