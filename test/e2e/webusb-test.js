@@ -4,7 +4,7 @@
 'use strict';
 
 const assert = require('bsert');
-const {WebUSB} = require('../../lib/hsd-ledger');
+const {WebUSB} = require('../../lib/hsd-ledger-browser');
 const {Device, DeviceInfo} = WebUSB;
 
 describe('WebUSB Device', function () {
@@ -30,7 +30,6 @@ describe('WebUSB Device', function () {
 
   it('should list devices', async () => {
     const devices = await Device.getDevices();
-
     assert.ok(devices.length > 0, 'There should be at least one device');
   });
 });

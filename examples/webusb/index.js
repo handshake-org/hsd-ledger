@@ -3,7 +3,7 @@
 /* eslint-env browser */
 
 const assert = require('bsert');
-const {LedgerHSD, WebUSB} = require('../..');
+const {LedgerHSD, WebUSB} = require('../../lib/hsd-ledger-browser');
 const {Device, DeviceInfo} = WebUSB;
 const KeyRing = require('hsd/lib/primitives/keyring');
 

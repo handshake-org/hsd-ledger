@@ -31,7 +31,8 @@
     "test": "bmocha --reporter spec test/*-test.js",
     "test-hid": "bmocha --allow-multiple --reporter spec test/e2e/hid-test.js",
     "test-hsd": "bmocha --allow-multiple --reporter spec test/e2e/hsd-test.js",
-    "test-webusb": "./scripts/bmocha-chrome test/device/webusb-test.js",
+    "test-webusb": "./scripts/bmocha-chrome test/e2e/webusb-test.js",
+    "test-webauthn": "./scripts/bmocha-chrome test/e2e/webauthn-test.js",
     "docs": "jsdoc -c jsdoc.json"
   },
   "dependencies": {

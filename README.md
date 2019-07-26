@@ -16,10 +16,15 @@ have an `hsd` repository cloned on your development machine.
 
 ## Usage
 
-Currently, we only support Node.js. We have plans to support browser
-usage through WebUSB. Example usage can be found and run using the
-following files:
+There are three ways to communicate with the Ledger device:
+- using HID from Node.js
+- using WebUSB in the browser
+- using WebAuthn
 
+Currently WebAuthn support is broken, but the initial effort
+has been left in the repo for reference.
+
+Example usage can be found and run using the following files:
 - [examples/getAppVersion.js][app] - Get the application version number.
 - [examples/getAccountXPUB.js][acc] - Get a BIP44 account xpub.
 - [examples/getXPUB.js][xpub] - Get an arbitrary xpub.
@@ -27,6 +32,8 @@ following files:
 - [examples/getPublicKey.js][pub] - Get a BIP44 compliant address.
 - [examples/signTransaction-p2pkh.js][p2pkh] - Sign P2PKH transaction.
 - [examples/signTransaction-p2sh.js][p2sh] - Sign P2SH transaction.
+- [examples/webusb/index.js][usb] - WebUSB.
+- [examples/webauthn/index.js][authn] - WebAuthn.
 
 [app]: ./examples/getAppVersion.js
 [acc]: ./examples/getAccountXPUB.js
@@ -35,6 +42,9 @@ following files:
 [pub]: ./examples/getPublicKey.js
 [p2pkh]: ./examples/signTransaction-p2pkh.js
 [p2sh]: ./examples/signTransaction-p2sh.js
+[p2sh]: ./examples/signTransaction-p2sh.js
+[usb]: ./examples/webusb/index.js
+[authn]: ./examples/webauthn/index.js
 
 ## Tests
 ### Unit tests

@@ -24,20 +24,6 @@ const SEED_PHRASE = [
 ].join(' ');
 
 module.exports = function (Device, DeviceInfo) {
-  describe('HID', function () {
-    this.timeout(Number(process.env.DEVICE_TIMEOUT) || 60000);
-
-    it('should list devices', async () => {
-      const devices = await Device.getDevices();
-
-      assert.ok(devices.length > 0, 'There should be at least one device');
-
-      for (const device of devices)
-        assert.ok(DeviceInfo.isLedgerDevice(device),
-          'Device should be a Ledger device');
-    });
-  });
-
   describe('LedgerHSD', function () {
     const timeout = Number(process.env.DEVICE_TIMEOUT) || 60000;
     const network = 'regtest';
