@@ -8,11 +8,7 @@ from [hsd][hsd].
 $ git clone https://github.com/boymanjor/hsd-ledger.git
 $ cd hsd-ledger
 $ npm install
-$ npm install --no-save path/to/hsd
 ```
-
->Note: `hsd` is a peer dependency. The above command assumes you already
-have an `hsd` repository cloned on your development machine.
 
 ## Usage
 
