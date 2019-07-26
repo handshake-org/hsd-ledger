@@ -25,11 +25,13 @@
   },
   "homepage": "https://github.com/boymanjor/hsd-ledger#readme",
   "scripts": {
+    "certs": "./scripts/certs",
     "clean": "rm -rf hsd-ledger.js ./docs ./coverage",
-    "lint": "eslint lib/ test/ || exit 0",
+    "lint": "eslint examples/ lib/ test/ || exit 0",
     "test": "bmocha --reporter spec test/*-test.js",
     "test-hid": "bmocha --allow-multiple --reporter spec test/e2e/hid-test.js",
     "test-hsd": "bmocha --allow-multiple --reporter spec test/e2e/hsd-test.js",
+    "test-webusb": "./scripts/bmocha-chrome test/device/webusb-test.js",
     "docs": "jsdoc -c jsdoc.json"
   },
   "dependencies": {
