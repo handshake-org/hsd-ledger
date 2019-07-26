@@ -26,7 +26,7 @@
   "homepage": "https://github.com/boymanjor/hsd-ledger#readme",
   "scripts": {
     "certs": "./scripts/certs",
-    "clean": "rm -rf hsd-ledger.js ./docs ./coverage",
+    "clean": "rm -rf hsd-ledger.js ./certs ./docs",
     "lint": "eslint examples/ lib/ test/ || exit 0",
     "test": "bmocha --reporter spec test/*-test.js",
     "test-hid": "bmocha --allow-multiple --reporter spec test/e2e/hid-test.js",
