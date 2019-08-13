@@ -6,8 +6,8 @@ const plugin = require('hsd/lib/wallet/plugin');
 const Logger = require('blgr');
 const {ChainEntry, FullNode, MTX, Network} = require('hsd');
 const {NodeClient, WalletClient} = require('hs-client');
-const {HID, LedgerHSD} = require('../../lib/hsd-ledger');
-const {Device} = HID;
+const {USB, LedgerHSD} = require('../../lib/hsd-ledger');
+const {Device} = USB;
 
 const network = Network.get('regtest');
 const {
@@ -189,10 +189,9 @@ class TestUtil {
 
     await this.logger.open();
 
-    const devices = await Device.getDevices();
+    this.device = await Device.requestDevice();
 
-    this.device = new Device({
-      device: devices[0],
+    this.device.set({
       timeout: 60000,
       logger: this.logger
     });

@@ -5,7 +5,7 @@
 
 const assert = require('bsert');
 const {WebAuthn} = require('../../lib/hsd-ledger-browser');
-const {Device, DeviceInfo} = WebAuthn;
+const {Device} = WebAuthn;
 
 describe('WebAuthn Device', function () {
   this.timeout(Number(process.env.DEVICE_TIMEOUT) || 40000);
@@ -17,4 +17,4 @@ describe('WebAuthn Device', function () {
   });
 });
 
-require('./general')(Device, DeviceInfo);
+require('./general')(Device);

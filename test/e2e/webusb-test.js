@@ -4,13 +4,13 @@
 'use strict';
 
 const assert = require('bsert');
-const {WebUSB} = require('../../lib/hsd-ledger-browser');
-const {Device, DeviceInfo} = WebUSB;
+const {USB} = require('../../lib/hsd-ledger-browser');
+const {Device} = USB;
 
-describe('WebUSB Device', function () {
+describe('USB Device (web)', function () {
   this.timeout(Number(process.env.DEVICE_TIMEOUT) || 40000);
 
-  // HACK.
+  // WebUSB needs User Action (UA) in order to request device.
   // TODO: Replace with appropriate flag in chrome.
   // (See script/bmocha-chrome)
   before((cb) => {
@@ -34,4 +34,4 @@ describe('WebUSB Device', function () {
   });
 });
 
-require('./general')(Device, DeviceInfo);
+require('./general')(Device);

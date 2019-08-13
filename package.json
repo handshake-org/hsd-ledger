@@ -26,29 +26,32 @@
   "homepage": "https://github.com/boymanjor/hsd-ledger#readme",
   "scripts": {
     "certs": "./scripts/certs",
-    "clean": "rm -rf hsd-ledger.js ./certs ./docs",
+    "clean": "rm -rf hsd-ledger.js examples/webauthn/app.js examples/webusb/app.js ./certs ./docs",
     "lint": "eslint examples/ lib/ test/ || exit 0",
     "test": "bmocha --reporter spec test/*-test.js",
-    "test-hid": "bmocha --allow-multiple --reporter spec test/e2e/hid-test.js",
+    "test-usb": "bmocha --allow-multiple --reporter spec test/e2e/usb-test.js",
     "test-hsd": "bmocha --allow-multiple --reporter spec test/e2e/hsd-test.js",
     "test-webusb": "./scripts/bmocha-chrome test/e2e/webusb-test.js",
     "test-webauthn": "./scripts/bmocha-chrome test/e2e/webauthn-test.js",
     "docs": "jsdoc -c jsdoc.json"
   },
   "dependencies": {
-    "blgr": "^0.1.1",
-    "bmutex": "0.1.2",
-    "bsert": "^0.0.10",
-    "bufio": "1.0.1",
-    "node-hid": "^0.7.3",
+    "blgr": "~0.1.7",
+    "bmutex": "~0.1.6",
+    "bsert": "~0.0.10",
+    "bufio": "^1.0.6",
     "openpgp": "^4.5.5",
     "qrcode": "^1.4.1"
+  },
+  "optionalDependencies": {
+    "busb": "0.0.1"
   },
   "peerDependencies": {
     "hsd": "handshake-org/hsd"
   },
   "devDependencies": {
     "bmocha": "^2.1.1",
+    "bpkg": "^0.6.0",
     "bslint": "^5.15.3",
     "hs-client": "^0.0.5",
     "hsd": "handshake-org/hsd",

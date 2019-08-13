@@ -23,7 +23,7 @@ const SEED_PHRASE = [
   'abandon abandon abandon about'
 ].join(' ');
 
-module.exports = function (Device, DeviceInfo) {
+module.exports = function (Device) {
   describe('LedgerHSD', function () {
     const timeout = Number(process.env.DEVICE_TIMEOUT) || 60000;
     const network = 'regtest';
@@ -41,8 +41,9 @@ module.exports = function (Device, DeviceInfo) {
 
       await logger.open();
 
-      device = new Device({
-        device: devices[0],
+      device =  devices[0],
+
+      device.set({
         timeout,
         logger
       });

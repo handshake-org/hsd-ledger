@@ -2,10 +2,9 @@
 
 const Logger = require('blgr');
 const {Amount, Address, Coin, MTX, Script} = require('hsd');
-
 const util = require('../test/utils/fund');
-const {HID, LedgerHSD, LedgerInput} = require('../lib/hsd-ledger');
-const {Device} = HID;
+const {USB, LedgerHSD, LedgerInput} = require('../lib/hsd-ledger');
+const {Device} = USB;
 
 (async () => {
   const logger = new Logger({
@@ -15,10 +14,10 @@ const {Device} = HID;
 
   await logger.open();
 
-  const devices = await Device.getDevices();
+  // Get first device available.
+  const device = await Device.requestDevice();
 
-  const device = new Device({
-    device: devices[0],
+  device.set({
     timeout: 15000, // optional (default is 5000ms)
     logger: logger  // optional
   });
