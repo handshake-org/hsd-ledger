@@ -72,7 +72,7 @@ const {Device} = USB;
     index: 0,
     publicKey: signers[0].pub,
     redeem,
-    type: Script.hashType.NONE
+    type: Script.hashType.ALL
   }));
 
   ledgerInputs.push(new LedgerInput({
@@ -82,7 +82,7 @@ const {Device} = USB;
     index: 0,
     publicKey: signers[1].pub,
     redeem,
-    type: Script.hashType.NONE
+    type: Script.hashType.ALL
   }));
 
   logger.info(`Confirm TXID: ${mtx.txid()}`);

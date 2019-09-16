@@ -56,7 +56,7 @@ const {Device} = USB;
     index: 0,
     path: 'm/44\'/5355\'/0\'/0/0',
     publicKey: pubkey,
-    type: Script.hashType.ANYONECANPAY | Script.hashType.NONE
+    type: Script.hashType.ALL
   });
 
   logger.info(`TXID: ${mtx.txid()}`);
