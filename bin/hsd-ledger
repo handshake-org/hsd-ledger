@@ -12,7 +12,7 @@ const openpgp = require('openpgp');
 const Config = require('bcfg');
 const QRCode = require('qrcode');
 const {NodeClient, WalletClient} = require('hs-client');
-const {HD, MTX, Network} = require('hsd');
+const {hd, MTX, Network} = require('hsd');
 const {PGP_PUBKEY} = require('../data/pgp');
 const {HID, LedgerHSD} = require('..');
 const {Device} = HID;
@@ -77,8 +77,8 @@ async function createAddress(client, config, ledger, args) {
   const name = args[0];
   const addr = await client.createAddress(id, name);
   const acct = await client.getAccount(id, name);
-  const xpub = HD.PublicKey.fromBase58(acct.accountKey, config.str('network'));
-  const account = (xpub.childIndex ^ HD.common.HARDENED) >>> 0;
+  const xpub = hd.PublicKey.fromBase58(acct.accountKey, config.str('network'));
+  const account = (xpub.childIndex ^ hd.common.HARDENED) >>> 0;
 
   console.log(`Verify address on Ledger device: ${addr.address}`);
 
