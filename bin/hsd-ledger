@@ -433,6 +433,7 @@ function usage(err) {
   console.log('  --wallet-api-key <api-key>');
   console.log('  --wallet-host <host> (default "localhost")');
   console.log('  --wallet-port <port> (default 14039)');
+  console.log('');
   console.log('The following options are for the getairdropaddress command:');
   console.log('  --project-sponsor (encrypts address for project sponsors)');
   console.log('  --qrcode (generates a QR encoded address)');
