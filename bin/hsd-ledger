@@ -14,8 +14,8 @@ const QRCode = require('qrcode');
 const {NodeClient, WalletClient} = require('hs-client');
 const {hd, MTX, Network} = require('hsd');
 const {PGP_PUBKEY} = require('../data/pgp');
-const {HID, LedgerHSD} = require('..');
-const {Device} = HID;
+const {USB, LedgerHSD} = require('..');
+const {Device} = USB;
 
 /**
  * Global constants
@@ -233,13 +233,8 @@ async function getAirdropAddress(config, ledger, args) {
 }
 
 async function main() {
-  const devices = await Device.getDevices();
-
-  if (devices.length === 0)
-    throw new Error('Must connect and unlock Ledger device.');
-
-  const device = new Device({
-    device: devices[0],
+  const device = await Device.requestDevice();
+  device.set({
     timeout: 15000
   });
 
