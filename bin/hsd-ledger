@@ -235,7 +235,7 @@ async function getAirdropAddress(config, ledger, args) {
 async function main() {
   const device = await Device.requestDevice();
   device.set({
-    timeout: 15000
+    timeout: 300000 // 5 minutes.
   });
 
   await device.open();
