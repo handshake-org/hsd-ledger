@@ -70,11 +70,11 @@ async function createAccount(client, config, ledger, args) {
 }
 
 async function createAddress(client, config, ledger, args) {
-  if (args.length !== 1)
+  if (args.length !== 0)
     throw new Error('Invalid arguments');
 
   const id = config.str('wallet-id');
-  const name = args[0];
+  const name = config.str('account-name');
   const addr = await client.createAddress(id, name);
   const acct = await client.getAccount(id, name);
   const xpub = hd.PublicKey.fromBase58(acct.accountKey, config.str('network'));
@@ -86,13 +86,13 @@ async function createAddress(client, config, ledger, args) {
 }
 
 async function sendToAddress(wclient, nclient, config, ledger, args) {
-  if (args.length !== 3)
+  if (args.length !== 2)
     throw new Error('Invalid arguments');
 
   const id = config.str('wallet-id');
-  const account = args[0];
-  const address = args[1];
-  const amount = parseFloat(args[2]);
+  const account = config.str('account-name');
+  const address = args[0];
+  const amount = parseFloat(args[1]);
 
   await wclient.execute('selectwallet', [id]);
 
@@ -140,11 +140,11 @@ async function getAccount(client, config, args) {
 }
 
 async function getBalance(client, config, args) {
-  if (args.length !== 1)
+  if (args.length !== 0)
     throw new Error('Invalid arguments');
 
   const id = config.str('wallet-id');
-  const name = args[0];
+  const name = config.str('account-name');
   const balance = await client.getBalance(id, name);
 
   console.log(balance);
@@ -245,12 +245,13 @@ async function main() {
     fallback: 'main',
     alias: {
       'h': 'help',
-      'i': 'account-index',
+      'i': 'accountindex',
+      'a': 'accountname',
       'n': 'network',
-      'p': 'project-sponsor',
+      'p': 'projectsponsor',
       'q': 'qrcode',
-      'k': 'show-key',
-      'w': 'wallet-id'
+      'k': 'showkey',
+      'w': 'walletid'
     }
   });
 
@@ -261,6 +262,7 @@ async function main() {
 
   config.inject({
     accountIndex: 0,
+    accountName: 'default',
     network: 'testnet',
     walletId: 'hsd-ledger',
     token: ''
@@ -399,20 +401,21 @@ function usage(err) {
   console.log('usage:');
   console.log('  $ hsd-ledger createwallet <wallet-id>');
   console.log('  $ hsd-ledger createaccount <account-name> <account-index>');
-  console.log('  $ hsd-ledger createaddress <account-name>');
-  console.log('  $ hsd-ledger sendtoaddress <account-name> <address> <amount>');
+  console.log('  $ hsd-ledger createaddress');
+  console.log('  $ hsd-ledger sendtoaddress <address> <amount>');
   console.log('  $ hsd-ledger getwallets');
   console.log('  $ hsd-ledger getaccounts');
   console.log('  $ hsd-ledger getaccount <account-name>');
-  console.log('  $ hsd-ledger getbalance <account-name>');
+  console.log('  $ hsd-ledger getbalance');
   console.log('  $ hsd-ledger getairdropaddress');
   console.log('');
   console.log('options:');
   console.log('  --help');
   console.log('  --version');
-  console.log('  --network <id> (default "testnet")');
-  console.log('  --wallet-id <id> (default "hsd-ledger")');
-  console.log('  --account-index <index> (default 0)');
+  console.log('  -n, --network <id> (default "testnet")');
+  console.log('  -w, --wallet-id <id> (default "hsd-ledger")');
+  console.log('  -a, --account-name <name> (default "default")');
+  console.log('  -i, --account-index <index> (default 0)');
   console.log('');
   console.log('The following options configure the node and wallet clients:');
   console.log('  --ssl');

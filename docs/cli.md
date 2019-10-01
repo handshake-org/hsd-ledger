@@ -67,20 +67,21 @@ This section highlights the general usage of the CLI app.
 usage:
   $ hsd-ledger createwallet <wallet-id>
   $ hsd-ledger createaccount <account-name> <account-index>
-  $ hsd-ledger createaddress <account-name>
-  $ hsd-ledger sendtoaddress <account-name> <address> <amount>
+  $ hsd-ledger createaddress
+  $ hsd-ledger sendtoaddress <address> <amount>
   $ hsd-ledger getwallets
   $ hsd-ledger getaccounts
   $ hsd-ledger getaccount <account-name>
-  $ hsd-ledger getbalance <account-name>
+  $ hsd-ledger getbalance
   $ hsd-ledger getairdropaddress
 
 options:
   --help
   --version
-  --network <id> (default "testnet")
-  --wallet-id <id> (default "hsd-ledger")
-  --account-index <index> (default 0)
+  -n, --network <id> (default "testnet")
+  -w, --wallet-id <id> (default "hsd-ledger")
+  -a, --account-name <name> (default "default")
+  -i, --account-index <index> (default 0)
 
 The following options configure the node and wallet clients:
   --ssl
@@ -147,7 +148,7 @@ is the cointype for the `regtest` network.
 To view the wallets on your HSD node run:
 
 ```bash
-$ ./bin/hsd-ledger -n regtest getwallets
+$ ./bin/hsd-ledger getwallets -n regtest
 ```
 
 >Note: `-n regtest` specifies that we are using the regtest network.
@@ -163,7 +164,7 @@ use the "hsd-ledger" wallet.
 To list the accounts in your default wallet run:
 
 ```bash
-$ ./bin/hsd-ledger -n regtest getaccounts
+$ ./bin/hsd-ledger getaccounts -n regtest
 ```
 
 You should see the "default" account listed.
@@ -175,13 +176,13 @@ Nano S. To create a new account named "second" using the XPUB at account
 index `M/44'/5355'/1'`run:
 
 ```bash
-$ ./bin/hsd-ledger -n regtest createaccount test-account 1
+$ ./bin/hsd-ledger createaccount second 1 -n regtest
 ```
 
 You should now see the "default" & "second" accounts listed when running:
 
 ```bash
-$ ./bin/hsd-ledger -n regtest getaccounts
+$ ./bin/hsd-ledger getaccounts -n regtest
 ```
 
 #### View balance
@@ -189,7 +190,7 @@ $ ./bin/hsd-ledger -n regtest getaccounts
 To view the HNS balance of the "default" account run:
 
 ```bash
-$ ./bin/hsd-ledger -n regtest getbalance default
+$ ./bin/hsd-ledger getbalance -n regtest
 ```
 
 The account should be empty.
@@ -200,7 +201,7 @@ We can fund the account with regtest coins by mining some blocks using a
 coinbase address from this account. To create an address run:
 
 ```bash
-$ ./bin/hsd-ledger -n regtest createaddress default
+$ ./bin/hsd-ledger createaddress -n regtest
 ```
 
 You will be asked to confirm that the address shown in the terminal matches the
@@ -212,7 +213,7 @@ Once you have generated an address, copy the address into your clipboard.
 Next navigate to the root of the hsd source code directory and run:
 
 ```bash
-$ ./bin/cli -n regtest rpc generatetoaddress 1 <address>
+$ ./bin/cli rpc generatetoaddress 1 <address> -n regtest
 ```
 
 The above will generate a regtest block and send the coinbase reward to the
@@ -221,14 +222,14 @@ generate a couple more blocks. We need to bypass the coinbase maturity
 period so the coins are spendable:
 
 ```bash
-$ ./bin/cli -n regtest rpc generate 2
+$ ./bin/cli rpc generate 2 -n regtest
 ```
 
 To confirm your updated balance, navigate back to the root of the hsd-ledger
 source code directory and run:
 
 ```bash
-$ ./bin/hsd-ledger -n regtest getbalance default
+$ ./bin/hsd-ledger getbalance -n regtest
 ```
 
 ### HNS Transactions
@@ -239,13 +240,13 @@ First, we need to generate a receiving address for the "second" account.
 To generate a new address run:
 
 ```bash
-$ ./bin/hsd-ledger -n regtest createaddress second
+$ ./bin/hsd-ledger createaddress -n regtest -a second
 ```
 
 Now we can send HNS to this new address from the "default" account by running:
 
 ```bash
-$ ./bin/hsd-ledger -n regtest sendtoaddress default <address> <amount>
+$ ./bin/hsd-ledger sendtoaddress <address> <amount> -n regtest
 ```
 
 >Note: `<address>` is the address generated in the previous command and
