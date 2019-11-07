@@ -7,7 +7,7 @@ addresses, and send HNS. Any addresses created with the app must be confirmed
 on-device. All transactions are signed on the Ledger Nano S and require
 on-device confirmation as well.
 
-The CLI app requires Node.js v8.0.0+ and access to a running, HSD wallet/node,
+The CLI app requires Node.js v8.0.0+, access to HSD wallet and node servers,
 and access to a Ledger Nano S running the latest firmware version.
 
 ## Before you begin
@@ -42,22 +42,23 @@ For instructions on setting up an HSD node, please see the official
 The CLI app embeds node and wallet clients for HSD. By default, the app will
 try to connect to HSD node and wallet servers running on localhost using the
 [default ports][config]. Users may specify custom locations for the node and
-wallet servers by using flags [below](#usage). The ClI app also defaults to
-using the testnet. This can also be configured using a flag
-specified [below](#usage).
+wallet servers by using flags [below](#usage). The CLI app defaults to using
+the testnet. This can also be configured using a flag specified
+[below](#usage).
 
-For more information on configuring clients for connection to HSD please see the
-official documentation [here][config]. The flags supported by the HSD Ledger CLI
-app are [below](#usage).
+For more information on configuring clients for connection to HSD, please see
+the official documentation [here][config]. The flags supported by the HSD
+Ledger CLI app are [below](#usage).
 
 <a href="#first"></a>Upon its first run, the CLI app will create a watch-only
 wallet using `hsd-ledger` as its wallet-id. This wallet acts as the default
 wallet for the app. Any commands that do not specify an alternative wallet will
 use this wallet. Alternative wallets can be created and specified using commands
-found [below](#usage). The XPUB at HD path `M/44'/5354'/0'`
-(default account for testnet) will be used to create an account with the
-account-name `default`. You may use this account or create new accounts within
-this wallet or other wallets found on your HSD node.
+found [below](#usage). The XPUB at HD path `M/44'/5354'/0'` (default account
+for testnet) will be used to create an account with the account-name `default`.
+Any commands that do not specify an alternative account will use this account.
+You may use this account or create new accounts within this wallet, or other
+wallets found on your HSD node.
 
 ## General Usage
 
@@ -179,6 +180,8 @@ index `M/44'/5355'/1'`run:
 $ ./bin/hsd-ledger createaccount second 1 -n regtest
 ```
 
+>Note: the HSD Ledger CLI app enforces hardened derivation.
+
 You should now see the "default" & "second" accounts listed when running:
 
 ```bash
@@ -217,9 +220,9 @@ $ ./bin/cli rpc generatetoaddress 1 <address> -n regtest
 ```
 
 The above will generate a regtest block and send the coinbase reward to the
-address you generated in the previous step. Run the following command to
-generate a couple more blocks. We need to bypass the coinbase maturity
-period so the coins are spendable:
+address you generated in the previous step. We need to bypass the coinbase
+maturity period so the coins are spendable. Run the following command to
+generate a couple of more blocks:
 
 ```bash
 $ ./bin/cli rpc generate 2 -n regtest
@@ -250,7 +253,7 @@ $ ./bin/hsd-ledger sendtoaddress <address> <amount> -n regtest
 ```
 
 >Note: `<address>` is the address generated in the previous command and
-`<amount>` is the amount of whole HNS, e.g. 5 HNS _not_ 5000000 dollarydoos.
+`<amount>` is the amount of dollarydoos, e.g. 5000000 _not_ 5 HNS.
 
 You will be asked to confirm that the txid shown in the terminal matches the
 txid shown on your Ledger Nano S. If you reject the txid, the transaction will
