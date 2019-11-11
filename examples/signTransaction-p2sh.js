@@ -2,6 +2,7 @@
 
 const Logger = require('blgr');
 const {Amount, Address, Coin, MTX, Script} = require('hsd');
+const rules = require('hsd/lib/covenants/rules');
 const util = require('../test/utils/fund');
 const {USB, LedgerHSD, LedgerInput} = require('../lib/hsd-ledger');
 const {Device} = USB;
@@ -10,14 +11,14 @@ const {Device} = USB;
   // Create logger.
   const logger = new Logger({
     console: true,
-    level: 'debug'
+    level: 'info'
   });
 
   // Get first device available and
   // set optional properties.
   const device = await Device.requestDevice();
   device.set({
-    timeout: 15000, // optional (default is 5000ms)
+    timeout: 1000 * 60 * 5, // optional (default is 5000ms)
     logger: logger  // optional
   });
 
@@ -85,13 +86,44 @@ const {Device} = USB;
     type: Script.hashType.ALL
   }));
 
-  logger.info(`Confirm TXID: ${mtx.txid()}`);
+  let fees = ledgerInputs[0].coin.value;
 
-  const part = await ledger.signTransaction(mtx, [ledgerInputs[0]]);
+  logger.info(`Confirm details for TXID: ${mtx.txid()}`);
+  logger.info('');
 
-  logger.info(`Confirm TXID: ${mtx.txid()}`);
+  for (let i = 0; i < mtx.outputs.length; i++) {
+    const output = mtx.outputs[i];
+    fees -= output.value;
+    logger.info(`Output #${i+1}`);
+    logger.info(`Value: ${output.value/1e6}`);
+    logger.info(`Address: ${output.address.toString('regtest')}`);
+    logger.info(`Covenant: ${rules.typesByVal[output.covenant.type]}`);
+    logger.info('');
+  }
 
-  const full = await ledger.signTransaction(part, [ledgerInputs[1]]);
+  logger.info(`Fees: ${fees / 1e6}`);
+  logger.info('');
+
+  const part = await ledger.signTransaction(mtx, {
+    inputs: [ledgerInputs[0]]
+  });
+
+  logger.info(`Confirm Outputs for TXID: ${mtx.txid()}`);
+
+  for (let i = 0; i < mtx.outputs.length; i++) {
+    const output = mtx.outputs[i];
+    logger.info(`Output #${i+1}`);
+    logger.info(`Value: ${output.value/1e6}`);
+    logger.info(`Address: ${output.address.toString('regtest')}`);
+    logger.info(`Covenant: ${rules.typesByVal[output.covenant.type]}`);
+    logger.info('');
+  }
+
+  logger.info(`Fees: ${fees/1e6}\n`);
+
+  const full = await ledger.signTransaction(part, {
+    inputs: [ledgerInputs[1]]
+  });
 
   logger.info(`Result of TX.verify(): ${full.verify()}.`);
 

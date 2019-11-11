@@ -55,7 +55,7 @@
     "bslint": "^5.15.3",
     "hs-client": "^0.0.5",
     "hsd": "handshake-org/hsd",
-    "jsdoc": "^3.5.5"
+    "jsdoc": "^3.6.3"
   },
   "engines": {
     "node": ">=8.0.0"

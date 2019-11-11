@@ -4,7 +4,7 @@ const assert = require('bsert');
 const bio = require('bufio');
 const plugin = require('hsd/lib/wallet/plugin');
 const Logger = require('blgr');
-const {ChainEntry, FullNode, MTX, Network} = require('hsd');
+const {Address, ChainEntry, FullNode, MTX, Network, Rules} = require('hsd');
 const {NodeClient, WalletClient} = require('hs-client');
 const {USB, LedgerHSD} = require('../../lib/hsd-ledger');
 const {Device} = USB;
@@ -578,22 +578,57 @@ class TestUtil {
    * Logs TXID before signing transaction with Ledger Nanos S.
    */
 
-  async signTransaction(mtx, inputs, msg) {
-    if (msg)
-      this.logger.info(msg);
+  async signTransaction(mtx, options, name) {
+    let fees = 0;
 
-    return this.ledger.signTransaction(mtx, inputs);
+    for (let i = 0; i < mtx.inputs.length; i++) {
+      const input = mtx.inputs[i];
+      const coin = mtx.view.getCoinFor(input);
+      fees += coin.value;
+    }
+
+    this.logger.info(`Confirm details for TXID: ${mtx.txid()}`);
+    this.logger.info('');
+
+    for (let i = 0, j = 1; i < mtx.outputs.length; i++) {
+      const output = mtx.outputs[i];
+      fees -= output.value;
+
+      if (options && options.change && options.change.getIndex() === i)
+        continue;
+
+      this.logger.info(`Output #${j++}`);
+      this.logger.info(`Covenant: ${Rules.typesByVal[output.covenant.type]}`);
+
+      if (output.covenant.type !== Rules.types.NONE)
+        this.logger.info(`Name: ${name}`);
+
+      if (output.covenant.type === Rules.types.TRANSFER) {
+        const ver = output.covenant.getU8(2);
+        const hash = output.covenant.get(3);
+        const addr = Address.fromHash(hash, ver);
+        this.logger.info(`New Owner: ${addr.toString(network)}`);
+      }
+
+      this.logger.info(`Value: ${output.value/1e6}`);
+      this.logger.info(`Address: ${output.address.toString('regtest')}`);
+      this.logger.info('');
+    }
+
+    this.logger.info(`Fees: ${fees/1e6}\n`);
+
+    return this.ledger.signTransaction(mtx, options);
   }
 
   /**
    * Logs TXID before signing transaction with Ledger Nanos S.
    */
 
-  async getTransactionSignatures(mtx, inputs, msg) {
+  async getTransactionSignatures(mtx, options, msg) {
     if (msg)
       this.logger.info(msg);
 
-    return this.ledger.getTransactionSignatures(mtx, inputs);
+    return this.ledger.getTransactionSignatures(mtx, options);
   }
 
   /**
