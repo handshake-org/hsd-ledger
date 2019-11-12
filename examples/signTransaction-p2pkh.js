@@ -67,7 +67,7 @@ const {Device} = USB;
 
   // Close logger and device.
   await device.close();
-  await ledger.close();
+  await logger.close();
 })().catch((e) => {
   console.error(e);
   process.exit(1);
