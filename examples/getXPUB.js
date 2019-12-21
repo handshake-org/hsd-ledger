@@ -8,7 +8,7 @@ const {Device} = USB;
   // Create logger.
   const logger = new Logger({
     console: true,
-    level: 'debug'
+    level: 'info'
   });
 
   // Get first device available and
