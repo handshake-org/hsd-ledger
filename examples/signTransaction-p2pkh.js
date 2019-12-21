@@ -60,7 +60,13 @@ const {Device} = USB;
     type: Script.hashType.ALL
   });
 
-  let fees = ledgerInput.coin.value;
+  let fees = 0;
+
+  for (let i = 0; i < mtx.inputs.length; i++) {
+    const input = mtx.inputs[i];
+    const coin = mtx.view.getCoinFor(input);
+    fees += coin.value;
+  }
 
   logger.info(`Confirm details for TXID: ${mtx.txid()}`);
   logger.info('');
