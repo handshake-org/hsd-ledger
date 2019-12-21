@@ -86,7 +86,13 @@ const {Device} = USB;
     type: Script.hashType.ALL
   }));
 
-  let fees = ledgerInputs[0].coin.value;
+  let fees = 0;
+
+  for (let i = 0; i < mtx.inputs.length; i++) {
+    const input = mtx.inputs[i];
+    const coin = mtx.view.getCoinFor(input);
+    fees += coin.value;
+  }
 
   logger.info(`Confirm details for TXID: ${mtx.txid()}`);
   logger.info('');
@@ -95,9 +101,9 @@ const {Device} = USB;
     const output = mtx.outputs[i];
     fees -= output.value;
     logger.info(`Output #${i+1}`);
+    logger.info(`Covenant: ${rules.typesByVal[output.covenant.type]}`);
     logger.info(`Value: ${output.value/1e6}`);
     logger.info(`Address: ${output.address.toString('regtest')}`);
-    logger.info(`Covenant: ${rules.typesByVal[output.covenant.type]}`);
     logger.info('');
   }
 
@@ -108,18 +114,18 @@ const {Device} = USB;
     inputs: [ledgerInputs[0]]
   });
 
-  logger.info(`Confirm Outputs for TXID: ${mtx.txid()}`);
+  logger.info(`Confirm details for TXID: ${mtx.txid()}`);
 
   for (let i = 0; i < mtx.outputs.length; i++) {
     const output = mtx.outputs[i];
     logger.info(`Output #${i+1}`);
+    logger.info(`Covenant: ${rules.typesByVal[output.covenant.type]}`);
     logger.info(`Value: ${output.value/1e6}`);
     logger.info(`Address: ${output.address.toString('regtest')}`);
-    logger.info(`Covenant: ${rules.typesByVal[output.covenant.type]}`);
     logger.info('');
   }
 
-  logger.info(`Fees: ${fees/1e6}\n`);
+  logger.info(`Fees: ${fees/1e6}`);
 
   const full = await ledger.signTransaction(part, {
     inputs: [ledgerInputs[1]]
