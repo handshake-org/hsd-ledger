@@ -15,7 +15,7 @@ const {Device} = USB;
   // set optional properties.
   const device = await Device.requestDevice();
   device.set({
-    timeout: 15000, // optional (default is 5000ms)
+    timeout: 15000, // optional (default is 5mins)
     logger: logger  // optional
   });
 
