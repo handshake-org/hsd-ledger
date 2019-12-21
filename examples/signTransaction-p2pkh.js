@@ -1,12 +1,10 @@
 'use strict';
 
 const Logger = require('blgr');
-const {Coin, MTX, KeyRing, Output, Script} = require('hsd');
+const {Coin, MTX, KeyRing, Script} = require('hsd');
 const rules = require('hsd/lib/covenants/rules');
 const util = require('../test/utils/fund');
-const {
-  USB, LedgerHSD, LedgerInput, LedgerCovenant
-} = require('../lib/hsd-ledger');
+const {USB, LedgerHSD, LedgerInput} = require('../lib/hsd-ledger');
 const {Device} = USB;
 
 (async () => {
@@ -43,12 +41,6 @@ const {Device} = USB;
   const addr = ring.getAddress();
   const {coins, txs} = await util.fundAddress(addr, 1);
 
-  const output = new Output();
-  output.address = KeyRing.generate().getAddress();
-  output.value = 10000000;
-  output.covenant.type = rules.types.NONE;
-
-  mtx.addOutput(output);
   mtx.addOutput({
     address: KeyRing.generate().getAddress(),
     value: 10000000
@@ -66,11 +58,6 @@ const {Device} = USB;
     path: 'm/44\'/5355\'/0\'/0/0',
     publicKey: pubkey,
     type: Script.hashType.ALL
-  });
-
-  const ledgerCovenant = new LedgerCovenant({
-    index: 0,
-    name: 'boyma'
   });
 
   let fees = ledgerInput.coin.value;
@@ -91,8 +78,7 @@ const {Device} = USB;
   logger.info(`Fees: ${fees/1e6}`);
 
   const signed = await ledger.signTransaction(mtx, {
-    inputs: [ledgerInput],
-    covenants: [ledgerCovenant]
+    inputs: [ledgerInput]
   });
 
   logger.info(`Result of TX.verify(): ${signed.verify()}.`);
