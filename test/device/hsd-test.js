@@ -118,7 +118,7 @@ describe('Ledger Nano S', function() {
       // Submit OPEN.
       const mtx = await util.createOpen(name);
       const change = await createLedgerChange(util, bob.wallet.id, mtx);
-      const signed = await util.signTransaction(mtx, {covenants, change}, name);
+      const signed = await util.signTransaction(mtx, {covenants, change});
       await util.sendRawTX(signed);
 
       // Mine OPEN.
@@ -139,7 +139,7 @@ describe('Ledger Nano S', function() {
       await util.selectWallet(alice.wallet.id);
       let mtx = await util.createBid(name, 5, 10);
       let change = await createLedgerChange(util, alice.wallet.id, mtx);
-      let signed = await util.signTransaction(mtx, {covenants, change}, name);
+      let signed = await util.signTransaction(mtx, {covenants, change});
       const txid = signed.txid();
       await util.sendRawTX(signed);
 
@@ -147,7 +147,7 @@ describe('Ledger Nano S', function() {
       await util.selectWallet(bob.wallet.id);
       mtx = await util.createBid(name, 4, 10);
       change = await createLedgerChange(util, bob.wallet.id, mtx);
-      signed = await util.signTransaction(mtx, {covenants, change}, name);
+      signed = await util.signTransaction(mtx, {covenants, change});
       await util.sendRawTX(signed);
 
       // Mine BID covenants.
@@ -169,7 +169,7 @@ describe('Ledger Nano S', function() {
       await util.selectWallet(alice.wallet.id);
       let mtx = await util.createReveal(name);
       let change = await createLedgerChange(util, alice.wallet.id, mtx);
-      let signed = await util.signTransaction(mtx, {covenants, change}, name);
+      let signed = await util.signTransaction(mtx, {covenants, change});
       const txid = signed.txid();
       await util.sendRawTX(signed);
 
@@ -177,7 +177,7 @@ describe('Ledger Nano S', function() {
       await util.selectWallet(bob.wallet.id);
       mtx = await util.createReveal(name);
       change = await createLedgerChange(util, bob.wallet.id, mtx);
-      signed = await util.signTransaction(mtx, {covenants, change}, name);
+      signed = await util.signTransaction(mtx, {covenants, change});
       await util.sendRawTX(signed);
 
       // Mine REVEAL covenants.
@@ -199,7 +199,7 @@ describe('Ledger Nano S', function() {
       await util.selectWallet(bob.wallet.id);
       const mtx = await util.createRedeem(name);
       const change = await createLedgerChange(util, bob.wallet.id, mtx);
-      const signed = await util.signTransaction(mtx, {covenants, change}, name);
+      const signed = await util.signTransaction(mtx, {covenants, change});
       await util.sendRawTX(signed);
 
       // Assert lockup.
@@ -289,7 +289,7 @@ describe('Ledger Nano S', function() {
       await util.selectWallet(alice.wallet.id);
       const mtx = await util.createRenewal(name);
       const change = await createLedgerChange(util, alice.wallet.id, mtx);
-      const signed = await util.signTransaction(mtx, {covenants, change}, name);
+      const signed = await util.signTransaction(mtx, {covenants, change});
       await util.sendRawTX(signed);
 
       // Mine RENEW.
@@ -306,7 +306,7 @@ describe('Ledger Nano S', function() {
       // Submit TRANSFER.
       const mtx = await util.createTransfer(name, bob.addr);
       const change = await createLedgerChange(util, alice.wallet.id, mtx);
-      const signed = await util.signTransaction(mtx, {covenants, change}, name);
+      const signed = await util.signTransaction(mtx, {covenants, change});
       await util.sendRawTX(signed);
 
       // Mine TRANSFER.
@@ -322,7 +322,7 @@ describe('Ledger Nano S', function() {
       // Submit cancellation.
       const mtx = await util.createCancel(name);
       const change = await createLedgerChange(util, alice.wallet.id, mtx);
-      const signed = await util.signTransaction(mtx, {covenants, change}, name);
+      const signed = await util.signTransaction(mtx, {covenants, change});
       await util.sendRawTX(signed);
 
       // Mine cancellation.
@@ -338,7 +338,7 @@ describe('Ledger Nano S', function() {
       // Submit TRANSFER.
       let mtx = await util.createTransfer(name, bob.addr);
       let change = await createLedgerChange(util, alice.wallet.id, mtx);
-      let signed = await util.signTransaction(mtx, {covenants, change}, name);
+      let signed = await util.signTransaction(mtx, {covenants, change});
       await util.sendRawTX(signed);
 
       // Mine TRANSFER and past the lockup period.
@@ -348,7 +348,7 @@ describe('Ledger Nano S', function() {
       // Submit FINALIZE.
       mtx = await util.createFinalize(name);
       change = await createLedgerChange(util, alice.wallet.id, mtx);
-      signed = await util.signTransaction(mtx, {covenants, change}, name);
+      signed = await util.signTransaction(mtx, {covenants, change});
       const txid = await util.sendRawTX(signed);
 
       // Mine FINALIZE.
@@ -367,7 +367,7 @@ describe('Ledger Nano S', function() {
       await util.selectWallet(bob.wallet.id);
       const mtx = await util.createRevoke(name);
       const change = await createLedgerChange(util, bob.wallet.id, mtx);
-      const signed = await util.signTransaction(mtx, {covenants, change}, name);
+      const signed = await util.signTransaction(mtx, {covenants, change});
       await util.sendRawTX(signed);
 
       // Mine REVOKE and advance past revocation delay.

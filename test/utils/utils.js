@@ -575,10 +575,10 @@ class TestUtil {
   }
 
   /**
-   * Logs TXID before signing transaction with Ledger Nanos S.
+   * Displays mtx details.
    */
 
-  async signTransaction(mtx, options, name) {
+  displayDetails(mtx, options) {
     let fees = 0;
 
     for (let i = 0; i < mtx.inputs.length; i++) {
@@ -600,8 +600,21 @@ class TestUtil {
       this.logger.info(`Output #${j++}`);
       this.logger.info(`Covenant: ${Rules.typesByVal[output.covenant.type]}`);
 
-      if (output.covenant.type !== Rules.types.NONE)
+      if (output.covenant.type !== Rules.types.NONE) {
+        let name;
+
+        if (!options || !options.covenants)
+          throw(new TestUtilError({
+            message: 'LedgerCovenants required.',
+            caller: 'displayDetails'
+          }));
+
+        for (const covenant of options.covenants)
+          if (covenant.getIndex() === i)
+            name = covenant.getName();
+
         this.logger.info(`Name: ${name}`);
+      }
 
       if (output.covenant.type === Rules.types.TRANSFER) {
         const ver = output.covenant.getU8(2);
@@ -616,7 +629,14 @@ class TestUtil {
     }
 
     this.logger.info(`Fees: ${fees/1e6}\n`);
+  }
 
+  /**
+   * Logs TXID before signing transaction with Ledger Nanos S.
+   */
+
+  async signTransaction(mtx, options) {
+    this.displayDetails(mtx, options);
     return this.ledger.signTransaction(mtx, options);
   }
 
@@ -624,10 +644,8 @@ class TestUtil {
    * Logs TXID before signing transaction with Ledger Nanos S.
    */
 
-  async getTransactionSignatures(mtx, options, msg) {
-    if (msg)
-      this.logger.info(msg);
-
+  async getTransactionSignatures(mtx, options) {
+    this.displayDetails(mtx, options);
     return this.ledger.getTransactionSignatures(mtx, options);
   }
 
