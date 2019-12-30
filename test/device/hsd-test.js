@@ -191,7 +191,7 @@ describe('Ledger Nano S', function() {
     });
 
     it('should submit REDEEM', async () => {
-      // // Advance past the reveal period.
+      // Advance past the reveal period.
       const ids = await util.generateToAddress(util.revealPeriod, alice.addr);
       await util.confirmBlock(ids.pop());
 
