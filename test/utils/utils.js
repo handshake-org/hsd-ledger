@@ -87,7 +87,7 @@ function displayDetails(logger, mtx, options) {
       const ver = output.covenant.getU8(2);
       const hash = output.covenant.get(3);
       const addr = Address.fromHash(hash, ver);
-      this.logger.info(`New Owner: ${addr.toString(network)}`);
+      logger.info(`New Owner: ${addr.toString(network)}`);
     }
 
     logger.info(`Value: ${output.value/1e6}`);
