@@ -41,6 +41,63 @@ class TestUtilError extends Error {
   }
 }
 
+/**
+ * Displays mtx details.
+ */
+
+function displayDetails(logger, mtx, options) {
+  let fees = 0;
+
+  for (let i = 0; i < mtx.inputs.length; i++) {
+    const input = mtx.inputs[i];
+    const coin = mtx.view.getCoinFor(input);
+    fees += coin.value;
+  }
+
+  logger.info(`Confirm details for TXID: ${mtx.txid()}`);
+  logger.info('');
+
+  for (let i = 0, j = 1; i < mtx.outputs.length; i++) {
+    const output = mtx.outputs[i];
+    fees -= output.value;
+
+    if (options && options.change && options.change.getIndex() === i)
+      continue;
+
+    logger.info(`Output #${j++}`);
+    logger.info(`Covenant: ${Rules.typesByVal[output.covenant.type]}`);
+
+    if (output.covenant.type !== Rules.types.NONE) {
+      let name;
+
+      if (!options || !options.covenants)
+        throw(new TestUtilError({
+          message: 'LedgerCovenants required.',
+          caller: 'displayDetails'
+        }));
+
+      for (const covenant of options.covenants)
+        if (covenant.getIndex() === i)
+          name = covenant.getName();
+
+      logger.info(`Name: ${name}`);
+    }
+
+    if (output.covenant.type === Rules.types.TRANSFER) {
+      const ver = output.covenant.getU8(2);
+      const hash = output.covenant.get(3);
+      const addr = Address.fromHash(hash, ver);
+      this.logger.info(`New Owner: ${addr.toString(network)}`);
+    }
+
+    logger.info(`Value: ${output.value/1e6}`);
+    logger.info(`Address: ${output.address.toString('regtest')}`);
+    logger.info('');
+  }
+
+  logger.info(`Fees: ${fees/1e6}\n`);
+}
+
 class TestUtil {
   constructor(options) {
     if (!options)
@@ -575,68 +632,11 @@ class TestUtil {
   }
 
   /**
-   * Displays mtx details.
-   */
-
-  displayDetails(mtx, options) {
-    let fees = 0;
-
-    for (let i = 0; i < mtx.inputs.length; i++) {
-      const input = mtx.inputs[i];
-      const coin = mtx.view.getCoinFor(input);
-      fees += coin.value;
-    }
-
-    this.logger.info(`Confirm details for TXID: ${mtx.txid()}`);
-    this.logger.info('');
-
-    for (let i = 0, j = 1; i < mtx.outputs.length; i++) {
-      const output = mtx.outputs[i];
-      fees -= output.value;
-
-      if (options && options.change && options.change.getIndex() === i)
-        continue;
-
-      this.logger.info(`Output #${j++}`);
-      this.logger.info(`Covenant: ${Rules.typesByVal[output.covenant.type]}`);
-
-      if (output.covenant.type !== Rules.types.NONE) {
-        let name;
-
-        if (!options || !options.covenants)
-          throw(new TestUtilError({
-            message: 'LedgerCovenants required.',
-            caller: 'displayDetails'
-          }));
-
-        for (const covenant of options.covenants)
-          if (covenant.getIndex() === i)
-            name = covenant.getName();
-
-        this.logger.info(`Name: ${name}`);
-      }
-
-      if (output.covenant.type === Rules.types.TRANSFER) {
-        const ver = output.covenant.getU8(2);
-        const hash = output.covenant.get(3);
-        const addr = Address.fromHash(hash, ver);
-        this.logger.info(`New Owner: ${addr.toString(network)}`);
-      }
-
-      this.logger.info(`Value: ${output.value/1e6}`);
-      this.logger.info(`Address: ${output.address.toString('regtest')}`);
-      this.logger.info('');
-    }
-
-    this.logger.info(`Fees: ${fees/1e6}\n`);
-  }
-
-  /**
    * Logs TXID before signing transaction with Ledger Nanos S.
    */
 
   async signTransaction(mtx, options) {
-    this.displayDetails(mtx, options);
+    displayDetails(this.logger, mtx, options);
     return this.ledger.signTransaction(mtx, options);
   }
 
@@ -645,7 +645,7 @@ class TestUtil {
    */
 
   async getTransactionSignatures(mtx, options) {
-    this.displayDetails(mtx, options);
+    displayDetails(this.logger, mtx, options);
     return this.ledger.getTransactionSignatures(mtx, options);
   }
 
@@ -661,5 +661,6 @@ class TestUtil {
   }
 }
 
+exports.displayDetails = displayDetails;
 exports.TestUtilError = TestUtilError;
 exports.TestUtil = TestUtil;

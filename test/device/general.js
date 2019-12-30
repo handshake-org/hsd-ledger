@@ -10,8 +10,9 @@ const {
 const assert = require('bsert');
 const fundUtil = require('../utils/fund');
 const util = require('../../lib/utils/util');
+const {displayDetails} = require('../utils/utils');
 const Logger = require('blgr');
-const {LedgerHSD, LedgerInput} = require('../../lib/hsd-ledger');
+const {LedgerHSD, LedgerInput, LedgerChange} = require('../../lib/hsd-ledger');
 
 const ACCOUNT = 'm/44\'/5355\'/0\'';
 const ADDRESS = `${ACCOUNT}/0/0`;
@@ -142,9 +143,16 @@ module.exports = function (Device) {
           coin: Coin.fromTX(txs[0], 0, -1),
           publicKey: addrPub
         });
-        logger.info(`Confirm TXID: ${mtx.txid()}`);
-        const signed = await ledger.signTransaction(mtx, [ledgerInput]);
 
+        // TODO(boymanjor): update details display.
+        const options = {
+          inputs: [ledgerInput],
+          change: new LedgerChange({index: 1, version: 0, path: CHANGE})
+        };
+
+        logger.info(`Verify TX details: ${mtx.txid()}`);
+        displayDetails(logger, mtx, options);
+        const signed = await ledger.signTransaction(mtx, options);
         assert.ok(signed.verify(), 'validation failed');
       });
 
@@ -185,7 +193,7 @@ module.exports = function (Device) {
 
         mtx.addOutput({ address, value });
 
-        await mtx.fund(coins, { changeAddress });
+        await mtx.fund(coins, {changeAddress});
 
         const ledgerInputs = [];
         const coin = Coin.fromTX(txs[0], 0, -1);
@@ -208,16 +216,16 @@ module.exports = function (Device) {
           redeem
         }));
 
-        logger.info(`Confirm TXID (1st signer): ${mtx.txid()}`);
-
-        const part = await ledger.signTransaction(mtx, [ledgerInputs[0]]);
-
+        let options = {inputs: [ledgerInputs[0]]};
+        logger.info(`Verify TX details (1st signer): ${mtx.txid()}`);
+        displayDetails(logger, mtx, options);
+        const part = await ledger.signTransaction(mtx, options);
         assert.ok(!part.verify(), 'validation should failed');
 
-        logger.info(`Confirm TXID (2nd signer): ${mtx.txid()}`);
-
-        const full = await ledger.signTransaction(part, [ledgerInputs[1]]);
-
+        options = {inputs: [ledgerInputs[1]]};
+        logger.info(`Verify TX details (2nd signer): ${mtx.txid()}`);
+        displayDetails(logger, mtx, options);
+        const full = await ledger.signTransaction(part, options);
         assert.ok(full.verify(), 'validation failed');
       });
     });
