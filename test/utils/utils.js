@@ -54,7 +54,7 @@ function displayDetails(logger, mtx, options) {
     fees += coin.value;
   }
 
-  logger.info(`Confirm details for TXID: ${mtx.txid()}`);
+  logger.info('Verify tx details on Ledger device.');
   logger.info('');
 
   for (let i = 0, j = 1; i < mtx.outputs.length; i++) {
@@ -95,7 +95,7 @@ function displayDetails(logger, mtx, options) {
     logger.info('');
   }
 
-  logger.info(`Fees: ${fees/1e6}\n`);
+  logger.info(`Fees: ${fees/1e6}`);
 }
 
 class TestUtil {

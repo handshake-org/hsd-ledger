@@ -14,7 +14,8 @@ const QRCode = require('qrcode');
 const {NodeClient, WalletClient} = require('hs-client');
 const {hd, MTX, Network} = require('hsd');
 const {PGP_PUBKEY} = require('../data/pgp');
-const {USB, LedgerHSD} = require('..');
+const {displayDetails} = require('../test/utils/utils');
+const {USB, LedgerHSD, LedgerChange} = require('..');
 const {Device} = USB;
 
 /**
@@ -48,7 +49,7 @@ async function createWallet(client, config, ledger, args) {
     watchOnly: true,
     accountKey: xpub.xpubkey(config.str('network'))
   });
-
+console.log(wallet);
   console.log(`Created wallet (id=hsd-ledger, wid=${wallet.wid}).`);
   console.log(`Created account (name=default, account-index=${index}').`);
 }
@@ -89,24 +90,48 @@ async function sendToAddress(wclient, nclient, config, ledger, args) {
   if (args.length !== 2)
     throw new Error('Invalid arguments');
 
+  const network = Network.get(config.str('network'));
   const id = config.str('wallet-id');
-  const account = config.str('account-name');
+  const acct = config.str('account-name');
   const address = args[0];
   const amount = parseFloat(args[1]);
 
   await wclient.execute('selectwallet', [id]);
 
-  const params = [address, amount, '', '', false, account];
+  const params = [address, amount, '', '', false, acct];
   const json = await wclient.execute('createsendtoaddress', params);
   const mtx = MTX.fromJSON(json);
+  let i, key;
 
-  console.log(`Verify txid on Ledger device: ${mtx.txid()}`);
+  for (i = mtx.outputs.length - 1; i >= 0; i--) {
+    const output = mtx.outputs[i];
+    const addr = output.address.toString(network.type);
+    key = await wclient.getKey(id, addr);
 
-  const signed = await ledger.signTransaction(mtx);
+    if (key && key.branch)
+      break;
+  }
+
+  if (!key || !key.branch)
+    throw new Error('Expected change address.');
+
+  const {account, branch, index} = key;
+  const coinType = network.keyPrefix.coinType;
+  const options = {
+    change: new LedgerChange({
+      path: `m/44'/${coinType}'/${account}'/${branch}/${index}`,
+      index: i,
+      version: 0
+    })
+  };
+
+  displayDetails(console, mtx, options);
+
+  const signed = await ledger.signTransaction(mtx, options);
   const rawtx = signed.encode().toString('hex');
   const txid = await nclient.execute('sendrawtransaction', [rawtx]);
 
-  console.log(`Submitted tx with id: ${txid}`);
+  console.log(`Submitted TXID: ${txid}`);
 }
 
 async function getWallets(client, args) {
