@@ -4,8 +4,9 @@ const assert = require('bsert');
 const bio = require('bufio');
 const plugin = require('hsd/lib/wallet/plugin');
 const Logger = require('blgr');
-const {Address, ChainEntry, FullNode, MTX, Network, Rules} = require('hsd');
+const {ChainEntry, FullNode, MTX, Network} = require('hsd');
 const {NodeClient, WalletClient} = require('hs-client');
+const util = require('../../lib/utils/util');
 const {USB, LedgerHSD} = require('../../lib/hsd-ledger');
 const {Device} = USB;
 
@@ -39,63 +40,6 @@ class TestUtilError extends Error {
     if (Error.captureStackTrace)
       Error.captureStackTrace(this, TestUtilError);
   }
-}
-
-/**
- * Displays mtx details.
- */
-
-function displayDetails(logger, mtx, options) {
-  let fees = 0;
-
-  for (let i = 0; i < mtx.inputs.length; i++) {
-    const input = mtx.inputs[i];
-    const coin = mtx.view.getCoinFor(input);
-    fees += coin.value;
-  }
-
-  logger.info('Verify tx details on Ledger device.');
-  logger.info('');
-
-  for (let i = 0, j = 1; i < mtx.outputs.length; i++) {
-    const output = mtx.outputs[i];
-    fees -= output.value;
-
-    if (options && options.change && options.change.getIndex() === i)
-      continue;
-
-    logger.info(`Output #${j++}`);
-    logger.info(`Covenant: ${Rules.typesByVal[output.covenant.type]}`);
-
-    if (output.covenant.type !== Rules.types.NONE) {
-      let name;
-
-      if (!options || !options.covenants)
-        throw(new TestUtilError({
-          message: 'LedgerCovenants required.',
-          caller: 'displayDetails'
-        }));
-
-      for (const covenant of options.covenants)
-        if (covenant.getIndex() === i)
-          name = covenant.getName();
-
-      logger.info(`Name: ${name}`);
-    }
-
-    if (output.covenant.type === Rules.types.TRANSFER) {
-      const ver = output.covenant.getU8(2);
-      const hash = output.covenant.get(3);
-      const addr = Address.fromHash(hash, ver);
-      logger.info(`New Owner: ${addr.toString(network)}`);
-    }
-
-    logger.info(`Value: ${output.value/1e6}`);
-    logger.info(`Address: ${output.address.toString('regtest')}`);
-    logger.info('');
-  }
-
-  logger.info(`Fees: ${fees/1e6}`);
 }
 
 class TestUtil {
@@ -636,7 +580,7 @@ class TestUtil {
    */
 
   async signTransaction(mtx, options) {
-    displayDetails(this.logger, mtx, options);
+    util.displayDetails(this.logger, network, mtx, options);
     return this.ledger.signTransaction(mtx, options);
   }
 
@@ -645,7 +589,7 @@ class TestUtil {
    */
 
   async getTransactionSignatures(mtx, options) {
-    displayDetails(this.logger, mtx, options);
+    util.displayDetails(this.logger, network, mtx, options);
     return this.ledger.getTransactionSignatures(mtx, options);
   }
 
@@ -661,6 +605,5 @@ class TestUtil {
   }
 }
 
-exports.displayDetails = displayDetails;
 exports.TestUtilError = TestUtilError;
 exports.TestUtil = TestUtil;

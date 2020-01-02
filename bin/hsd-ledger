@@ -14,8 +14,7 @@ const QRCode = require('qrcode');
 const {NodeClient, WalletClient} = require('hs-client');
 const {hd, MTX, Network} = require('hsd');
 const {PGP_PUBKEY} = require('../data/pgp');
-const {displayDetails} = require('../test/utils/utils');
-const {USB, LedgerHSD, LedgerChange} = require('..');
+const {util, USB, LedgerHSD, LedgerChange} = require('..');
 const {Device} = USB;
 
 /**
@@ -125,7 +124,7 @@ async function sendToAddress(wclient, nclient, config, ledger, args) {
     })
   };
 
-  displayDetails(console, mtx, options);
+  util.displayDetails(console, network, mtx, options);
 
   const signed = await ledger.signTransaction(mtx, options);
   const rawtx = signed.encode().toString('hex');

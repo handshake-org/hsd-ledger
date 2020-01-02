@@ -9,7 +9,7 @@ const {hashType} = require('hsd/lib/script/common');
 const {LedgerChange, LedgerCovenant, LedgerInput} = require('../..');
 const {TestUtil} = require('../utils/utils.js');
 
- async function createLedgerChange(util, wid, mtx) {
+async function createLedgerChange(util, wid, mtx) {
   let i, key;
 
   for (i = mtx.outputs.length - 1; i >= 0; i--) {
