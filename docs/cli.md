@@ -3,9 +3,9 @@
 The [hsd-ledger][repo] client library includes a CLI application that can
 connect to an [HSD][hsd] wallet/node server and the Ledger Handshake app.
 This CLI app allows users to manage accounts, view HNS balances, create HNS
-addresses, and send HNS. Any addresses created with the app must be confirmed
+addresses, and send HNS. Any addresses created with the app must be verified
 on-device. All transactions are signed on the Ledger Nano S and require
-on-device confirmation as well.
+on-device verification as well.
 
 The CLI app requires Node.js v8.0.0+, access to HSD wallet and node servers,
 and access to a Ledger Nano S running the latest firmware version.
@@ -207,7 +207,7 @@ coinbase address from this account. To create an address run:
 $ ./bin/hsd-ledger createaddress -n regtest
 ```
 
-You will be asked to confirm that the address shown in the terminal matches the
+You will be asked to verify that the address shown in the terminal matches the
 address shown on your Ledger Nano S.
 
 #### Fund your account
@@ -255,12 +255,12 @@ $ ./bin/hsd-ledger sendtoaddress <address> <amount> -n regtest
 >Note: `<address>` is the address generated in the previous command and
 `<amount>` is the amount of dollarydoos, e.g. 5000000 _not_ 5 HNS.
 
-You will be asked to confirm that the txid shown in the terminal matches the
-txid shown on your Ledger Nano S. If you reject the txid, the transaction will
-not be signed or sent to the network.
+You will be asked to verify that the transaction details shown in the terminal
+matches the details shown on your Ledger Nano S. If you reject any of the details,
+the transaction will not be signed or sent to the network.
 
-Once you confirm the txid, you can mine a block on your HSD node and check
-that the balances of the "default" and "second" accounts have been updated.
+Once you verify the transaction details, you can mine a block on your HSD node
+and check that the balances of the "default" and "second" accounts have been updated.
 
 Congrats! You have signed a valid transaction using your Ledger Nano S.
 
