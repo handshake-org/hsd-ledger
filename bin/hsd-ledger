@@ -48,7 +48,7 @@ async function createWallet(client, config, ledger, args) {
     watchOnly: true,
     accountKey: xpub.xpubkey(config.str('network'))
   });
-console.log(wallet);
+
   console.log(`Created wallet (id=hsd-ledger, wid=${wallet.wid}).`);
   console.log(`Created account (name=default, account-index=${index}').`);
 }
