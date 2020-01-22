@@ -10,7 +10,6 @@ const {
 const assert = require('bsert');
 const fundUtil = require('../utils/fund');
 const util = require('../../lib/utils/util');
-const {displayDetails} = require('../utils/utils');
 const Logger = require('blgr');
 const {LedgerHSD, LedgerInput, LedgerChange} = require('../../lib/hsd-ledger');
 
@@ -151,7 +150,7 @@ module.exports = function (Device) {
         };
 
         logger.info(`Verify TX details: ${mtx.txid()}`);
-        displayDetails(logger, mtx, options);
+        util.displayDetails(logger, network, mtx, options);
         const signed = await ledger.signTransaction(mtx, options);
         assert.ok(signed.verify(), 'validation failed');
       });
@@ -218,13 +217,13 @@ module.exports = function (Device) {
 
         let options = {inputs: [ledgerInputs[0]]};
         logger.info(`Verify TX details (1st signer): ${mtx.txid()}`);
-        displayDetails(logger, mtx, options);
+        util.displayDetails(logger, network, mtx, options);
         const part = await ledger.signTransaction(mtx, options);
         assert.ok(!part.verify(), 'validation should failed');
 
         options = {inputs: [ledgerInputs[1]]};
         logger.info(`Verify TX details (2nd signer): ${mtx.txid()}`);
-        displayDetails(logger, mtx, options);
+        util.displayDetails(logger, network, mtx, options);
         const full = await ledger.signTransaction(part, options);
         assert.ok(full.verify(), 'validation failed');
       });
