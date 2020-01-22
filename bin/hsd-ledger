@@ -6,14 +6,9 @@
  * Module imports
  */
 
-const fs = require('fs');
-const os = require('os');
-const openpgp = require('openpgp');
 const Config = require('bcfg');
-const QRCode = require('qrcode');
 const {NodeClient, WalletClient} = require('hs-client');
 const {hd, MTX, Network} = require('hsd');
-const {PGP_PUBKEY} = require('../data/pgp');
 const {util, USB, LedgerHSD, LedgerChange} = require('..');
 const {Device} = USB;
 
@@ -29,12 +24,9 @@ const VALID_CMDS = [
   'getwallets',
   'getaccounts',
   'getaccount',
-  'getbalance',
-  'getairdropaddress'
+  'getbalance'
 ];
 
-const AIRDROP_ADDR_PATH = 'm/44\'/5353\'/0\'/0/0';
-const HSD_LEDGER_DIR = os.homedir() + '/.hsd-ledger/';
 const VERSION = require('../package').version;
 
 async function createWallet(client, config, ledger, args) {
@@ -174,88 +166,6 @@ async function getBalance(client, config, args) {
   console.log(balance);
 }
 
-async function getAirdropAddress(config, ledger, args) {
-  if (args.length !== 0)
-    throw new Error('Invalid arguments');
-
-  let pubkey, ciphertext;
-  const addr = await ledger.getAddress(0, 0, 0);
-  const xpub = await ledger.getAccountXPUB(0);
-
-  // Confirm Address.
-  console.log('Address (confirm on device):');
-  console.log(addr);
-  await ledger.getAddress(0, 0, 0, {confirm: true});
-
-  if(config.str('show-key')) {
-    const publicKey = await ledger.getPublicKey(AIRDROP_ADDR_PATH);
-    pubkey = publicKey;
-
-    // Confirm Public Key.
-    console.log('\nPublic Key (confirm on device):');
-    console.log(pubkey.toString('hex'));
-    await ledger.getPublicKey(AIRDROP_ADDR_PATH, {confirm: true});
-  }
-
-  if(config.str('project-sponsor')) {
-    const keys = (await openpgp.key.readArmored(PGP_PUBKEY)).keys;
-    ciphertext = (await openpgp.encrypt({
-      message: openpgp.message.fromText(addr),
-      publicKeys: keys
-    })).data;
-
-    // Display Encrypted Address.
-    console.log('\nEncrypted Address:');
-    console.log(ciphertext);
-  }
-
-  // Confirm XPUB.
-  console.log('\nXpub (confirm on device):');
-  console.log(xpub.xpubkey(config.str('network')));
-  await ledger.getAccountXPUB(0, {confirm: true});
-
-  if (config.str('qrcode')) {
-    if (!fs.existsSync(HSD_LEDGER_DIR))
-      fs.mkdirSync(HSD_LEDGER_DIR);
-
-    const prefix = HSD_LEDGER_DIR + addr;
-    const addrSuffix = '_address_QR_code.png';
-    const xpubSuffix = '_xpub_QR_code.png';
-    const pubkeySuffix = '_pubkey_QR_code.png';
-    const cipherSuffix = '_encrypted_address_QR_code.png';
-
-    console.log('\nThe following files were generated:');
-
-    {
-      const details = addr;
-      const file = prefix + addrSuffix;
-      await QRCode.toFile(file, details);
-      console.log(`- ${file}`);
-    }
-
-    {
-      const details = xpub.xpubkey(config.str('network'));
-      const file = prefix + xpubSuffix;
-      await QRCode.toFile(file, details);
-      console.log(`- ${file}`);
-    }
-
-    if (pubkey) {
-      const details = pubkey.toString('hex');
-      const file = prefix + pubkeySuffix;
-      await QRCode.toFile(file, details);
-      console.log(`- ${file}`);
-    }
-
-    if (ciphertext) {
-      const details = ciphertext;
-      const file = prefix + cipherSuffix;
-      await QRCode.toFile(file, details);
-      console.log(`- ${file}`);
-    }
-  }
-}
-
 async function main() {
   const device = await Device.requestDevice();
   device.set({
@@ -314,11 +224,6 @@ async function main() {
     device: device,
     network: type
   });
-
-  if (cmd === VALID_CMDS[8]) {
-    await getAirdropAddress(config, ledger, args);
-    process.exit(0);
-  }
 
   const nclient = new NodeClient({
     url: config.str('url') || config.str('node-url'),
@@ -431,7 +336,6 @@ function usage(err) {
   console.log('  $ hsd-ledger getaccounts');
   console.log('  $ hsd-ledger getaccount <account-name>');
   console.log('  $ hsd-ledger getbalance');
-  console.log('  $ hsd-ledger getairdropaddress');
   console.log('');
   console.log('options:');
   console.log('  --help');
@@ -460,11 +364,6 @@ function usage(err) {
   console.log('  --wallet-api-key <api-key>');
   console.log('  --wallet-host <host> (default "localhost")');
   console.log('  --wallet-port <port> (default 14039)');
-  console.log('');
-  console.log('The following options are for the getairdropaddress command:');
-  console.log('  --project-sponsor (encrypts address for project sponsors)');
-  console.log('  --qrcode (generates a QR encoded address)');
-  console.log('  --show-key (show address public key)');
   console.log('');
 }
 

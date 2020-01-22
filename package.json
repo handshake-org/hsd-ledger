@@ -39,9 +39,7 @@
     "blgr": "~0.1.7",
     "bmutex": "~0.1.6",
     "bsert": "~0.0.10",
-    "bufio": "^1.0.6",
-    "openpgp": "^4.5.5",
-    "qrcode": "^1.4.1"
+    "bufio": "^1.0.6"
   },
   "optionalDependencies": {
     "busb": "0.0.1"
