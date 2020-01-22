@@ -130,7 +130,7 @@ $ ./bin/hsd -n regtest
 From a separate terminal window, download and install hsd-ledger:
 
 ```bash
-$ git clone https://github.com/boymanjor/hsd-ledger.git
+$ git clone https://github.com/handshake-org/hsd-ledger.git
 $ cd hsd-ledger
 $ npm install
 ```
@@ -269,9 +269,9 @@ Congrats! You have signed a valid transaction using your Ledger Nano S.
 If you encounter any issue with your Ledger device and the CLI binary,
 please open an issue on the GitHub [repo][issues].
 
-[repo]: https://github.com/boymanjor/hsd-ledger
+[repo]: https://github.com/handshake-org/hsd-ledger
 [hsd]: https://github.com/handshake-org/hsd
-[install]: https://github.com/boymanjor/hsd-ledger/blob/master/README.md#install
-[issues]: https://github.com/boymanjor/hsd-ledger/issues
+[install]: https://github.com/handshake-org/hsd-ledger/blob/master/README.md#install
+[issues]: https://github.com/handshake-org/hsd-ledger/issues
 [docs]: https://handshake-org.github.io/
 [config]: https://handshake-org.github.io/api-docs/index.html#configuring-clients

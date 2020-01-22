@@ -12,7 +12,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/boymanjor/hsd-ledger.git"
+    "url": "git+https://github.com/handshake-org/hsd-ledger.git"
   },
   "main": "./lib/hsd-ledger.js",
   "license": "MIT",
@@ -21,9 +21,9 @@
     "The Handshake Developers"
   ],
   "bugs": {
-    "url": "https://github.com/boymanjor/hsd-ledger/issues"
+    "url": "https://github.com/handshake-org/hsd-ledger/issues"
   },
-  "homepage": "https://github.com/boymanjor/hsd-ledger#readme",
+  "homepage": "https://github.com/handshake-org/hsd-ledger#readme",
   "scripts": {
     "certs": "./scripts/certs",
     "clean": "rm -rf hsd-ledger.js examples/webauthn/app.js examples/webusb/app.js ./certs ./docs",

@@ -5,7 +5,7 @@ from [hsd][hsd].
 
 ## Install
 ```
-$ git clone https://github.com/boymanjor/hsd-ledger.git
+$ git clone https://github.com/handshake-org/hsd-ledger.git
 $ cd hsd-ledger
 $ npm install
 ```
@@ -90,6 +90,6 @@ This project is a fork of [bledger][bledger].
 
 See LICENSE for more info.
 
-[hns]: https://github.com/boymanjor/ledger-app-hns
+[hns]: https://github.com/handshake-org/ledger-app-hns
 [hsd]: https://github.com/handshake-org/hsd
 [bledger]: https://github.com/bcoin-org/bledger
