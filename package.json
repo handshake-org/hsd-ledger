@@ -42,7 +42,7 @@
     "bufio": "^1.0.6"
   },
   "optionalDependencies": {
-    "busb": "0.0.1"
+    "busb": "0.1.1"
   },
   "peerDependencies": {
     "hsd": "handshake-org/hsd"
