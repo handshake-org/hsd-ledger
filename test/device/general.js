@@ -65,7 +65,7 @@ module.exports = function (Device) {
     describe('getAppVersion()', () => {
       it('should return version', async () => {
         const got = await ledger.getAppVersion();
-        const want = '0.1.0';
+        const want = '1.0.0';
 
         assert.strictEqual(got, want, 'version mismatch');
       });
