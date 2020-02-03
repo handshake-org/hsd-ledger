@@ -197,7 +197,7 @@ async function main() {
   config.inject({
     accountIndex: 0,
     accountName: 'default',
-    network: 'testnet',
+    network: 'main',
     walletId: 'hsd-ledger',
     token: ''
   });
@@ -340,7 +340,7 @@ function usage(err) {
   console.log('options:');
   console.log('  --help');
   console.log('  --version');
-  console.log('  -n, --network <id> (default "testnet")');
+  console.log('  -n, --network <id> (default "main")');
   console.log('  -w, --wallet-id <id> (default "hsd-ledger")');
   console.log('  -a, --account-name <name> (default "default")');
   console.log('  -i, --account-index <index> (default 0)');
