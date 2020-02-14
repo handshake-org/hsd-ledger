@@ -43,7 +43,7 @@ The CLI app embeds node and wallet clients for HSD. By default, the app will
 try to connect to HSD node and wallet servers running on localhost using the
 [default ports][config]. Users may specify custom locations for the node and
 wallet servers by using flags [below](#usage). The CLI app defaults to using
-the testnet. This can also be configured using a flag specified
+the mainnet. This can also be configured using a flag specified
 [below](#usage).
 
 For more information on configuring clients for connection to HSD, please see
@@ -54,8 +54,8 @@ Ledger CLI app are [below](#usage).
 wallet using `hsd-ledger` as its wallet-id. This wallet acts as the default
 wallet for the app. Any commands that do not specify an alternative wallet will
 use this wallet. Alternative wallets can be created and specified using commands
-found [below](#usage). The XPUB at HD path `M/44'/5354'/0'` (default account
-for testnet) will be used to create an account with the account-name `default`.
+found [below](#usage). The XPUB at HD path `M/44'/5353'/0'` (default account
+for mainnet) will be used to create an account with the account-name `default`.
 Any commands that do not specify an alternative account will use this account.
 You may use this account or create new accounts within this wallet, or other
 wallets found on your HSD node.
@@ -78,7 +78,7 @@ usage:
 options:
   --help
   --version
-  -n, --network <id> (default "testnet")
+  -n, --network <id> (default "mainnet")
   -w, --wallet-id <id> (default "hsd-ledger")
   -a, --account-name <name> (default "default")
   -i, --account-index <index> (default 0)
