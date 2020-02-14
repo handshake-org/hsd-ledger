@@ -78,7 +78,7 @@ usage:
 options:
   --help
   --version
-  -n, --network <id> (default "mainnet")
+  -n, --network <id> (default "main")
   -w, --wallet-id <id> (default "hsd-ledger")
   -a, --account-name <name> (default "default")
   -i, --account-index <index> (default 0)
