@@ -31,6 +31,9 @@ Example usage can be found and run using the following files:
 - [examples/webusb/index.js][usb] - WebUSB.
 - [examples/webauthn/index.js][authn] - WebAuthn.
 
+There is also a CLI tool that can interact with an `hsd` full node.
+The docs are [here][docs].
+
 [app]: ./examples/getAppVersion.js
 [acc]: ./examples/getAccountXPUB.js
 [xpub]: ./examples/getXPUB.js
@@ -41,6 +44,7 @@ Example usage can be found and run using the following files:
 [p2sh]: ./examples/signTransaction-p2sh.js
 [usb]: ./examples/webusb/index.js
 [authn]: ./examples/webauthn/index.js
+[docs]: ./docs/cli.md
 
 ## Tests
 ### Unit tests
