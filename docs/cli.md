@@ -74,7 +74,6 @@ usage:
   $ hsd-ledger getaccounts
   $ hsd-ledger getaccount <account-name>
   $ hsd-ledger getbalance
-  $ hsd-ledger getairdropaddress
 
 options:
   --help
@@ -103,11 +102,6 @@ The following options configure the wallet client only:
   --wallet-api-key <api-key>
   --wallet-host <host> (default "localhost")
   --wallet-port <port> (default 14039)
-
-The following options are for the getairdropaddress command:
-  --project-sponsor (encrypts address for project sponsors)
-  --qrcode (generates a QR encoded address)
-  --show-key (show address public key)
 ```
 
 ## Tutorial
