@@ -247,7 +247,7 @@ $ ./bin/hsd-ledger sendtoaddress <address> <amount> -n regtest
 ```
 
 >Note: `<address>` is the address generated in the previous command and
-`<amount>` is the amount of dollarydoos, e.g. 5000000 _not_ 5 HNS.
+`<amount>` is the amount in full HNS, e.g. 5 HNS _not_ 5000000 dollarydoos.
 
 You will be asked to verify that the transaction details shown in the terminal
 matches the details shown on your Ledger Nano S. If you reject any of the details,
