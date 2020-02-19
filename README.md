@@ -12,7 +12,9 @@ $ npm install
 
 ## Usage
 
-There are three ways to communicate with the Ledger device:
+### Node.js Library
+
+There are three ways to use this library to interact with a Ledger device:
 - using HID from Node.js
 - using WebUSB in the browser
 - using WebAuthn
@@ -31,8 +33,10 @@ Example usage can be found and run using the following files:
 - [examples/webusb/index.js][usb] - WebUSB.
 - [examples/webauthn/index.js][authn] - WebAuthn.
 
-There is also a CLI tool that can interact with an `hsd` full node.
-The docs are [here][docs].
+### CLI
+
+There is a CLI tool, in the `bin` directory, that can interact with a Ledger
+device and an `hsd` full node. The docs are [here][docs].
 
 [app]: ./examples/getAppVersion.js
 [acc]: ./examples/getAccountXPUB.js
