@@ -26,13 +26,12 @@
   "homepage": "https://github.com/handshake-org/hsd-ledger#readme",
   "scripts": {
     "certs": "./scripts/certs",
-    "clean": "rm -rf hsd-ledger.js examples/webauthn/app.js examples/webusb/app.js ./certs",
+    "clean": "rm -rf hsd-ledger.js examples/webusb/app.js ./certs",
     "lint": "eslint examples/ lib/ test/ || exit 0",
     "test": "bmocha --reporter spec test/*-test.js",
     "test-usb": "bmocha --allow-multiple --reporter spec test/device/usb-test.js",
     "test-hsd": "bmocha --allow-multiple --reporter spec test/device/hsd-test.js",
     "test-webusb": "./scripts/bmocha-chrome test/device/webusb-test.js",
-    "test-webauthn": "./scripts/bmocha-chrome test/device/webauthn-test.js",
     "docs": "jsdoc -c jsdoc.json"
   },
   "dependencies": {
