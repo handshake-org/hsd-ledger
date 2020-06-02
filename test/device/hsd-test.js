@@ -5,7 +5,6 @@
 
 const assert = require('bsert');
 const rules = require('hsd/lib/covenants/rules');
-const {hashType} = require('hsd/lib/script/common');
 const {LedgerChange, LedgerCovenant, LedgerInput} = require('../..');
 const {TestUtil} = require('../utils/utils.js');
 
@@ -219,9 +218,6 @@ describe('Ledger Nano S', function() {
       // Submit REGISTER.
       await util.selectWallet(alice.wallet.id);
 
-      // Use 256b txt record to also test that SIGHASH_SINGLE parsing
-      // code works over mulitple APDU messages.
-      // TODO(boymanjor): make this into its own test.
       const bytes =[
         'ce6cfbd5f11a36d141d5afd14a9c8450887a47496f57a6deb74348298de2abe6',
         '88acd75bd26983566fa705b7d043f1557ec50a1e09001686afecce17eea6d4db',
@@ -244,8 +240,7 @@ describe('Ledger Nano S', function() {
           index: i,
           coin: coin,
           path: path,
-          publicKey: publicKey,
-          type: hashType.SINGLE
+          publicKey: publicKey
         }));
       }
       const change = await createLedgerChange(util, alice.wallet.id, mtx);
