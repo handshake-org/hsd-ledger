@@ -36,24 +36,20 @@
     "docs": "jsdoc -c jsdoc.json"
   },
   "dependencies": {
-    "blgr": "~0.1.7",
-    "bmutex": "~0.1.6",
-    "bsert": "~0.0.10",
-    "bufio": "^1.0.6"
-  },
-  "optionalDependencies": {
-    "busb": "0.1.1"
+    "blgr": "git+https://github.com/bcoin-org/blgr#semver:~0.1.7",
+    "bmutex": "git+https://github.com/bcoin-org/bmutex#semver:~0.1.6",
+    "bsert": "git+https://github.com/chjj/bsert#semver:~0.0.10",
+    "bufio": "git+https://github.com/bcoin-org/bufio#semver:^1.0.6",
+    "busb": "git+https://github.com/nodar-chkuaselidze/busb#semver:~1.0.0-beta.0"
   },
   "peerDependencies": {
-    "hsd": "handshake-org/hsd"
+    "hsd": "git+https://github.com/handshake-org/hsd#semver:^2.1.5"
   },
   "devDependencies": {
-    "bmocha": "^2.1.1",
-    "bpkg": "^0.6.0",
-    "bslint": "^5.15.3",
-    "hs-client": "^0.0.5",
-    "hsd": "handshake-org/hsd",
-    "jsdoc": "^3.6.3"
+    "bmocha": "git+https://github.com/bcoin-org/bmocha#semver:^2.1.3",
+    "bpkg": "git+https://github.com/chjj/bpkg#semver:^0.6.0",
+    "hs-client": "git+https://github.com/handshake-org/hs-client#semver:^0.0.8",
+    "hsd": "git+https://github.com/handshake-org/hsd#semver:^2.1.5"
   },
   "engines": {
     "node": ">=8.0.0"
