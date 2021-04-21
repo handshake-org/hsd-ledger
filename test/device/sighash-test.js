@@ -14,6 +14,7 @@ const {
   USB, LedgerHSD, LedgerChange, LedgerCovenant, LedgerInput
 } = require('../..');
 const {Device} = USB;
+const LOG_LEVEL = process.env.LOG_LEVEL || 'info';
 
 const network = Network.get('regtest');
 
@@ -29,7 +30,7 @@ describe('Sighash types support', function() {
     // Create logger.
     logger = new Logger({
       console: true,
-      level: 'info'
+      level: LOG_LEVEL
     });
 
     // Get first device available and set optional properties.
