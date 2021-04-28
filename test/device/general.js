@@ -65,7 +65,7 @@ module.exports = function (Device) {
     describe('getAppVersion()', () => {
       it('should return version', async () => {
         const got = await ledger.getAppVersion();
-        const want = '1.0.2';
+        const want = '1.0.4';
 
         assert.strictEqual(got, want, 'version mismatch');
       });
@@ -284,6 +284,9 @@ module.exports = function (Device) {
 
     for (const coin of coins)
       value += coin.value;
+
+    // Require a change output
+    value -= parseInt(value / 10);
 
     mtx.addOutput({ value, address });
 
