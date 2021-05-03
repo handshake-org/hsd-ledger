@@ -136,27 +136,39 @@ describe('Ledger Nano S / Nano X', function() {
 
       // Submit winning BID.
       await util.selectWallet(alice.wallet.id);
-      let mtx = await util.createBid(name, 5, 10);
+      const mtx = await util.createBid(name, 5, 10);
       let change = await createLedgerChange(util, alice.wallet.id, mtx);
       let signed = await util.signTransaction(mtx, {covenants, change});
       const txid = signed.txid();
       await util.sendRawTX(signed);
 
-      // Submit losing BID.
-      await util.selectWallet(bob.wallet.id);
-      mtx = await util.createBid(name, 4, 10);
-      change = await createLedgerChange(util, bob.wallet.id, mtx);
-      signed = await util.signTransaction(mtx, {covenants, change});
-      await util.sendRawTX(signed);
+      // Submit losing BIDs.
+      let mtx1, mtx2;
+      {
+        await util.selectWallet(bob.wallet.id);
+        mtx1 = await util.createBid(name, 4, 10);
+        change = await createLedgerChange(util, bob.wallet.id, mtx1);
+        signed = await util.signTransaction(mtx1, {covenants, change});
+        await util.sendRawTX(signed);
+      }
+
+      {
+        await util.selectWallet(bob.wallet.id);
+        mtx2 = await util.createBid(name, 3, 10);
+        change = await createLedgerChange(util, bob.wallet.id, mtx2);
+        signed = await util.signTransaction(mtx2, {covenants, change});
+        await util.sendRawTX(signed);
+      }
 
       // Mine BID covenants.
       await util.generateToAddress(1, alice.addr);
-      await util.confirmTX(mtx.txid());
+      await util.confirmTX(mtx1.txid());
+      await util.confirmTX(mtx2.txid());
       await util.confirmTX(txid);
 
       // Assert BID covenants.
       const info = await util.getAuctionInfo(name);
-      assert.deepEqual(info.bids.length, 2, 'wrong number of bids');
+      assert.deepEqual(info.bids.length, 3, 'wrong number of bids');
     });
 
     it('should submit REVEAL', async () => {
@@ -172,12 +184,19 @@ describe('Ledger Nano S / Nano X', function() {
       const txid = signed.txid();
       await util.sendRawTX(signed);
 
-      // Submit losing REVEAL.
-      await util.selectWallet(bob.wallet.id);
-      mtx = await util.createReveal(name);
-      change = await createLedgerChange(util, bob.wallet.id, mtx);
-      signed = await util.signTransaction(mtx, {covenants, change});
-      await util.sendRawTX(signed);
+      // Submit losing REVEALs.
+      {
+        const covenants = [
+          new LedgerCovenant({index: 0, name}),
+          new LedgerCovenant({index: 1, name})
+        ];
+        await util.selectWallet(bob.wallet.id);
+        mtx = await util.createReveal(name);
+        change = await createLedgerChange(util, bob.wallet.id, mtx);
+        signed = await util.signTransaction(mtx, {covenants, change});
+        await util.sendRawTX(signed);
+        assert(signed.outputs.length === 3);
+      }
 
       // Mine REVEAL covenants.
       await util.generateToAddress(1, alice.addr);
@@ -186,7 +205,7 @@ describe('Ledger Nano S / Nano X', function() {
 
       // Assert REVEAL covenants.
       const info = await util.getAuctionInfo(name);
-      assert.deepEqual(info.reveals.length, 2, 'wrong number of reveals');
+      assert.deepEqual(info.reveals.length, 3, 'wrong number of reveals');
     });
 
     it('should submit REDEEM', async () => {
@@ -194,12 +213,20 @@ describe('Ledger Nano S / Nano X', function() {
       const ids = await util.generateToAddress(util.revealPeriod, alice.addr);
       await util.confirmBlock(ids.pop());
 
-      // Submit REDEEM.
-      await util.selectWallet(bob.wallet.id);
-      const mtx = await util.createRedeem(name);
-      const change = await createLedgerChange(util, bob.wallet.id, mtx);
-      const signed = await util.signTransaction(mtx, {covenants, change});
-      await util.sendRawTX(signed);
+      // Submit REDEEMs.
+      let mtx;
+      {
+        const covenants = [
+          new LedgerCovenant({index: 0, name}),
+          new LedgerCovenant({index: 1, name})
+        ];
+        await util.selectWallet(bob.wallet.id);
+        mtx = await util.createRedeem(name);
+        const change = await createLedgerChange(util, bob.wallet.id, mtx);
+        const signed = await util.signTransaction(mtx, {covenants, change});
+        await util.sendRawTX(signed);
+        assert(signed.outputs.length === 3);
+      }
 
       // Assert lockup.
       const before = await util.getAccount(bob.wallet.id, bob.acct.name);
