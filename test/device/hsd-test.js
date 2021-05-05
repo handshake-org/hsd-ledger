@@ -32,7 +32,8 @@ async function createLedgerChange(util, wid, mtx) {
 }
 
 describe('Ledger Nano S / Nano X', function() {
-  this.timeout(60000);
+  // Physical device interaction can be slow, disable timeout
+  this.timeout(0);
 
   const util = new TestUtil();
   let alice, bob;
