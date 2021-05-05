@@ -143,7 +143,7 @@ describe('Ledger Nano S / Nano X', function() {
       await util.sendRawTX(signed);
 
       // Submit losing BIDs.
-      let mtx1, mtx2;
+      let mtx1, mtx2, mtx3;
       {
         await util.selectWallet(bob.wallet.id);
         mtx1 = await util.createBid(name, 4, 10);
@@ -160,15 +160,24 @@ describe('Ledger Nano S / Nano X', function() {
         await util.sendRawTX(signed);
       }
 
+      {
+        await util.selectWallet(bob.wallet.id);
+        mtx3 = await util.createBid(name, 2, 10);
+        change = await createLedgerChange(util, bob.wallet.id, mtx3);
+        signed = await util.signTransaction(mtx3, {covenants, change});
+        await util.sendRawTX(signed);
+      }
+
       // Mine BID covenants.
       await util.generateToAddress(1, alice.addr);
       await util.confirmTX(mtx1.txid());
       await util.confirmTX(mtx2.txid());
+      await util.confirmTX(mtx3.txid());
       await util.confirmTX(txid);
 
       // Assert BID covenants.
       const info = await util.getAuctionInfo(name);
-      assert.deepEqual(info.bids.length, 3, 'wrong number of bids');
+      assert.deepEqual(info.bids.length, 4, 'wrong number of bids');
     });
 
     it('should submit REVEAL', async () => {
@@ -188,14 +197,15 @@ describe('Ledger Nano S / Nano X', function() {
       {
         const covenants = [
           new LedgerCovenant({index: 0, name}),
-          new LedgerCovenant({index: 1, name})
+          new LedgerCovenant({index: 1, name}),
+          new LedgerCovenant({index: 2, name})
         ];
         await util.selectWallet(bob.wallet.id);
         mtx = await util.createReveal(name);
         change = await createLedgerChange(util, bob.wallet.id, mtx);
         signed = await util.signTransaction(mtx, {covenants, change});
         await util.sendRawTX(signed);
-        assert(signed.outputs.length === 3);
+        assert(signed.outputs.length === 4);
       }
 
       // Mine REVEAL covenants.
@@ -205,7 +215,7 @@ describe('Ledger Nano S / Nano X', function() {
 
       // Assert REVEAL covenants.
       const info = await util.getAuctionInfo(name);
-      assert.deepEqual(info.reveals.length, 3, 'wrong number of reveals');
+      assert.deepEqual(info.reveals.length, 4, 'wrong number of reveals');
     });
 
     it('should submit REDEEM', async () => {
@@ -218,14 +228,15 @@ describe('Ledger Nano S / Nano X', function() {
       {
         const covenants = [
           new LedgerCovenant({index: 0, name}),
-          new LedgerCovenant({index: 1, name})
+          new LedgerCovenant({index: 1, name}),
+          new LedgerCovenant({index: 2, name})
         ];
         await util.selectWallet(bob.wallet.id);
         mtx = await util.createRedeem(name);
         const change = await createLedgerChange(util, bob.wallet.id, mtx);
         const signed = await util.signTransaction(mtx, {covenants, change});
         await util.sendRawTX(signed);
-        assert(signed.outputs.length === 3);
+        assert(signed.outputs.length === 4);
       }
 
       // Assert lockup.
