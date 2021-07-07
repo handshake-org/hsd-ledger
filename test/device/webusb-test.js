@@ -4,8 +4,8 @@
 'use strict';
 
 const assert = require('bsert');
-const {USB} = require('../../lib/hsd-ledger-browser');
-const {Device} = USB;
+const {HID} = require('../../lib/hsd-ledger-browser');
+const {Device} = HID;
 
 describe('USB Device (web)', function () {
   this.timeout(Number(process.env.DEVICE_TIMEOUT) || 40000);

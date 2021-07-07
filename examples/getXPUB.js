@@ -1,8 +1,8 @@
 'use strict';
 
 const Logger = require('blgr');
-const {USB, LedgerHSD} = require('../lib/hsd-ledger');
-const {Device} = USB;
+const {HID, LedgerHSD} = require('../lib/hsd-ledger');
+const {Device} = HID;
 
 (async () => {
   // Create logger.

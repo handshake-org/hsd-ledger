@@ -4,8 +4,8 @@ const Logger = require('blgr');
 const {Amount, Address, Coin, MTX, Script} = require('hsd');
 const rules = require('hsd/lib/covenants/rules');
 const util = require('../test/utils/fund');
-const {USB, LedgerHSD, LedgerInput} = require('../lib/hsd-ledger');
-const {Device} = USB;
+const {HID, LedgerHSD, LedgerInput} = require('../lib/hsd-ledger');
+const {Device} = HID;
 
 (async () => {
   // Create logger.

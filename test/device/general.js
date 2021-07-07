@@ -41,7 +41,7 @@ module.exports = function (Device) {
 
       await logger.open();
 
-      device =  devices[0],
+      device = devices[0];
 
       device.set({
         timeout,
@@ -65,7 +65,7 @@ module.exports = function (Device) {
     describe('getAppVersion()', () => {
       it('should return version', async () => {
         const got = await ledger.getAppVersion();
-        const want = '1.0.4';
+        const want = '1.0.5';
 
         assert.strictEqual(got, want, 'version mismatch');
       });

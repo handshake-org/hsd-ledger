@@ -7,8 +7,8 @@ const Logger = require('blgr');
 const {ChainEntry, FullNode, MTX, Network} = require('hsd');
 const {NodeClient, WalletClient} = require('hs-client');
 const util = require('../../lib/utils/util');
-const {USB, LedgerHSD} = require('../../lib/hsd-ledger');
-const {Device} = USB;
+const {HID, LedgerHSD} = require('../../lib/hsd-ledger');
+const {Device} = HID;
 
 const network = Network.get('regtest');
 const {
