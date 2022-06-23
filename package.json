@@ -1,6 +1,6 @@
 {
   "name": "hsd-ledger",
-  "version": "1.0.0-rc2",
+  "version": "2.0.0",
   "description": "Communication and management of ledger devices",
   "keywords": [
     "Handshake",
