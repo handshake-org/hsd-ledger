@@ -14,6 +14,13 @@ $ npm install
 
 ### Node.js Library
 
+When requiring `hsd-ledger` as a dependency in your project, you MUST
+also install `hsd`, either globally (`npm i -g hsd`) or require `hsd` as a
+sibling dependency along side `hsd-ledger`. This is effectively how
+`peerDependencies` worked in npm version 4 through 6, but starting with npm v7,
+those dependencies are installed, usually a second time, causing `instanceof`
+checks to fail.
+
 There are two ways to use this library to interact with a Ledger device:
 - using HID from Node.js
 - using WebUSB in the browser
