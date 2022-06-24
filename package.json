@@ -45,7 +45,7 @@
   "devDependencies": {
     "bmocha": "git+https://github.com/bcoin-org/bmocha#semver:^2.1.3",
     "hs-client": "git+https://github.com/handshake-org/hs-client#semver:^0.0.8",
-    "hsd": "git+https://github.com/handshake-org/hsd#semver:^3.0.1"
+    "hsd": "git+https://github.com/handshake-org/hsd#semver:^4.0.0"
   },
   "engines": {
     "node": ">=8.0.0"
