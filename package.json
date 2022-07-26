@@ -40,7 +40,8 @@
     "bmutex": "git+https://github.com/bcoin-org/bmutex#semver:~0.1.6",
     "bsert": "git+https://github.com/chjj/bsert#semver:~0.0.10",
     "bufio": "git+https://github.com/bcoin-org/bufio#semver:^1.0.6",
-    "busb": "git+https://github.com/nodar-chkuaselidze/busb#semver:~1.0.0-beta.0"
+    "busb": "git+https://github.com/nodar-chkuaselidze/busb#semver:~1.0.0-beta.0",
+    "chrome-net": "^3.3.4"
   },
   "peerDependencies": {
     "hsd": "git+https://github.com/handshake-org/hsd#semver:^2.1.5"
