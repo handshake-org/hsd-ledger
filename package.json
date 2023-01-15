@@ -40,7 +40,7 @@
     "bmutex": "git+https://github.com/bcoin-org/bmutex#semver:~0.1.6",
     "bsert": "git+https://github.com/chjj/bsert#semver:~0.0.10",
     "bufio": "git+https://github.com/bcoin-org/bufio#semver:^1.0.6",
-    "node-hid": "git+https://github.com/nodech/node-hid#semver:2.1.1-hsd.0"
+    "node-hid": "git+https://github.com/nodech/node-hid#semver:~2.1.2-hsd.0"
   },
   "devDependencies": {
     "bmocha": "git+https://github.com/bcoin-org/bmocha#semver:^2.1.3",
