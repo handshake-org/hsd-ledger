@@ -170,10 +170,10 @@ async function sendRaw(wclient, nclient, config, ledger, args) { // Create a fun
       const coinType = network.keyPrefix.coinType; // Get the coin type from the network
       switch (output.covenant.type) { 
         case types.NONE:
-        case types.OPEN:
         case types.BID:
         case types.FINALIZE:
           break;
+        case types.OPEN:
         case types.REVEAL:
         case types.REDEEM:
         case types.REGISTER:
