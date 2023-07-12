@@ -6,11 +6,15 @@
  * Module imports
  */
 
+
+
 const Config = require('bcfg');
-const {NodeClient, WalletClient} = require('hs-client');
-const {hd, MTX, Network} = require('hsd');
-const {util, USB, LedgerHSD, LedgerChange} = require('..');
-const {Device} = USB;
+const { NodeClient, WalletClient } = require('hs-client');
+const { hd, MTX, Network } = require('hsd');
+const { Rules } = require('hsd/lib/covenants');
+const { hashName, types } = Rules;
+const { util, HID, LedgerHSD, LedgerChange, LedgerCovenant } = require('..');
+const { Device } = HID;
 
 /**
  * Global constants
@@ -24,7 +28,9 @@ const VALID_CMDS = [
   'getwallets',
   'getaccounts',
   'getaccount',
-  'getbalance'
+  'getbalance',
+  'sendraw',
+  'signraw'
 ];
 
 const VERSION = require('../package').version;
@@ -74,7 +80,7 @@ async function createAddress(client, config, ledger, args) {
 
   console.log(`Verify address on Ledger device: ${addr.address}`);
 
-  await ledger.getAddress(account, addr.branch, addr.index, {confirm: true});
+  await ledger.getAddress(account, addr.branch, addr.index, { confirm: true });
 }
 
 async function sendToAddress(wclient, nclient, config, ledger, args) {
@@ -106,7 +112,7 @@ async function sendToAddress(wclient, nclient, config, ledger, args) {
   if (!key || !key.branch)
     throw new Error('Expected change address.');
 
-  const {account, branch, index} = key;
+  const { account, branch, index } = key;
   const coinType = network.keyPrefix.coinType;
   const options = {
     change: new LedgerChange({
@@ -123,6 +129,163 @@ async function sendToAddress(wclient, nclient, config, ledger, args) {
   const txid = await nclient.execute('sendrawtransaction', [rawtx]);
 
   console.log(`Submitted TXID: ${txid}`);
+}
+async function sendRaw(wclient, nclient, config, ledger, args) { // Create a function to sign raw transactions
+  if (args.length !== 2) // Make sure there are two arguments (batch, names)
+    throw new Error('Invalid arguments'); // Throw an error if there are not two arguments
+
+  const network = Network.get(config.str('network')); // Get the network
+  const id = config.str('wallet-id'); // Get the wallet id
+  const acct = config.str('account-name'); // Get the account name
+  // Log the arguments to the console (for debugging)
+
+  const batch = JSON.parse(args[0]); // Get the batch
+  const names = JSON.parse(args[1]); // Get the names
+  await wclient.execute('selectwallet', [id]); // Select the wallet
+
+  try {
+    const mtx = MTX.fromJSON(batch.result); // Create a new MTX from the JSON
+    const hashes = {}; // Create an empty object to store the hashes
+    for (const name of names) { // Loop through the names
+      const hash = hashName(name); // Hash the name
+      hashes[hash] = name; // Add the hash to the hashes object to use later
+    }
+
+
+    let i, key; // Create variables to use later
+    const options = []; // Create an empty array to store the options
+    for (i = mtx.outputs.length - 1; i >= 0; i--) { // Loop through the outputs
+      const output = mtx.outputs[i]; // Get the output
+      const addr = output.address.toString(network.type); // Get the address
+      key = await wclient.getKey(id, addr); // Get the key
+      if (!key) // If there is no key
+        continue; // Continue to the next output
+      if (key.branch === 1) { // If the key is a change address
+        if (options.change) // If there is already a change address
+          throw new Error('Transaction should only have one change output.'); // Throw an error
+        const path = `m/44'/${network.keyPrefix.coinType}'/${key.account}'/${key.branch}/${key.index}`; // Create the derivation path
+        options.change = new LedgerChange({ path: `m/44'/${network.keyPrefix.coinType}'/${key.account}'/${key.branch}/${key.index}`, index: i, version: 0 }); // Add the change address to the options
+      }
+      const { account, branch, index } = key; // Get the account, branch, and index from the key
+      const coinType = network.keyPrefix.coinType; // Get the coin type from the network
+      switch (output.covenant.type) { 
+        case types.NONE:
+        case types.BID:
+        case types.FINALIZE:
+          break;
+        case types.OPEN:
+        case types.REVEAL:
+        case types.REDEEM:
+        case types.REGISTER:
+        case types.UPDATE:
+        case types.RENEW:
+        case types.TRANSFER:
+        case types.REVOKE: { // If the covenant type is any of REVEAL, REDEEM, REGISTER, UPDATE, RENEW, TRANSFER, or REVOKE
+          if (options.covenants == null) // If there are no covenants
+            options.covenants = []; // Create an empty array for the covenants
+          const hash = output.covenant.items[0]; // Get the hash from the covenant
+          const name = hashes[hash]; // Get the name from the hashes object (is needed for SPV nodes)
+          if (name == undefined) { // If the name is not found
+            console.log("Name not found in file"); // Log that the name was not found
+            console.log(hash); // Log the hash (for debugging)
+          }
+          options.covenants.push(new LedgerCovenant({ index: i, name })); // Add the covenant to the options
+
+          break;
+        }
+        default:
+          throw new Error('Unrecognized covenant type.');
+
+      }
+
+    } // end for loop
+    util.displayDetails(console, network, mtx, options); // Display the details to the log for user verification
+    const signed = await ledger.signTransaction(mtx, options); // Sign the transaction with the ledger
+    const rawtx = signed.encode().toString('hex'); // Encode the transaction as hex
+    const txid = await nclient.execute('sendrawtransaction', [rawtx]); // Send the transaction to the network
+    console.log(`Submitted TXID: ${txid}`); // Log the TXID to the console to view the transaction on a block explorer
+
+  } catch (err) { // Catch any errors
+    console.error(err); // Log the error to the console
+  }
+}
+
+async function signRaw(wclient, nclient, config, ledger, args) { // Create a function to sign raw transactions
+  if (args.length !== 2) // Make sure there are two arguments (batch, names)
+    throw new Error('Invalid arguments'); // Throw an error if there are not two arguments
+
+  const network = Network.get(config.str('network')); // Get the network
+  const id = config.str('wallet-id'); // Get the wallet id
+  const acct = config.str('account-name'); // Get the account name
+  // Log the arguments to the console (for debugging)
+
+  const batch = JSON.parse(args[0]); // Get the batch
+  const names = JSON.parse(args[1]); // Get the names
+  await wclient.execute('selectwallet', [id]); // Select the wallet
+
+  try {
+    const mtx = MTX.fromJSON(batch.result); // Create a new MTX from the JSON
+    const hashes = {}; // Create an empty object to store the hashes
+    for (const name of names) { // Loop through the names
+      const hash = hashName(name); // Hash the name
+      hashes[hash] = name; // Add the hash to the hashes object to use later
+    }
+
+
+    let i, key; // Create variables to use later
+    const options = []; // Create an empty array to store the options
+    for (i = mtx.outputs.length - 1; i >= 0; i--) { // Loop through the outputs
+      const output = mtx.outputs[i]; // Get the output
+      const addr = output.address.toString(network.type); // Get the address
+      key = await wclient.getKey(id, addr); // Get the key
+      if (!key) // If there is no key
+        continue; // Continue to the next output
+      if (key.branch === 1) { // If the key is a change address
+        if (options.change) // If there is already a change address
+          throw new Error('Transaction should only have one change output.'); // Throw an error
+        const path = `m/44'/${network.keyPrefix.coinType}'/${key.account}'/${key.branch}/${key.index}`; // Create the derivation path
+        options.change = new LedgerChange({ path: `m/44'/${network.keyPrefix.coinType}'/${key.account}'/${key.branch}/${key.index}`, index: i, version: 0 }); // Add the change address to the options
+      }
+      const { account, branch, index } = key; // Get the account, branch, and index from the key
+      const coinType = network.keyPrefix.coinType; // Get the coin type from the network
+      switch (output.covenant.type) { 
+        case types.NONE:
+        case types.BID:
+        case types.FINALIZE:
+          break;
+        case types.OPEN:
+        case types.REVEAL:
+        case types.REDEEM:
+        case types.REGISTER:
+        case types.UPDATE:
+        case types.RENEW:
+        case types.TRANSFER:
+        case types.REVOKE: { // If the covenant type is any of REVEAL, REDEEM, REGISTER, UPDATE, RENEW, TRANSFER, or REVOKE
+          if (options.covenants == null) // If there are no covenants
+            options.covenants = []; // Create an empty array for the covenants
+          const hash = output.covenant.items[0]; // Get the hash from the covenant
+          const name = hashes[hash]; // Get the name from the hashes object (is needed for SPV nodes)
+          if (name == undefined) { // If the name is not found
+            console.log("Name not found in file"); // Log that the name was not found
+            console.log(hash); // Log the hash (for debugging)
+          }
+          options.covenants.push(new LedgerCovenant({ index: i, name })); // Add the covenant to the options
+
+          break;
+        }
+        default:
+          throw new Error('Unrecognized covenant type.');
+
+      }
+
+    } // end for loop
+    util.displayDetails(console, network, mtx, options); // Display the details to the log for user verification
+    const signed = await ledger.signTransaction(mtx, options); // Sign the transaction with the ledger
+    console.log(signed); // Log the TX to the console
+
+  } catch (err) { // Catch any errors
+    console.error(err); // Log the error to the console
+  }
 }
 
 async function getWallets(client, args) {
@@ -210,12 +373,12 @@ async function main() {
   const id = config.str('wallet-id');
   const token = config.str('token');
 
-  if(config.str('help') && argv.length === 0) {
+  if (config.str('help') && argv.length === 0) {
     usage();
     process.exit(0);
   }
 
-  if(config.str('version') && argv.length === 0) {
+  if (config.str('version') && argv.length === 0) {
     version();
     process.exit(0);
   }
@@ -290,13 +453,19 @@ async function main() {
         await getBalance(wclient, config, args);
         break;
 
+      case VALID_CMDS[8]:
+        await sendRaw(wclient, nclient, config, ledger, args);
+        break;
+      case VALID_CMDS[9]:
+        await signRaw(wclient, nclient, config, ledger, args);
+        break;
       default:
         usage(new Error('Must provide valid command.'));
         process.exit(1);
         break;
     }
-  } catch(e) {
-    throw(e);
+  } catch (e) {
+    throw (e);
   } finally {
     await wclient.close();
     await nclient.close();
