@@ -50,6 +50,9 @@ For more information on configuring clients for connection to HSD, please see
 the official documentation [here][config]. The flags supported by the HSD
 Ledger CLI app are [below](#usage).
 
+To connect to an emulator ([speculos][speculos]) instead of a physical device,
+set the device type with `--device speculos`.
+
 <a href="#first"></a>Upon its first run, the CLI app will create a watch-only
 wallet using `hsd-ledger` as its wallet-id. This wallet acts as the default
 wallet for the app. Any commands that do not specify an alternative wallet will
@@ -78,6 +81,7 @@ usage:
 options:
   --help
   --version
+  --device <type> ({"hid", "speculos"}, default "hid")
   -n, --network <id> (default "main")
   -w, --wallet-id <id> (default "hsd-ledger")
   -a, --account-name <name> (default "default")
@@ -269,3 +273,4 @@ please open an issue on the GitHub [repo][issues].
 [issues]: https://github.com/handshake-org/hsd-ledger/issues
 [docs]: https://handshake-org.github.io/
 [config]: https://handshake-org.github.io/api-docs/index.html#configuring-clients
+[speculos]: https://github.com/LedgerHQ/speculos
