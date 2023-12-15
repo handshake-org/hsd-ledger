@@ -7,7 +7,7 @@ const assert = require('bsert');
 const {HID} = require('../../lib/hsd-ledger');
 const {Device} = HID;
 
-describe('USB Device (node)', function () {
+describe('HID Device (node)', function () {
   this.timeout(Number(process.env.DEVICE_TIMEOUT) || 40000);
 
   it('should list devices', async () => {

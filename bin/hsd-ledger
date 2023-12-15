@@ -9,8 +9,7 @@
 const Config = require('bcfg');
 const {NodeClient, WalletClient} = require('hs-client');
 const {hd, MTX, Network} = require('hsd');
-const {util, USB, LedgerHSD, LedgerChange} = require('..');
-const {Device} = USB;
+const {util, HID, Speculos, LedgerHSD, LedgerChange} = require('..');
 
 /**
  * Global constants
@@ -167,13 +166,6 @@ async function getBalance(client, config, args) {
 }
 
 async function main() {
-  const device = await Device.requestDevice();
-  device.set({
-    timeout: 300000 // 5 minutes.
-  });
-
-  await device.open();
-
   const config = new Config('hsd', {
     suffix: 'network',
     fallback: 'main',
@@ -210,15 +202,37 @@ async function main() {
   const id = config.str('wallet-id');
   const token = config.str('token');
 
-  if(config.str('help') && argv.length === 0) {
+  if (config.str('help') && argv.length === 0) {
     usage();
     process.exit(0);
   }
 
-  if(config.str('version') && argv.length === 0) {
+  if (config.str('version') && argv.length === 0) {
     version();
     process.exit(0);
   }
+
+  const deviceType = config.str('device', 'hid');
+  let device;
+
+  switch (deviceType) {
+    case 'hid':
+      device = await HID.Device.requestDevice();
+      break;
+
+    case 'speculos':
+      device = await Speculos.Device.requestDevice();
+      break;
+
+    default:
+      usage(new Error('Invalid device type.'));
+      process.exit(1);
+  }
+
+  device.set({
+    timeout: 300000 // 5 minutes.
+  });
+  await device.open();
 
   const ledger = new LedgerHSD({
     device: device,
@@ -293,10 +307,9 @@ async function main() {
       default:
         usage(new Error('Must provide valid command.'));
         process.exit(1);
-        break;
     }
-  } catch(e) {
-    throw(e);
+  } catch (e) {
+    throw (e);
   } finally {
     await wclient.close();
     await nclient.close();
@@ -340,6 +353,7 @@ function usage(err) {
   console.log('options:');
   console.log('  --help');
   console.log('  --version');
+  console.log('  --device <type> ({"hid", "speculos"}, default "hid")');
   console.log('  -n, --network <id> (default "main")');
   console.log('  -w, --wallet-id <id> (default "hsd-ledger")');
   console.log('  -a, --account-name <name> (default "default")');

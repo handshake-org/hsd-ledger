@@ -64,19 +64,19 @@ to control the log output. Possible log levels include: `none`, `info`,
 `warning`, `debug`, `error`, `spam`.
 
 
->Note: the end-to-end tests require a connected Ledger Nano S using the
+>Note: the end-to-end tests require a connected Ledger Nano using the
 seed phrase:
 ```
 abandon abandon abandon abandon abandon abandon
 abandon abandon abandon abandon abandon about
 ```
 
-#### Using Ledger Nano S
+#### Using Ledger Nano
 ```bash
 $ npm run test-hid
 ```
 
-#### Using Ledger Nano S and hsd
+#### Using Ledger Nano and hsd
 ```bash
 $ npm run test-hsd
 ```

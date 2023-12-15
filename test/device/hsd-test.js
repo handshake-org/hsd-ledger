@@ -31,7 +31,7 @@ async function createLedgerChange(util, wid, mtx) {
   });
 }
 
-describe('Ledger Nano S / Nano X', function() {
+describe('Ledger Nano', function() {
   this.timeout(60000);
 
   const util = new TestUtil();
