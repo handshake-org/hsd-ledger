@@ -11,9 +11,9 @@ const {Resource} = require('hsd/lib/dns/resource');
 const rules = require('hsd/lib/covenants/rules');
 const util = require('../utils/fund');
 const {
-  USB, LedgerHSD, LedgerChange, LedgerCovenant, LedgerInput
+  HID, LedgerHSD, LedgerChange, LedgerCovenant, LedgerInput
 } = require('../..');
-const {Device} = USB;
+const {Device} = HID;
 const LOG_LEVEL = process.env.LOG_LEVEL || 'info';
 
 const network = Network.get('regtest');
